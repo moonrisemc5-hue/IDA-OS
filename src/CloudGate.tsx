@@ -119,7 +119,7 @@ function AccountSetup({ selectedApps, onCreated, onExisting }: { selectedApps:st
       <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>EMAIL</label><input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" type="email" autoComplete="email" style={inputStyle}/>
       <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" type="password" autoComplete="new-password" style={inputStyle}/>
       <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>CONFIRM PASSWORD</label><input value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Enter it again" type="password" autoComplete="new-password" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
-      <button disabled={busy||!name||!email||!password||!confirm} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!email||!password||!confirm)?.5:1}}>{busy?'Creating your IDA…':'Create account'}</button>
+      <button disabled={busy||!name||!email||!password||!confirm} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!email||!password||!confirm) ? .5 : 1}}>{busy?'Creating your IDA…':'Create account'}</button>
       {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12,lineHeight:1.5,opacity:.82}}>{message}</div>}
       <button onClick={onExisting} style={switchStyle}>I already have an IDA account</button>
     </div>
@@ -134,7 +134,7 @@ function ExistingAccount({ onSignedIn }: { onSignedIn:(session:Session)=>void })
       <div style={{textAlign:'center',marginBottom:24}}><Hilal small/><div style={{fontSize:25,fontWeight:600,marginTop:17}}>Sign in to IDA</div></div>
       <label style={{fontSize:11,opacity:.55}}>EMAIL</label><input value={email} onChange={e=>setEmail(e.target.value)} style={inputStyle}/>
       <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} type="password" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
-      <button disabled={busy||!email||!password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!email||!password)?.5:1}}>{busy?'Signing in…':'Sign in'}</button>
+      <button disabled={busy||!email||!password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!email||!password) ? .5 : 1}}>{busy?'Signing in…':'Sign in'}</button>
       {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12}}>{message}</div>}
     </div>
   </div>
