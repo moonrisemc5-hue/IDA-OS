@@ -81,7 +81,7 @@ function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
       @keyframes idaSpinner{to{transform:rotate(360deg)}}
       .ida-boot-text{animation:idaBootFade 3s ease both}
     `}</style>
-    <div style={{textAlign:'center',animation:stage==='working'?'none':'idaBootFade 3s ease both'}}>
+    <div style={{textAlign:'center',animation:(stage==='working'||stage==='install')?'none':'idaBootFade 3s ease both'}}>
       {stage==='hi' ? <div style={{fontSize:'clamp(58px,9vw,96px)',fontWeight:300,letterSpacing:'-.05em'}}>Hi.</div> :
        stage==='working' ? <><div style={{fontSize:'clamp(26px,4vw,40px)',fontWeight:350,letterSpacing:'-.02em'}}>We are working on IDA</div><div style={{margin:'28px auto 0',width:20,height:20,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
        stage==='install' ? <><div style={{fontSize:24,fontWeight:350}}>{text}</div><div style={{margin:'26px auto 0',width:18,height:18,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
@@ -316,7 +316,7 @@ export function CloudGate() {
     if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onExisting={()=>setBootStage('existing')}/>
     return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);lockDesktop()}}/>
   }
-  if(!ready)return <BootScreen stage="install"/>
+  if(!ready)return <div style={{position:'fixed',inset:0,zIndex:999999,background:'#000',color:'#fff',display:'grid',placeItems:'center',fontFamily:'Segoe UI,system-ui,sans-serif'}}><div style={{textAlign:'center'}}><div style={{fontSize:24,fontWeight:350}}>Getting things ready</div><div style={{margin:'26px auto 0',width:18,height:18,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/><div style={{marginTop:18,fontSize:12,opacity:.42}}>Connecting to your IDA account…</div></div></div>
   const signOut= async()=>{await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);lockDesktop();setFirstBoot(false);setBootStage('existing')}
   if(!desktopOpen)return <LockScreen session={session} onUnlock={async next=>{writeIdaSession(next);await loadUser(next);setSession(next);openDesktop()}} onSignOut={signOut}/>
   return <><DaApps accountName={session.displayName} onSignOut={signOut}/>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
