@@ -40,9 +40,16 @@ function looksLikeIdaState(state: unknown): state is CloudState {
   return !!state && typeof state === 'object' && (state as any).version === 1 && !!(state as any).keys
 }
 
-const inputStyle: CSSProperties = { width:'100%',boxSizing:'border-box',padding:'13px 14px',borderRadius:12,border:'1px solid rgba(255,255,255,.12)',background:'rgba(0,0,0,.22)',color:'#fff',outline:'none',fontSize:15 }
-const buttonStyle: CSSProperties = { width:'100%',marginTop:14,padding:'13px 14px',border:0,borderRadius:12,background:'#fff',color:'#111',fontWeight:700,cursor:'pointer' }
-const switchStyle: CSSProperties = { width:'100%',marginTop:10,padding:10,border:0,background:'transparent',color:'#fff',opacity:.7,cursor:'pointer' }
+const inputStyle: CSSProperties = { width:'100%',boxSizing:'border-box',padding:'14px 15px',borderRadius:10,border:'1px solid rgba(255,255,255,.14)',background:'rgba(255,255,255,.055)',color:'#fff',outline:'none',fontSize:15,transition:'border .18s,background .18s,box-shadow .18s' }
+const buttonStyle: CSSProperties = { width:'100%',marginTop:16,padding:'13px 14px',border:0,borderRadius:10,background:'#fff',color:'#111',fontWeight:700,cursor:'pointer',fontSize:14,transition:'transform .15s,opacity .15s' }
+const switchStyle: CSSProperties = { width:'100%',marginTop:12,padding:9,border:0,background:'transparent',color:'#fff',opacity:.68,cursor:'pointer',fontSize:13 }
+
+function Hilal() {
+  return <div style={{position:'relative',width:58,height:58,margin:'0 auto 22px'}}>
+    <div style={{position:'absolute',inset:3,borderRadius:'50%',background:'#fff',boxShadow:'0 0 30px rgba(255,255,255,.12)'}}/>
+    <div style={{position:'absolute',width:52,height:52,left:13,top:-1,borderRadius:'50%',background:'#080b12'}}/>
+  </div>
+}
 
 function AuthScreen({ initialMessage = '' }: { initialMessage?: string }) {
   const [mode, setMode] = useState<'signin'|'signup'>('signin')
@@ -59,19 +66,26 @@ function AuthScreen({ initialMessage = '' }: { initialMessage?: string }) {
     if (result.error) setMessage(result.error.message)
     else if (mode === 'signup' && !result.data.session) setMessage('Account created. Check your email if confirmation is required, then sign in.')
   }
-  return <div style={{position:'fixed',inset:0,display:'grid',placeItems:'center',background:'#07090e',color:'#fff',fontFamily:'system-ui,Segoe UI,sans-serif',zIndex:999999}}>
-    <div style={{width:'min(420px,calc(100vw - 32px))',padding:32,borderRadius:24,background:'rgba(20,25,38,.94)',boxShadow:'0 24px 80px rgba(0,0,0,.5)',border:'1px solid rgba(255,255,255,.1)'}}>
-      <div style={{textAlign:'center',marginBottom:24}}><div style={{fontSize:44,lineHeight:1,marginBottom:12}}>☾</div><div style={{fontSize:28,fontWeight:700}}>IDA</div><div style={{opacity:.65,marginTop:6}}>Sign in to your IDA desktop</div></div>
-      <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" autoComplete="email" style={inputStyle}/>
-      <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" autoComplete={mode==='signin'?'current-password':'new-password'} style={{...inputStyle,marginTop:10}} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
-      <button disabled={busy || !email || !password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy || !email || !password) ? .5 : 1}}>{busy ? 'Please wait…' : mode==='signin' ? 'Sign in' : 'Create account'}</button>
-      <button onClick={()=>{setMode(mode==='signin'?'signup':'signin');setMessage('')}} style={switchStyle}>{mode==='signin' ? 'Create a new IDA account' : 'I already have an account'}</button>
-      {message && <div style={{marginTop:14,padding:12,borderRadius:12,background:'rgba(255,255,255,.06)',fontSize:13,lineHeight:1.45,opacity:.85}}>{message}</div>}
-      <div style={{marginTop:18,fontSize:11,textAlign:'center',opacity:.45}}>Your IDA data is saved separately for your account.</div>
+  return <div style={{position:'fixed',inset:0,display:'grid',placeItems:'center',background:'radial-gradient(circle at 50% 38%,rgba(43,51,70,.28),transparent 38%),#080b12',color:'#fff',fontFamily:'system-ui,Segoe UI,sans-serif',zIndex:999999}}>
+    <div style={{position:'absolute',inset:0,pointerEvents:'none',background:'linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px)',backgroundSize:'44px 44px',maskImage:'linear-gradient(to bottom,black,transparent 72%)'}}/>
+    <div style={{width:'min(390px,calc(100vw - 36px))',padding:'42px 38px 30px',borderRadius:18,background:'rgba(17,21,31,.9)',boxShadow:'0 28px 90px rgba(0,0,0,.55)',border:'1px solid rgba(255,255,255,.11)',backdropFilter:'blur(22px)'}}>
+      <div style={{textAlign:'center',marginBottom:30}}>
+        <Hilal/>
+        <div style={{fontSize:25,fontWeight:650,letterSpacing:'.02em'}}>Welcome to IDA</div>
+        <div style={{fontSize:13,opacity:.55,marginTop:7}}>{mode==='signin' ? 'Sign in to continue to your desktop' : 'Create your personal IDA account'}</div>
+      </div>
+      <label style={{display:'block',fontSize:11,opacity:.55,marginBottom:7}}>EMAIL</label>
+      <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" style={inputStyle}/>
+      <label style={{display:'block',fontSize:11,opacity:.55,margin:'15px 0 7px'}}>PASSWORD</label>
+      <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" type="password" autoComplete={mode==='signin'?'current-password':'new-password'} style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
+      <button disabled={busy || !email || !password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy || !email || !password) ? .5 : 1}}>{busy ? 'Signing in…' : mode==='signin' ? 'Sign in to IDA' : 'Create IDA account'}</button>
+      <button onClick={()=>{setMode(mode==='signin'?'signup':'signin');setMessage('')}} style={switchStyle}>{mode==='signin' ? 'New to IDA? Create an account' : 'Already have an IDA account? Sign in'}</button>
+      {message && <div style={{marginTop:15,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.08)',fontSize:12,lineHeight:1.5,opacity:.82}}>{message}</div>}
+      <div style={{marginTop:25,paddingTop:17,borderTop:'1px solid rgba(255,255,255,.07)',fontSize:11,textAlign:'center',opacity:.38}}>Your desktop, apps, files and settings are saved to your IDA account.</div>
     </div>
+    <div style={{position:'absolute',bottom:20,fontSize:10,opacity:.25,letterSpacing:'.08em'}}>IDA • PERSONAL DESKTOP</div>
   </div>
 }
-
 export function CloudGate() {
   const [session, setSession] = useState<Session | null>(null)
   const [ready, setReady] = useState(false)
