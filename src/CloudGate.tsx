@@ -204,8 +204,8 @@ export function CloudGate() {
   const [bootStage,setBootStage]=useState<'loading'|'hi'|'working'|'choices'|'install'|'account'|'existing'>('loading')
   const [selectedApps,setSelectedApps]=useState<string[]>(['DaMusic','DaEconomy','DaCourt'])
   const [desktopOpen,setDesktopOpen]=useState(false)
-  const openDesktop=()=>{try{localStorage.setItem('ida-desktop-session-open-v1','1');localStorage.removeItem('ida-power-lock-v1')}catch{};openDesktop()}
-  const lockDesktop=()=>{try{localStorage.removeItem('ida-desktop-session-open-v1')}catch{};lockDesktop()}
+  const openDesktop=()=>{try{localStorage.setItem('ida-desktop-session-open-v1','1');localStorage.removeItem('ida-power-lock-v1')}catch{};setDesktopOpen(true)}
+  const lockDesktop=()=>{try{localStorage.removeItem('ida-desktop-session-open-v1')}catch{};setDesktopOpen(false)}
   const saveTimer=useRef<number|null>(null)
   const saving=useRef(false)
   const queued=useRef(false)
@@ -267,7 +267,7 @@ export function CloudGate() {
     writeIdaSession(nextSession)
     setSession(nextSession)
     void loadUser(nextSession)
-    setDesktopOpen(false)
+    lockDesktop()
     setBootStage('loading')
   }
 
@@ -318,5 +318,5 @@ export function CloudGate() {
   }
   if(!ready)return <BootScreen stage="install"/>
   if(!desktopOpen)return <LockScreen session={session} onUnlock={next=>{writeIdaSession(next);setSession(next);void loadUser(next);openDesktop()}} onSignOut={async()=>{await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);lockDesktop();setFirstBoot(false);setBootStage('existing')}}/>
-  return <><DaApps/>,display:'flex',alignItems:'center',gap:8,padding:'7px 9px 7px 11px',borderRadius:999,background:'rgba(8,11,18,.7)',backdropFilter:'blur(16px)',color:'#fff',font:'12px system-ui',boxShadow:'0 6px 24px rgba(0,0,0,.25)'}}><span style={{maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',opacity:.8}}>{accountLabel}</span><button onClick={async()=>{if(session)await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);setDesktopOpen(false);setFirstBoot(false);setBootStage('existing')}} style={{border:0,borderRadius:999,padding:'5px 9px',background:'rgba(255,255,255,.1)',color:'#fff',cursor:'pointer'}}>Sign out</button></div>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
+  return <><DaApps/>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
 }
