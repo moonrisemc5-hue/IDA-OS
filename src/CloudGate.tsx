@@ -79,7 +79,7 @@ function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
   return <div style={bootStyle}>
     <style>{`
       @keyframes idaBootFade{0%{opacity:0;transform:translateY(7px)}38%{opacity:1;transform:none}62%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-7px)}}
-      .ida-hi-text{animation:idaBootFade 3s ease both}
+      .ida-hi-text{animation:idaBootFade 4s ease both}
       @keyframes idaSpinner{to{transform:rotate(360deg)}}
       .ida-boot-text{animation:idaBootFade 3s ease both}
     `}</style>
@@ -265,6 +265,7 @@ export function CloudGate() {
       clearLocalState()
       localStorage.setItem('ida-firstboot-complete-v3','1')
       localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...apps]))
+      localStorage.setItem('ida-taskbar',JSON.stringify(['DaSettings']))
     }catch{}
     writeIdaSession(nextSession)
     setSession(nextSession)
@@ -302,7 +303,7 @@ export function CloudGate() {
   useEffect(()=>{
     if(!firstBoot||session)return
     if(bootStage==='hi'){
-      const t=window.setTimeout(()=>setBootStage('working'),3000)
+      const t=window.setTimeout(()=>setBootStage('working'),4000)
       return()=>window.clearTimeout(t)
     }
     if(bootStage==='working'){
