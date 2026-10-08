@@ -300,7 +300,7 @@ export function DaApps() {
     // IDA-supported apps are still ordinary desktop/file-system shortcuts.
     // Only DaSettings is protected; DaFile Explorer, DaMedia, DaNotes, etc. can have their shortcuts deleted.
     if(type==='app' && appBaseId(id)==='DaSettings') return
-    if(type==='app' && !desktopApps.includes(id) && !Object.values(folderApps).some(items=>items.includes(id))) return
+    if(type==='app' && !appForId(id)) return
     if(type==='app'){ const app=appForId(id); if(!app)return; saveTrash([...trash,{type:'app',id,name:appLabels[id]||app.name,app,deletedAt:Date.now()}]); saveDesktopApps(desktopApps.filter(n=>n!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)]))); Object.keys(windows).filter(k=>k===id||windows[k]?.appInstanceId===id).forEach(closeWindow) }
     else if(type==='folder'){ const folder=folders.find(f=>f.id===id); if(!folder)return; saveTrash([...trash,{type:'folder',id,name:folder.name,folder,deletedAt:Date.now()}]); commitFolders(folders.filter(f=>f.id!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).filter(([k])=>k!==id))); closeWindow(id) }
     else { const file=files.find(f=>f.id===id); if(!file)return; saveTrash([...trash,{type:'file',id,name:file.name,file,deletedAt:Date.now()}]); commitFiles(files.filter(f=>f.id!==id)); const nextNotes={...notes}; delete nextNotes[id]; updateNotes(nextNotes); closeWindow(id) }
@@ -714,6 +714,7 @@ function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove,
   const offset = useRef({ x: 0, y: 0 })
   const startPoint = useRef({ x: 0, y: 0 })
   const ghostRef = useRef<HTMLElement|null>(null)
+  const [dragPos,setDragPos] = useState<Position|null>(null)
   const clearGhost = () => { ghostRef.current?.remove(); ghostRef.current=null; document.body.style.cursor='' }
 
   const pointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -748,7 +749,7 @@ function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove,
     const maxY = Math.max(0, parent.height - tile.offsetHeight)
     const x = Math.min(maxX, Math.max(0, e.clientX - parent.left - offset.current.x))
     const y = Math.min(maxY, Math.max(0, e.clientY - parent.top - offset.current.y))
-    onMove({ x: (x / parent.width) * 100, y: (y / parent.height) * 100 })
+    setDragPos({ x: (x / parent.width) * 100, y: (y / parent.height) * 100 })
     if(ghostRef.current){
       ghostRef.current.style.transform=`translate3d(${e.clientX-offset.current.x}px,${e.clientY-offset.current.y}px,0)`
       const hit=(document.elementFromPoint(e.clientX,e.clientY) as HTMLElement|null)
@@ -767,8 +768,11 @@ function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove,
     if (tileRef.current) { tileRef.current.style.cursor = editMode ? 'grab' : 'pointer'; tileRef.current.style.opacity='' }
     clearGhost()
     if (wasDragging) {
+      const finalPos = dragPos
       const target=(document.elementFromPoint(e.clientX,e.clientY) as HTMLElement|null)?.closest('[data-drop-folder]')?.getAttribute('data-drop-folder')
       if(target) onDropTarget(target)
+      else if(finalPos) onMove(finalPos)
+      setDragPos(null)
     } else onSelect()
   }
 
@@ -776,7 +780,7 @@ function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove,
     <button
       ref={tileRef}
       className={`app-tile ${selected ? 'app-tile-selected' : ''}`}
-      style={{ left: `${position.x}%`, top: `${position.y}%`, ['--scale' as string]: scale }}
+      style={{ left: `${(dragPos||position).x}%`, top: `${(dragPos||position).y}%`, ['--scale' as string]: scale }}
       onPointerDown={pointerDown}
       onPointerMove={pointerMove}
       onPointerUp={pointerUp}
