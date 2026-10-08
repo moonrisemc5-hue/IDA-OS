@@ -161,6 +161,7 @@ function ExistingAccount({ onSignedIn, title='Sign in to IDA', initialName='', c
 }
 function LockScreen({ session, onUnlock }: { session:IdaSession; onUnlock:(next:IdaSession)=>void }) {
   const [now,setNow]=useState(new Date())
+  const [wifiOn,setWifiOn]=useState(()=>{try{return localStorage.getItem('ida-internet-on')!=='0'}catch{return true}})
   const [unlocking,setUnlocking]=useState(false)
   useEffect(()=>{const t=window.setInterval(()=>setNow(new Date()),1000);return()=>window.clearInterval(t)},[])
   const name=session.displayName||'IDA User'
@@ -192,7 +193,7 @@ function LockScreen({ session, onUnlock }: { session:IdaSession; onUnlock:(next:
         <div style={{fontSize:13,opacity:.7,marginTop:6}}>Press anywhere to open IDA</div>
       </div>
     </div>
-    <div style={{position:'absolute',right:22,bottom:20,display:'flex',alignItems:'center',gap:7,fontSize:12,opacity:.86,textShadow:'0 2px 10px rgba(0,0,0,.55)'}}><Wifi size={17} strokeWidth={2}/><span>Wi-Fi</span></div>
+    <button type="button" onClick={()=>{const next=!wifiOn;setWifiOn(next);try{localStorage.setItem('ida-internet-on',next?'1':'0')}catch{};window.dispatchEvent(new CustomEvent('ida-wifi-change',{detail:{on:next}}))}} style={{position:'absolute',right:22,bottom:20,display:'flex',alignItems:'center',gap:7,fontSize:12,opacity:.9,textShadow:'0 2px 10px rgba(0,0,0,.55)',background:'transparent',border:0,color:'#fff',cursor:'pointer',padding:8,borderRadius:10}} aria-label={wifiOn?'Turn Wi-Fi off':'Turn Wi-Fi on'}><Wifi size={17} strokeWidth={2}/><span>Wi-Fi {wifiOn?'On':'Off'}</span></button>
   </div>
 }
 function AuthScreen() { return <ExistingAccount onSignedIn={()=>{}}/> }
