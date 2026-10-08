@@ -65,13 +65,22 @@ const switchStyle: CSSProperties = { width:'100%',marginTop:12,padding:9,border:
 
 const FIRSTBOOT_WALLPAPER = 'https://images.pexels.com/photos/7025657/pexels-photo-7025657.jpeg?cs=srgb&dl=pexels-nasimgs-7025657.jpg&fm=jpg'
 
-class IdaDesktopBoundary extends Component<{children:ReactNode},{failed:boolean}> {
-  state={failed:false}
-  static getDerivedStateFromError(){return {failed:true}}
+class IdaDesktopBoundary extends Component<{children:ReactNode},{failed:boolean;message:string}> {
+  state={failed:false,message:''}
+  static getDerivedStateFromError(error:unknown){
+    return {failed:true,message:error instanceof Error?error.message:String(error)}
+  }
+  componentDidCatch(error:unknown){
+    console.error('IDA desktop render error',error)
+  }
   render(){
     if(!this.state.failed) return this.props.children
     return <div style={{position:'fixed',inset:0,display:'grid',placeItems:'center',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',textAlign:'center',padding:24}}>
-      <div><div style={{fontSize:24,fontWeight:600}}>IDA recovered from an app error</div><div style={{marginTop:8,opacity:.65,fontSize:13}}>Your account and files were not deleted.</div><button onClick={()=>{try{localStorage.removeItem('ida-open-windows-v1');localStorage.removeItem('ida-active-window-v1')}catch{};location.reload()}} style={{marginTop:18,padding:'11px 18px',border:0,borderRadius:10,cursor:'pointer',fontWeight:700}}>Continue to IDA</button></div>
+      <div style={{maxWidth:720}}>
+        <div style={{fontSize:24,fontWeight:600}}>IDA hit a desktop error</div>
+        <div style={{marginTop:8,opacity:.65,fontSize:13}}>Your account and files were not deleted.</div>
+        <div style={{marginTop:18,padding:14,borderRadius:10,background:'rgba(255,255,255,.06)',font:'12px ui-monospace,monospace',textAlign:'left',overflowWrap:'anywhere'}}>{this.state.message||'Unknown render error'}</div>
+      </div>
     </div>
   }
 }
