@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { createClient, type Session } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import { DaApps } from './App'
 
 const SUPABASE_URL = 'https://roxnnwrmgbxnhmwjolep.supabase.co'
@@ -9,8 +9,25 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
 })
 
+const ACCOUNT_SESSION_KEY = 'ida-account-session-v1'
 const SYNC_PREFIXES = ['ida-', 'daapps-']
-const isSyncKey = (key: string) => SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
+const isSyncKey = (key: string) => key !== ACCOUNT_SESSION_KEY && SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
+type IdaSession = { accountId:string; sessionToken:string; displayName:string }
+function readIdaSession(): IdaSession|null {
+  try {
+    const raw=localStorage.getItem(ACCOUNT_SESSION_KEY)
+    if(!raw)return null
+    const parsed=JSON.parse(raw)
+    if(parsed?.accountId&&parsed?.sessionToken&&parsed?.displayName)return parsed as IdaSession
+  } catch {}
+  return null
+}
+function writeIdaSession(session:IdaSession|null) {
+  try {
+    if(session)localStorage.setItem(ACCOUNT_SESSION_KEY,JSON.stringify(session))
+    else localStorage.removeItem(ACCOUNT_SESSION_KEY)
+  } catch {}
+}
 type CloudState = { version: 1; keys: Record<string, string> }
 
 function readLocalState(): CloudState {
@@ -95,9 +112,8 @@ function AppChoiceScreen({ selected, setSelected, onContinue }: { selected:strin
   </div>
 }
 
-function AccountSetup({ selectedApps, onCreated, onExisting }: { selectedApps:string[]; onCreated:(session:Session,displayName:string,apps:string[])=>void; onExisting:()=>void }) {
+function AccountSetup({ selectedApps, onCreated, onExisting }: { selectedApps:string[]; onCreated:(session:IdaSession,displayName:string,apps:string[])=>void; onExisting:()=>void }) {
   const [name,setName]=useState('')
-  const [email,setEmail]=useState('')
   const [password,setPassword]=useState('')
   const [confirm,setConfirm]=useState('')
   const [busy,setBusy]=useState(false)
@@ -106,44 +122,47 @@ function AccountSetup({ selectedApps, onCreated, onExisting }: { selectedApps:st
     if(password.length<8){setMessage('Use a password with at least 8 characters.');return}
     if(password!==confirm){setMessage('The passwords do not match.');return}
     setBusy(true);setMessage('')
-    const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{display_name:name.trim()||'IDA User'},emailRedirectTo:window.location.href}})
+    const {data,error}=await supabase.rpc('ida_create_account',{p_name:name.trim(),p_password:password})
     setBusy(false)
     if(error){setMessage(error.message);return}
-    if(data.session){onCreated(data.session,name.trim()||'IDA User',selectedApps)}
-    else setMessage('Your account is saved. Check your email to finish setup; IDA will continue automatically after confirmation.')
+    const created=data as IdaSession
+    if(created?.account_id&&created?.session_token){
+      const next={accountId:created.account_id,sessionToken:created.session_token,displayName:created.display_name||name.trim()}
+      writeIdaSession(next)
+      onCreated(next,next.displayName,selectedApps)
+    } else setMessage('Could not create the IDA account.')
   }
   return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.28),transparent 45%),#080b12'}}>
     <div style={{width:'min(410px,calc(100vw - 34px))',padding:'34px 36px 28px',borderRadius:18,background:'rgba(18,22,32,.94)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)'}}>
       <div style={{textAlign:'center',marginBottom:25}}><Hilal small/><div style={{fontSize:26,fontWeight:600,marginTop:18}}>Make your IDA account</div><div style={{fontSize:12,opacity:.55,marginTop:6}}>This is your personal IDA desktop.</div></div>
       <label style={{fontSize:11,opacity:.55}}>NAME</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" style={inputStyle}/>
-      <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>EMAIL</label><input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" type="email" autoComplete="email" style={inputStyle}/>
-      <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" type="password" autoComplete="new-password" style={inputStyle}/>
+            <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" type="password" autoComplete="new-password" style={inputStyle}/>
       <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>CONFIRM PASSWORD</label><input value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Enter it again" type="password" autoComplete="new-password" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
-      <button disabled={busy||!name||!email||!password||!confirm} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!email||!password||!confirm) ? .5 : 1}}>{busy?'Creating your IDA…':'Create account'}</button>
+      <button disabled={busy||!name||!password||!confirm} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!password||!confirm) ? .5 : 1}}>{busy?'Creating your IDA…':'Create account'}</button>
       {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12,lineHeight:1.5,opacity:.82}}>{message}</div>}
       <button onClick={onExisting} style={switchStyle}>I already have an IDA account</button>
     </div>
   </div>
 }
 
-function ExistingAccount({ onSignedIn }: { onSignedIn:(session:Session)=>void }) {
-  const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [busy,setBusy]=useState(false); const [message,setMessage]=useState('')
-  const submit=async()=>{setBusy(true);setMessage('');const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});setBusy(false);if(error)setMessage(error.message);else if(data.session)onSignedIn(data.session)}
+function ExistingAccount({ onSignedIn }: { onSignedIn:(session:IdaSession)=>void }) {
+  const [name,setName]=useState(''); const [password,setPassword]=useState(''); const [busy,setBusy]=useState(false); const [message,setMessage]=useState('')
+  const submit=async()=>{setBusy(true);setMessage('');const {data,error}=await supabase.rpc('ida_sign_in',{p_name:name.trim(),p_password:password});setBusy(false);if(error)setMessage(error.message);else if(data?.account_id&&data?.session_token){const next={accountId:data.account_id,sessionToken:data.session_token,displayName:data.display_name||name.trim()};writeIdaSession(next);onSignedIn(next)}}
   return <div style={{...bootStyle,background:'#080b12'}}>
     <div style={{width:'min(390px,calc(100vw - 34px))',padding:'34px 36px',borderRadius:18,background:'rgba(18,22,32,.94)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)'}}>
       <div style={{textAlign:'center',marginBottom:24}}><Hilal small/><div style={{fontSize:25,fontWeight:600,marginTop:17}}>Sign in to IDA</div></div>
-      <label style={{fontSize:11,opacity:.55}}>EMAIL</label><input value={email} onChange={e=>setEmail(e.target.value)} style={inputStyle}/>
+      <label style={{fontSize:11,opacity:.55}}>NAME</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Your IDA name" style={inputStyle}/>
       <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} type="password" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
-      <button disabled={busy||!email||!password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!email||!password) ? .5 : 1}}>{busy?'Signing in…':'Sign in'}</button>
+      <button disabled={busy||!name||!password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!password) ? .5 : 1}}>{busy?'Signing in…':'Sign in'}</button>
       {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12}}>{message}</div>}
     </div>
   </div>
 }
 
-function LockScreen({ session, onOpen }: { session:Session; onOpen:()=>void }) {
+function LockScreen({ session, onOpen }: { session:IdaSession; onOpen:()=>void }) {
   const [now,setNow]=useState(new Date())
   useEffect(()=>{const t=window.setInterval(()=>setNow(new Date()),1000);return()=>window.clearInterval(t)},[])
-  const name=(session.user.user_metadata?.display_name as string)||'IDA User'
+  const name=session.displayName||'IDA User'
   const time=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
   const date=now.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'})
   return <div onClick={onOpen} style={{position:'fixed',inset:0,zIndex:999999,overflow:'hidden',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',cursor:'default'}}>
@@ -163,12 +182,10 @@ function LockScreen({ session, onOpen }: { session:Session; onOpen:()=>void }) {
   </div>
 }
 
-function AuthScreen({ initialMessage = '' }: { initialMessage?: string }) {
-  return <ExistingAccount onSignedIn={()=>{}}/>
-}
+function AuthScreen() { return <ExistingAccount onSignedIn={()=>{}}/> }
 
 export function CloudGate() {
-  const [session,setSession]=useState<Session|null>(null)
+  const [session,setSession]=useState<IdaSession|null>(null)
   const [ready,setReady]=useState(false)
   const [error,setError]=useState('')
   const [firstBoot,setFirstBoot]=useState(false)
@@ -179,6 +196,7 @@ export function CloudGate() {
   const saving=useRef(false)
   const queued=useRef(false)
   const activeUser=useRef<string|null>(null)
+  const activeSessionToken=useRef<string|null>(null)
   const originalMethods=useRef<{setItem:Storage['setItem'];removeItem:Storage['removeItem'];clear:Storage['clear']}|null>(null)
 
   const saveNow=async()=>{
@@ -188,7 +206,7 @@ export function CloudGate() {
     saving.current=true
     try{
       const state=readLocalState()
-      const {error:saveError}=await supabase.from('ida_state').upsert({user_id:userId,state,updated_at:new Date().toISOString()},{onConflict:'user_id'})
+      const {error:saveError}=await supabase.rpc('ida_save_state',{p_account_id:userId,p_session_token:activeSessionToken.current,p_state:state})
       if(saveError)setError(saveError.message)
     }catch(e){setError(e instanceof Error?e.message:'Could not save IDA data.')}
     finally{saving.current=false;if(queued.current){queued.current=false;void saveNow()}}
@@ -216,21 +234,22 @@ export function CloudGate() {
     originalMethods.current=null
   }
 
-  const loadUser=async(userId:string)=>{
-    setReady(false);setError('');activeUser.current=userId
+  const loadUser=async(nextSession:IdaSession)=>{
+    setReady(false);setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
     const localBeforeCloud=readLocalState()
-    const {data,error:loadError}=await supabase.from('ida_state').select('state').eq('user_id',userId).maybeSingle()
-    if(loadError){setError(loadError.message);installStorageSync();setReady(true);return}
-    if(data?.state&&looksLikeIdaState(data.state))applyLocalState(data.state)
-    else if(Object.keys(localBeforeCloud.keys).length)await supabase.from('ida_state').upsert({user_id:userId,state:localBeforeCloud,updated_at:new Date().toISOString()},{onConflict:'user_id'})
+    const {data,error:loadError}=await supabase.rpc('ida_load_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken})
+    if(loadError){setError(loadError.message);writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;setReady(false);return}
+    if(data&&looksLikeIdaState(data))applyLocalState(data)
+    else if(Object.keys(localBeforeCloud.keys).length)await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
     installStorageSync();setReady(true)
   }
 
-  const finishNewAccount=(nextSession:Session,name:string,apps:string[])=>{
+  const finishNewAccount=(nextSession:IdaSession,name:string,apps:string[])=>{
     try{
       localStorage.setItem('ida-firstboot-complete-v3','1')
       localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...apps]))
     }catch{}
+    writeIdaSession(nextSession)
     setSession(nextSession)
     setDesktopOpen(false)
     setBootStage('loading')
@@ -245,26 +264,19 @@ export function CloudGate() {
     let mounted=true
     const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v3')==='1'
     setFirstBoot(!hadFirstBoot)
-    supabase.auth.getSession().then(({data})=>{
-      if(!mounted)return
-      setSession(data.session)
-      if(data.session)void loadUser(data.session.user.id)
+    const stored=readIdaSession()
+    if(stored){
+      setSession(stored)
+      void loadUser(stored)
+    } else {
+      setReady(true)
+      if(hadFirstBoot)setBootStage('existing')
       else{
-        setReady(true)
-        if(hadFirstBoot)setBootStage('existing')
-        else{
-          setBootStage('loading')
-          window.setTimeout(()=>mounted&&setBootStage('hi'),5000)
-        }
+        setBootStage('loading')
+        window.setTimeout(()=>mounted&&setBootStage('hi'),5000)
       }
-    })
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,next)=>{
-      if(!mounted)return
-      setSession(next)
-      if(next)void loadUser(next.user.id)
-      else{activeUser.current=null;removeStorageSync();clearLocalState();setReady(false);setDesktopOpen(false)}
-    })
-    return()=>{mounted=false;subscription.unsubscribe();removeStorageSync();if(saveTimer.current!==null)window.clearTimeout(saveTimer.current)}
+    }
+    return()=>{mounted=false;removeStorageSync();if(saveTimer.current!==null)window.clearTimeout(saveTimer.current)}
   },[])
 
   useEffect(()=>{
@@ -279,14 +291,14 @@ export function CloudGate() {
     }
   },[bootStage,firstBoot,session])
 
-  const accountLabel=useMemo(()=>session?.user.user_metadata?.display_name||session?.user.email||'IDA User',[session])
+  const accountLabel=useMemo(()=>session?.displayName||'IDA User',[session])
   if(!session){
     if(bootStage==='loading'||bootStage==='hi'||bootStage==='working'||bootStage==='install')return <BootScreen stage={bootStage}/>
     if(bootStage==='choices')return <AppChoiceScreen selected={selectedApps} setSelected={setSelectedApps} onContinue={startInstall}/>
     if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onExisting={()=>setBootStage('existing')}/>
-    return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};setSession(next);setDesktopOpen(false)}}/>
+    return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);setDesktopOpen(false)}}/>
   }
   if(!ready)return <BootScreen stage="install"/>
   if(!desktopOpen)return <LockScreen session={session} onOpen={()=>setDesktopOpen(true)}/>
-  return <><DaApps/><div style={{position:'fixed',right:10,top:10,zIndex:99998,display:'flex',alignItems:'center',gap:8,padding:'7px 9px 7px 11px',borderRadius:999,background:'rgba(8,11,18,.7)',backdropFilter:'blur(16px)',color:'#fff',font:'12px system-ui',boxShadow:'0 6px 24px rgba(0,0,0,.25)'}}><span style={{maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',opacity:.8}}>{accountLabel}</span><button onClick={()=>void supabase.auth.signOut({scope:'local'})} style={{border:0,borderRadius:999,padding:'5px 9px',background:'rgba(255,255,255,.1)',color:'#fff',cursor:'pointer'}}>Sign out</button></div>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
+  return <><DaApps/><div style={{position:'fixed',right:10,top:10,zIndex:99998,display:'flex',alignItems:'center',gap:8,padding:'7px 9px 7px 11px',borderRadius:999,background:'rgba(8,11,18,.7)',backdropFilter:'blur(16px)',color:'#fff',font:'12px system-ui',boxShadow:'0 6px 24px rgba(0,0,0,.25)'}}><span style={{maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',opacity:.8}}>{accountLabel}</span><button onClick={async()=>{if(session)await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);setDesktopOpen(false);setFirstBoot(false);setBootStage('existing')}} style={{border:0,borderRadius:999,padding:'5px 9px',background:'rgba(255,255,255,.1)',color:'#fff',cursor:'pointer'}}>Sign out</button></div>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
 }
