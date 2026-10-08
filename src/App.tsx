@@ -547,8 +547,9 @@ export function DaApps() {
   }
 
   const openPowerMenu = () => { setSearchOpen(false); setPowerMenu(v=>!v); setStartOpen(true) }
-  const shutdownIDA = () => { setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setShutdown(true); window.setTimeout(() => window.location.replace('about:blank'), 1800) }
-  const sleepIDA = () => { setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setSleeping(true) }
+  const markPowerLock = () => { try { localStorage.setItem('ida-power-lock-v1','1') } catch {} }
+  const shutdownIDA = () => { markPowerLock(); setPowerMenu(false); setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setShutdown(true); window.setTimeout(() => window.location.replace('about:blank'), 1800) }
+  const sleepIDA = () => { markPowerLock(); setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setSleeping(true) }
   const refreshIDA = () => {
     try {
       localStorage.setItem('ida-open-windows-v1', JSON.stringify(windows))
