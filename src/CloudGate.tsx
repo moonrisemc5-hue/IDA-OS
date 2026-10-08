@@ -112,7 +112,7 @@ function AppChoiceScreen({ selected, setSelected, onContinue }: { selected:strin
   </div>
 }
 
-function AccountSetup({ selectedApps, onCreated, onExisting }: { selectedApps:string[]; onCreated:(session:IdaSession,displayName:string,apps:string[])=>void; onExisting:()=>void }) {
+function AccountSetup({ selectedApps, onCreated, onExisting, onSkip }: { selectedApps:string[]; onCreated:(session:IdaSession,displayName:string,apps:string[])=>void; onExisting:()=>void; onSkip:()=>void }) {
   const [name,setName]=useState('')
   const [password,setPassword]=useState('')
   const [confirm,setConfirm]=useState('')
@@ -141,6 +141,7 @@ function AccountSetup({ selectedApps, onCreated, onExisting }: { selectedApps:st
       <button disabled={busy||!name||!password||!confirm} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!password||!confirm) ? .5 : 1}}>{busy?'Creating your IDA…':'Create account'}</button>
       {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12,lineHeight:1.5,opacity:.82}}>{message}</div>}
       <button onClick={onExisting} style={switchStyle}>I already have an IDA account</button>
+      <button onClick={onSkip} style={{...switchStyle,marginTop:4}}>Skip for now</button>
     </div>
   </div>
 }
@@ -313,10 +314,10 @@ export function CloudGate() {
   if(!session){
     if(bootStage==='loading'||bootStage==='hi'||bootStage==='working'||bootStage==='install')return <BootScreen stage={bootStage}/>
     if(bootStage==='choices')return <AppChoiceScreen selected={selectedApps} setSelected={setSelectedApps} onContinue={startInstall}/>
-    if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onExisting={()=>setBootStage('existing')}/>
+    if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onExisting={()=>setBootStage('existing')} onSkip={()=>setBootStage('existing')}/>
     return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);lockDesktop()}}/>
   }
   if(!ready)return <BootScreen stage="install"/>
-  if(!desktopOpen)return <LockScreen session={session} onUnlock={async next=>{writeIdaSession(next);await loadUser(next);setSession(next);openDesktop()}} onSignOut={async()=>{await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);lockDesktop();setFirstBoot(false);setBootStage('existing')}}/>
-  return <><DaApps/>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
+  if(!desktopOpen)return <LockScreen session={session} onUnlock={async next=>{writeIdaSession(next);await loadUser(next);setSession(next);openDesktop()}}/>
+  return <><DaApps onRestartToLock={lockDesktop}/>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
 }
