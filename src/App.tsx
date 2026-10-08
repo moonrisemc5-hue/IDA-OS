@@ -739,8 +739,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   )
 }
 
-function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove, onDropTarget, onContext, scale, selected, onSelect }: {
-  app: AppItem; displayName:string; position: Position; editMode: boolean; onEdit: () => void; onOpen: () => void; onMove: (p: Position) => void; onDropTarget:(target:string)=>void; onContext:(x:number,y:number)=>void; scale:number; selected:boolean; onSelect:()=>void
+function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onOpen, onMove, onDropTarget, onContext, scale, selected, onSelect }: {
+  app: AppItem; displayName:string; shortcutId?:string; position: Position; editMode: boolean; onEdit: () => void; onOpen: () => void; onMove: (p: Position) => void; onDropTarget:(target:string)=>void; onContext:(x:number,y:number)=>void; scale:number; selected:boolean; onSelect:()=>void
 }) {
   const tileRef = useRef<HTMLButtonElement>(null)
   const dragging = useRef(false)
