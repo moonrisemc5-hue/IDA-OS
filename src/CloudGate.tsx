@@ -228,7 +228,7 @@ export function CloudGate() {
 
   const finishNewAccount=(nextSession:Session,name:string,apps:string[])=>{
     try{
-      localStorage.setItem('ida-firstboot-complete-v2','1')
+      localStorage.setItem('ida-firstboot-complete-v3','1')
       localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...apps]))
     }catch{}
     setSession(nextSession)
@@ -243,7 +243,7 @@ export function CloudGate() {
 
   useEffect(()=>{
     let mounted=true
-    const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v2')==='1'
+    const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v3')==='1'
     setFirstBoot(!hadFirstBoot)
     supabase.auth.getSession().then(({data})=>{
       if(!mounted)return
@@ -284,7 +284,7 @@ export function CloudGate() {
     if(bootStage==='loading'||bootStage==='hi'||bootStage==='working'||bootStage==='install')return <BootScreen stage={bootStage}/>
     if(bootStage==='choices')return <AppChoiceScreen selected={selectedApps} setSelected={setSelectedApps} onContinue={startInstall}/>
     if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onExisting={()=>setBootStage('existing')}/>
-    return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v2','1')}catch{};setSession(next);setDesktopOpen(false)}}/>
+    return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};setSession(next);setDesktopOpen(false)}}/>
   }
   if(!ready)return <BootScreen stage="install"/>
   if(!desktopOpen)return <LockScreen session={session} onOpen={()=>setDesktopOpen(true)}/>
