@@ -281,6 +281,15 @@ export function DaApps() {
 
   const saveTaskbar = (next: string[]) => { setTaskbarApps(next); try { localStorage.setItem('ida-taskbar', JSON.stringify(next)) } catch {} }
   const saveDesktopApps = (next:string[]) => { setDesktopApps(next); try { localStorage.setItem('ida-desktop-apps', JSON.stringify(next)) } catch {} }
+  const removeDesktopShortcut = (id:string) => {
+    if (appBaseId(id)==='DaSettings') return false
+    setDesktopApps(prev => {
+      const next = prev.filter(entry => entry !== id)
+      try { localStorage.setItem('ida-desktop-apps', JSON.stringify(next)) } catch {}
+      return next
+    })
+    return true
+  }
   const isDappInstalled = (name:string) => desktopApps.some(x=>x.split('::')[0]===name) || Object.values(folderApps).some(items=>items.some(x=>x.split('::')[0]===name))
   const uninstallDapp = (name:string) => {
     if(name==='DaSettings' || name==='DaTrash' || name==='DaMedia' || name==='DAPP') return
@@ -301,7 +310,14 @@ export function DaApps() {
     // Only DaSettings is protected; DaFile Explorer, DaMedia, DaNotes, etc. can have their shortcuts deleted.
     if(type==='app' && appBaseId(id)==='DaSettings') return
     if(type==='app' && !appForId(id)) return
-    if(type==='app'){ const app=appForId(id); if(!app)return; saveTrash([...trash,{type:'app',id,name:appLabels[id]||app.name,app,deletedAt:Date.now()}]); saveDesktopApps(desktopApps.filter(n=>n!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)]))); Object.keys(windows).filter(k=>k===id||windows[k]?.appInstanceId===id).forEach(closeWindow) }
+    if(type==='app'){
+      const app=appForId(id)
+      if(!app) return
+      if(!removeDesktopShortcut(id)) return
+      saveTrash([...trash.filter(item => !(item.type==='app' && item.id===id)),{type:'app',id,name:appLabels[id]||app.name,app,deletedAt:Date.now()}])
+      commitFolderApps(Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)])))
+      Object.keys(windows).filter(k=>k===id||k===appBaseId(id)||windows[k]?.appInstanceId===id||windows[k]?.appInstanceId===appBaseId(id)).forEach(closeWindow)
+    }
     else if(type==='folder'){ const folder=folders.find(f=>f.id===id); if(!folder)return; saveTrash([...trash,{type:'folder',id,name:folder.name,folder,deletedAt:Date.now()}]); commitFolders(folders.filter(f=>f.id!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).filter(([k])=>k!==id))); closeWindow(id) }
     else { const file=files.find(f=>f.id===id); if(!file)return; saveTrash([...trash,{type:'file',id,name:file.name,file,deletedAt:Date.now()}]); commitFiles(files.filter(f=>f.id!==id)); const nextNotes={...notes}; delete nextNotes[id]; updateNotes(nextNotes); closeWindow(id) }
   }
