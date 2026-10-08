@@ -906,7 +906,20 @@ function SettingsPanel({ taskbarTheme, taskbarManualColor, onTaskbarTheme, onTas
 function ExternalAppPanel({url,name}:{url:string;name:string}){return <iframe className="external-app-frame" src={url} title={name} />}
 function ShutdownScreen(){return <div className="shutdown-screen"><div className="shutdown-logo">IDA</div><div className="shutdown-spinner"/><div className="shutdown-message">Shutting down IDA</div><div className="shutdown-sub">Closing IDA...</div></div>}
 function SleepScreen({onWake}:{onWake:()=>void}){return <div className="shutdown-screen"><div className="shutdown-logo">IDA</div><div className="shutdown-message">IDA is sleeping</div><button className="wake-button" onClick={onWake}>Open IDA</button></div>}
-function IdaAppIcon({name,size=28}:{name:string;size?:number}){\n  const glyph =\n    name==='DaMusic'?'♪':\n    name==='DaEconomy'?'
+function IdaAppIcon({name,size=28}:{name:string;size?:number}){
+  const glyph =
+    name==='DaMusic'?'♪':
+    name==='DaEconomy'?'$':
+    name==='DaCourt'?'⚖':
+    name==='DaScope'?'⌕':
+    name==='DaFile Explorer'?'▣':
+    name==='DaSettings'?'⚙':
+    name==='DaTrash'?'▥':
+    name==='DaMedia'?'▶':
+    name==='DaNotes'?'✎':
+    name==='DAPP'?'✦':'◈'
+  return <span style={{display:'inline-grid',placeItems:'center',width:size,height:size,fontSize:size*.62,fontWeight:800,lineHeight:1,color:'currentColor',fontFamily:'Segoe UI Symbol,Segoe UI,sans-serif'}} aria-hidden="true">{glyph}</span>
+}
 function RestartScreen(){return <div className="restart-screen"><div className="restart-logo"><HilalLogo/></div><div className="restart-spinner"><span/></div><div className="restart-message">Restarting IDA</div><div className="restart-sub">Don't turn off the web</div><div className="restart-progress"><span/></div><div className="restart-status">Almost there...</div></div>}
 function PowerMenu({onShutdown,onSleep,onRestart,onCancel}:{onShutdown:()=>void;onSleep:()=>void;onRestart:()=>void;onCancel:()=>void}){return <section className="power-menu" onPointerDown={e=>e.stopPropagation()}><div className="power-title"><Power size={18}/><strong>Power</strong></div><button onClick={onShutdown}><Power size={18}/><span><strong>Shut down</strong><small>Close IDA</small></span></button><button onClick={onSleep}><span className="sleep-icon">◐</span><span><strong>Sleep</strong><small>Keep IDA open and resume later</small></span></button><button onClick={onRestart}><span className="restart-icon">↻</span><span><strong>Restart IDA</strong><small>Restart the IDA desktop</small></span></button><button className="power-cancel" onClick={onCancel}>Cancel</button></section>}
 
