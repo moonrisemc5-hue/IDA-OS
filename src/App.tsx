@@ -456,6 +456,7 @@ export function DaApps({onSignOut,accountName}:{onSignOut?:()=>void;accountName?
     if (app.kind==='store') { const k=requestedId==='DAPP'?'DAPP':'desktop:'+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:prev[k]?{...prev[k],minimized:false,z:maxZ+1}:{kind:'store',appName:'DAPP',minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,980),height:Math.min(window.innerHeight-90,680),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow(k); return }
     if (app.kind==='trash' && requestedId==='DaTrash') { setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,DaTrash:prev.DaTrash?{...prev.DaTrash,minimized:false,z:maxZ+1}:{kind:'trash',appName:'DaTrash',minimized:false,maximized:false,x:60,y:45,width:Math.min(window.innerWidth-40,900),height:Math.min(window.innerHeight-90,620),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow('DaTrash'); return }
     if (app.kind==='music' && desktopInstance) { const base={...baseApp,name:'DaMusic'}; openApp(base,false); return }
+    if (app.kind==='external') { openWebAppInstance(app, desktopInstance); return }
     if (app.kind==='scope') { const k=(desktopInstance?'desktop:':'taskbar:')+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'scope',appName:'DaScope',minimized:false,maximized:false,x:45,y:35,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance}}});setActiveWindow(k);return }
     const k = desktopInstance ? `desktop:${requestedId}:${Date.now()}` : requestedId
     setWindows(prev => { const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0)); const existing=prev[k]; return {...prev,[k]:existing?{...existing,minimized:false,z:maxZ+1}:{kind:app.kind,appName:app.name,minimized:false,maximized:false,x:20 + Object.keys(prev).length*18,y:18 + Object.keys(prev).length*18,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance,appInstanceId:requestedId}} })
@@ -821,9 +822,33 @@ function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove,
 
 function DappLogo({size=38}:{size?:number}){return <span className="dapp-logo" style={{width:size,height:size}}><span className="dapp-logo-core">D</span><span className="dapp-logo-orbit orbit-a"/><span className="dapp-logo-orbit orbit-b"/></span>}
 function DaScopeLogo({size=38}:{size?:number}){return <span className="dascope-logo" style={{width:size,height:size}} aria-hidden="true"><Moon size={size*0.86} strokeWidth={2.35}/></span>}
-function DaScopeSearch(){const [query,setQuery]=useState('');const [searched,setSearched]=useState('');const [loading,setLoading]=useState(false);const submit=()=>{const q=query.trim();if(!q)return;setLoading(true);setSearched(q);window.setTimeout(()=>setLoading(false),650)};return <div className="dascope-search-shell"><div className="dascope-search-head"><DaScopeLogo size={48}/><div><strong>DaScope</strong><span>Search the web, simply.</span></div></div><form className="dascope-searchbar" onSubmit={e=>{e.preventDefault();submit()}}><Search size={19}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search the web..." autoFocus/><button type="submit" aria-label="Search"><Search size={17}/></button></form>{loading?<div className="dascope-results-loading"><div className="dascope-loader"/><span>Searching the web...</span></div>:searched?<div className="dascope-results"><div className="dascope-results-top"><strong>Results for “{searched}”</strong><span>Google-powered results will appear here</span></div>{['Web results','News & updates','Images & more'].map((label,i)=><a key={label} className="dascope-result" href={'https://www.google.com/search?q='+encodeURIComponent(searched+' '+label)} target="_blank" rel="noreferrer"><div className="dascope-result-dot">{i+1}</div><div><strong>{label} · {searched}</strong><span>Google search results for {searched}. Connect a Google Programmable Search Engine to populate live results here.</span><small>google.com</small></div><span className="dascope-result-arrow">↗</span></a>)}</div>:<div className="dascope-empty"><DaScopeLogo size={72}/><strong>What are you looking for?</strong><span>Search websites, ideas, news, and more.</span></div>}</div>}
-function IdaAppIcon({name,size=28}:{name:string;size?:number}){return name==='DAPP'?<DappLogo size={size}/>:name==='DaScope'?<DaScopeLogo size={size}/>:name==='DaEconomy'?<BankIcon size={size}/>:name==='DaCourt'?<Scale size={size}/>:name==='DaMusic'?<Music2 size={size}/>:name==='DaFile Explorer'?<Folder size={size}/>:name==='DaNotes'?<FileText size={size}/>:name==='DaTrash'?<Trash2 size={size}/>:name==='DaSettings'?<Gear size={size}/>:name==='DaMedia'?<Film size={size}/>:<Folder size={size}/>} 
-
+function DaScopeSearch(){
+  const [query,setQuery]=useState('');
+  const [searched,setSearched]=useState('');
+  const [loading,setLoading]=useState(false);
+  const [googleUrl,setGoogleUrl]=useState<string|null>(null);
+  const submit=()=>{const q=query.trim();if(!q)return;setLoading(true);setSearched(q);setGoogleUrl(null);window.setTimeout(()=>setLoading(false),650)};
+  if(googleUrl) return <div className="dascope-browser-view">
+    <div className="dascope-browser-toolbar">
+      <button className="dascope-browser-back" onClick={()=>setGoogleUrl(null)} aria-label="Back to DaScope">←</button>
+      <DaScopeLogo size={30}/><strong>DaScope</strong>
+    </div>
+    <iframe className="dascope-google-frame" src={googleUrl} title="Google in DaScope"/>
+  </div>;
+  return <div className="dascope-search-shell">
+    <div className="dascope-search-head"><DaScopeLogo size={48}/><div><strong>DaScope</strong><span>Search the web, simply.</span></div></div>
+    <form className="dascope-searchbar" onSubmit={e=>{e.preventDefault();submit()}}><Search size={19}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search the web..." autoFocus/><button type="submit" aria-label="Search"><Search size={17}/></button></form>
+    {loading?<div className="dascope-results-loading"><div className="dascope-loader"/><span>Searching the web...</span></div>:searched?<div className="dascope-results">
+      <div className="dascope-results-top"><strong>Results for “{searched}”</strong><span>Google results stay inside DaScope.</span></div>
+      {['Web results','News & updates','Images & more'].map((label,i)=>{
+        const url='https://www.google.com/search?igu=1&q='+encodeURIComponent(searched+' '+label);
+        return <button key={label} className="dascope-result" onClick={()=>setGoogleUrl(url)}>
+          <div className="dascope-result-dot">{i+1}</div><div><strong>{label} · {searched}</strong><span>Open Google results inside DaScope.</span><small>google.com</small></div><span className="dascope-result-arrow">→</span>
+        </button>
+      })}
+    </div>:<div className="dascope-empty"><DaScopeLogo size={72}/><strong>What are you looking for?</strong><span>Search websites, ideas, news, and more.</span></div>}
+  </div>
+}
 function DappStore({internetOn,installed,onInstall,onUninstall,onOpen}:{internetOn:boolean;installed:(name:string)=>boolean;onInstall:(name:string)=>void;onUninstall:(name:string)=>void;onOpen:(name:string)=>void}){
   const [query,setQuery]=useState(''); const [selected,setSelected]=useState<DappCatalogItem|null>(null); const [installing,setInstalling]=useState<string|null>(null); const [uninstalling,setUninstalling]=useState<string|null>(null); const [progress,setProgress]=useState(0); const [confirm,setConfirm]=useState<string|null>(null); const [voterId,setVoterId]=useState('')
   const results=DAPP_CATALOG.filter(a=>(a.name+' '+a.description+' '+a.category).toLowerCase().includes(query.toLowerCase()))
