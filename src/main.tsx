@@ -1,5 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { DaApps } from './App';
+import { CloudGate } from './CloudGate';
 import './styles.css';
-createRoot(document.getElementById('root')!).render(<React.StrictMode><DaApps /></React.StrictMode>);
+createRoot(document.getElementById('root')!).render(<React.StrictMode><CloudGate /></React.StrictMode>);
