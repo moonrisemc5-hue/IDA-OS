@@ -117,7 +117,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [batteryCharging, setBatteryCharging] = useState(false)
   const [volume, setVolume] = useState(70)
   const [desktop, setDesktop] = useState(false)
-  const [taskbarApps, setTaskbarApps] = useState<string[]>(['DaEconomy','DaCourt','DaMusic','DaSettings'])
+  const [taskbarApps, setTaskbarApps] = useState<string[]>(['DaSettings'])
   const [taskbarTheme, setTaskbarTheme] = useState<'default'|'aurora'|'sunset'|'ocean'|'manual'>('default')
   const [taskbarManualColor, setTaskbarManualColor] = useState('#151b2a')
   const [contextMenu, setContextMenu] = useState<{x:number;y:number;scope:'desktop'|'explorer'|'window';app?:AppItem;appId?:string;file?:UserFile;folderItem?:UserFolder;folder?:ExplorerFolder;windowKey?:string}|null>(null)
