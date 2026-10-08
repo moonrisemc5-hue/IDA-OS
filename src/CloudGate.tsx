@@ -166,7 +166,7 @@ function LockScreen({ session, onOpen }: { session:IdaSession; onOpen:()=>void }
   const time=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
   const date=now.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'})
   return <div onClick={onOpen} style={{position:'fixed',inset:0,zIndex:999999,overflow:'hidden',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',cursor:'default'}}>
-    <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.5)),url("\${FIRSTBOOT_WALLPAPER}")`,backgroundSize:'cover',backgroundPosition:'center',filter:'saturate(.85)'}}/>
+    <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.5)),url("${FIRSTBOOT_WALLPAPER}")`,backgroundSize:'cover',backgroundPosition:'center',filter:'saturate(.85)'}}/>
     <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at 50% 25%,transparent 0,rgba(0,0,0,.18) 45%,rgba(0,0,0,.6) 100%)'}}/>
     <div style={{position:'relative',height:'100%',display:'flex',flexDirection:'column',alignItems:'center',paddingTop:'11vh',textShadow:'0 3px 18px rgba(0,0,0,.55)'}}>
       <div style={{fontSize:'clamp(72px,10vw,118px)',fontWeight:250,letterSpacing:'-.055em',lineHeight:1}}>{time}</div>
@@ -249,7 +249,6 @@ export function CloudGate() {
       localStorage.setItem('ida-firstboot-complete-v3','1')
       localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...apps]))
     }catch{}
-    writeIdaSession(nextSession)
     writeIdaSession(nextSession)
     setSession(nextSession)
     void loadUser(nextSession)
