@@ -287,6 +287,7 @@ export function CloudGate() {
   const finishNewAccount=(nextSession:IdaSession,name:string,apps:string[])=>{
     try{
       clearLocalState()
+      localStorage.setItem('ida-language',selectedLanguage)
       localStorage.setItem('ida-firstboot-complete-v3','1')
       localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...apps]))
       localStorage.setItem('ida-taskbar',JSON.stringify(['DaSettings']))
@@ -342,7 +343,7 @@ export function CloudGate() {
     if(bootStage==='loading'||bootStage==='hi'||bootStage==='working'||bootStage==='install')return <BootScreen stage={bootStage}/>
     if(bootStage==='language')return <LanguageChoiceScreen selected={selectedLanguage} onSelect={setSelectedLanguage} onContinue={()=>{try{localStorage.setItem('ida-language',selectedLanguage)}catch{};setBootStage('choices')}}/>
     if(bootStage==='choices')return <AppChoiceScreen selected={selectedApps} setSelected={setSelectedApps} onContinue={startInstall}/>
-    if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onSkip={()=>{try{clearLocalState();localStorage.setItem('ida-firstboot-complete-v3','1');localStorage.setItem(GUEST_LOCK_KEY,'1');localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...selectedApps]));localStorage.setItem('ida-taskbar',JSON.stringify(['DaSettings']))}catch{};writeIdaSession(null);setSession({accountId:'',sessionToken:'',displayName:'IDA User'});setDesktopOpen(false);lockDesktop()}}/>
+    if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onSkip={()=>{try{clearLocalState();localStorage.setItem('ida-language',selectedLanguage);localStorage.setItem('ida-firstboot-complete-v3','1');localStorage.setItem(GUEST_LOCK_KEY,'1');localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...selectedApps]));localStorage.setItem('ida-taskbar',JSON.stringify(['DaSettings']))}catch{};writeIdaSession(null);setSession({accountId:'',sessionToken:'',displayName:'IDA User'});setDesktopOpen(false);lockDesktop()}}/>
     return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);lockDesktop()}}/>
   }
   if(!ready)return <BootScreen stage="install"/>
