@@ -59,11 +59,11 @@ const bootStyle: CSSProperties = { position:'fixed',inset:0,zIndex:999999,backgr
 function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
   const text = stage==='loading' ? 'This won’t take long' : stage==='hi' ? 'Hi.' : stage==='working' ? 'We are working on IDA' : 'Getting things ready'
   return <div style={bootStyle}>
-    <style>{\`
+    <style>{`
       @keyframes idaBootFade{0%{opacity:0;transform:translateY(7px)}35%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
       @keyframes idaSpinner{to{transform:rotate(360deg)}}
       .ida-boot-text{animation:idaBootFade 3s ease both}
-    \`}</style>
+    `}</style>
     <div style={{textAlign:'center',animation:stage==='working'?'none':'idaBootFade 3s ease both'}}>
       {stage==='hi' ? <div style={{fontSize:'clamp(58px,9vw,96px)',fontWeight:300,letterSpacing:'-.05em'}}>Hi.</div> :
        stage==='working' ? <><div style={{fontSize:'clamp(26px,4vw,40px)',fontWeight:350,letterSpacing:'-.02em'}}>We are working on IDA</div><div style={{margin:'28px auto 0',width:20,height:20,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
@@ -147,7 +147,7 @@ function LockScreen({ session, onOpen }: { session:Session; onOpen:()=>void }) {
   const time=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
   const date=now.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'})
   return <div onClick={onOpen} style={{position:'fixed',inset:0,zIndex:999999,overflow:'hidden',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',cursor:'default'}}>
-    <div style={{position:'absolute',inset:0,backgroundImage:\`linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.5)),url("\${FIRSTBOOT_WALLPAPER}")\`,backgroundSize:'cover',backgroundPosition:'center',filter:'saturate(.85)'}}/>
+    <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.5)),url("\${FIRSTBOOT_WALLPAPER}")`,backgroundSize:'cover',backgroundPosition:'center',filter:'saturate(.85)'}}/>
     <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at 50% 25%,transparent 0,rgba(0,0,0,.18) 45%,rgba(0,0,0,.6) 100%)'}}/>
     <div style={{position:'relative',height:'100%',display:'flex',flexDirection:'column',alignItems:'center',paddingTop:'11vh',textShadow:'0 3px 18px rgba(0,0,0,.55)'}}>
       <div style={{fontSize:'clamp(72px,10vw,118px)',fontWeight:250,letterSpacing:'-.055em',lineHeight:1}}>{time}</div>
