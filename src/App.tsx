@@ -17,8 +17,8 @@ const FILE_KEY = 'ida-files-v2'
 const readFiles = (): UserFile[] => { try { const raw=localStorage.getItem(FILE_KEY); return raw ? JSON.parse(raw) : [] } catch { return [] } }
 const saveFiles = (files: UserFile[]) => { try { localStorage.setItem(FILE_KEY, JSON.stringify(files)) } catch {} }
 
-const appBaseId = (id:string) => id.split('::')[0]
-const appForId = (id:string) => APPS.find(a=>a.name===appBaseId(id))
+const appBaseId = (id:string) => id.split('::')[0].split(':').pop() || id
+const appForId = (id:string) => { const exact=APPS.find(a=>a.name===id); if(exact)return exact; const base=appBaseId(id); return APPS.find(a=>a.name===base) }
 
 const APPS: AppItem[] = [
   { name: 'DAPP', kind: 'store', tone: 'violet' },
@@ -180,7 +180,7 @@ export function DaApps() {
       setFiles(readFiles())
       const savedFolders = localStorage.getItem('ida-folders-v1'); if(savedFolders) setFolders(JSON.parse(savedFolders))
       const savedFolderApps = localStorage.getItem('ida-folder-apps-v1'); if(savedFolderApps) setFolderApps(JSON.parse(savedFolderApps))
-      const savedDesktopApps = localStorage.getItem('ida-desktop-apps'); if (savedDesktopApps) setDesktopApps(Array.from(new Set(['DAPP',...(savedDesktopApps?JSON.parse(savedDesktopApps):[]),'DaTrash'])))
+      const savedDesktopApps = localStorage.getItem('ida-desktop-apps'); if (savedDesktopApps) { const raw=Array.isArray(JSON.parse(savedDesktopApps))?JSON.parse(savedDesktopApps):[]; const normalized=raw.map((id:string)=>typeof id==='string'?id:'').filter(Boolean); setDesktopApps(Array.from(new Set(['DAPP',...normalized,'DaTrash']))) }
       const savedLabels = localStorage.getItem('ida-app-labels'); if (savedLabels) setAppLabels(JSON.parse(savedLabels))
       const savedNotes = localStorage.getItem('ida-notes-v2'); if (savedNotes) setNotes(JSON.parse(savedNotes))
       const savedTrash = localStorage.getItem('ida-trash-v1'); if (savedTrash) setTrash(JSON.parse(savedTrash))
@@ -298,6 +298,7 @@ export function DaApps() {
   const saveTrash = (next:typeof trash) => { setTrash(next); try { localStorage.setItem('ida-trash-v1', JSON.stringify(next)) } catch {} }
   const deleteToTrash = (type:'app'|'file'|'folder', id:string) => {
     if(type==='app' && (appBaseId(id)==='DaTrash' || appBaseId(id)==='DaSettings')) return
+    if(type==='app' && !desktopApps.includes(id) && !Object.values(folderApps).some(items=>items.includes(id))) return
     if(type==='app'){ const app=appForId(id); if(!app)return; saveTrash([...trash,{type:'app',id,name:appLabels[id]||app.name,app,deletedAt:Date.now()}]); saveDesktopApps(desktopApps.filter(n=>n!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)]))); Object.keys(windows).filter(k=>k===id||windows[k]?.appInstanceId===id).forEach(closeWindow) }
     else if(type==='folder'){ const folder=folders.find(f=>f.id===id); if(!folder)return; saveTrash([...trash,{type:'folder',id,name:folder.name,folder,deletedAt:Date.now()}]); commitFolders(folders.filter(f=>f.id!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).filter(([k])=>k!==id))); closeWindow(id) }
     else { const file=files.find(f=>f.id===id); if(!file)return; saveTrash([...trash,{type:'file',id,name:file.name,file,deletedAt:Date.now()}]); commitFiles(files.filter(f=>f.id!==id)); const nextNotes={...notes}; delete nextNotes[id]; updateNotes(nextNotes); closeWindow(id) }
@@ -673,7 +674,7 @@ export function DaApps() {
       {controlOpen && <ControlCenter brightness={brightness} setBrightness={setBrightness} internetOn={internetOn} setInternetOn={setInternetState} volume={volume} setVolume={setVolume} onVolumeChange={(v)=>{setVolume(v);playVolumeTest(v)}} batteryLevel={batteryLevel} batteryCharging={batteryCharging} onClose={() => setControlOpen(false)} />}
 
       {Object.entries(windows).map(([key, win]) => {
-        const app = appForId(key) || (win.kind==='external' && win.appName ? appForId(win.appName) : null) || (win.kind==='media' ? ({name:'DaMedia',kind:'media',tone:'blue'} as AppItem) : win.kind==='notes' ? ({name:'DaNotes',kind:'notes',tone:'slate'} as AppItem) : win.kind==='explorer' ? ({name:folders.find(f=>f.id===win.folderId)?.name||'File',kind:'explorer',tone:'blue'} as AppItem) : (win.fileId ? ({name:files.find(f=>f.id===win.fileId)?.name||key,kind:'external',tone:'blue'} as AppItem) : null))
+        const app = appForId(key) || (win.appName ? appForId(win.appName) : null) || (win.kind==='scope' ? ({name:'DaScope',kind:'scope',tone:'blue'} as AppItem) : win.kind==='media' ? ({name:'DaMedia',kind:'media',tone:'blue'} as AppItem) : win.kind==='notes' ? ({name:'DaNotes',kind:'notes',tone:'slate'} as AppItem) : win.kind==='explorer' ? ({name:folders.find(f=>f.id===win.folderId)?.name||'File',kind:'explorer',tone:'blue'} as AppItem) : (win.fileId ? ({name:files.find(f=>f.id===win.fileId)?.name||key,kind:'external',tone:'blue'} as AppItem) : null))
         if (!app) return null
         const userFile = win.fileId ? files.find(f=>f.id===win.fileId) : undefined
         return <WindowFrame key={key} app={app} state={win} active={activeWindow===key} onContextMenu={win.externalUrl ? undefined : (x,y)=>{setContextMenu({x,y,scope:'window',windowKey:key});setStartOpen(false);setSearchOpen(false);setPowerMenu(false)}} onFocus={()=>focusWindow(key)} onPatch={(p)=>patchWindow(key,p)} onMinimize={()=>patchWindow(key,{minimized:true})} onClose={()=>closeWindow(key)} onMaximize={()=>patchWindow(key,{maximized:!win.maximized})}>
