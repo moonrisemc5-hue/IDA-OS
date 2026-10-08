@@ -297,7 +297,7 @@ export function DaApps() {
   const updateNotes = (next:Record<string,string>) => { setNotes(next); try { localStorage.setItem('ida-notes-v2', JSON.stringify(next)) } catch {} }
   const saveTrash = (next:typeof trash) => { setTrash(next); try { localStorage.setItem('ida-trash-v1', JSON.stringify(next)) } catch {} }
   const deleteToTrash = (type:'app'|'file'|'folder', id:string) => {
-    if(type==='app' && (id==='DaTrash' || id==='DaSettings' || id.startsWith('DaTrash:'))) return
+    if(type==='app' && (appBaseId(id)==='DaTrash' || appBaseId(id)==='DaSettings')) return
     if(type==='app'){ const app=appForId(id); if(!app)return; saveTrash([...trash,{type:'app',id,name:appLabels[id]||app.name,app,deletedAt:Date.now()}]); saveDesktopApps(desktopApps.filter(n=>n!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)]))); Object.keys(windows).filter(k=>k===id||windows[k]?.appInstanceId===id).forEach(closeWindow) }
     else if(type==='folder'){ const folder=folders.find(f=>f.id===id); if(!folder)return; saveTrash([...trash,{type:'folder',id,name:folder.name,folder,deletedAt:Date.now()}]); commitFolders(folders.filter(f=>f.id!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).filter(([k])=>k!==id))); closeWindow(id) }
     else { const file=files.find(f=>f.id===id); if(!file)return; saveTrash([...trash,{type:'file',id,name:file.name,file,deletedAt:Date.now()}]); commitFiles(files.filter(f=>f.id!==id)); const nextNotes={...notes}; delete nextNotes[id]; updateNotes(nextNotes); closeWindow(id) }
