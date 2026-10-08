@@ -11,8 +11,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
 })
 
 const ACCOUNT_SESSION_KEY = 'ida-account-session-v1'
+const GUEST_LOCK_KEY = 'ida-guest-lock-v1'
 const SYNC_PREFIXES = ['ida-', 'daapps-']
-const isSyncKey = (key: string) => key !== ACCOUNT_SESSION_KEY && key !== 'ida-firstboot-complete-v3' && SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
+const isSyncKey = (key: string) => key !== ACCOUNT_SESSION_KEY && key !== GUEST_LOCK_KEY && key !== 'ida-firstboot-complete-v3' && SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
 type IdaSession = { accountId:string; sessionToken:string; displayName:string }
 function readIdaSession(): IdaSession|null {
   try {
@@ -79,11 +80,11 @@ function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
   return <div style={bootStyle}>
     <style>{`
       @keyframes idaBootFade{0%{opacity:0;transform:translateY(7px)}38%{opacity:1;transform:none}62%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-7px)}}
-      .ida-hi-text{animation:idaBootFade 4s ease both}
+      .ida-hi-text{animation:idaBootFade 5s ease both}
       @keyframes idaSpinner{to{transform:rotate(360deg)}}
       .ida-boot-text{animation:idaBootFade 3s ease both}
     `}</style>
-    <div className={stage==='hi' ? 'ida-hi-text' : undefined} style={{textAlign:'center',animation:stage==='working'?'none':'idaBootFade 3s ease both'}}>
+    <div className={stage==='hi' ? 'ida-hi-text' : undefined} style={{textAlign:'center',animation:stage==='hi'||stage==='working'?'none':'idaBootFade 3s ease both'}}>
       {stage==='hi' ? <div style={{fontSize:'clamp(58px,9vw,96px)',fontWeight:300,letterSpacing:'-.05em'}}>Hi.</div> :
        stage==='working' ? <><div style={{fontSize:'clamp(26px,4vw,40px)',fontWeight:350,letterSpacing:'-.02em'}}>We are working on IDA</div><div style={{margin:'28px auto 0',width:20,height:20,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
        stage==='install' ? <><div style={{fontSize:24,fontWeight:350}}>{text}</div><div style={{margin:'26px auto 0',width:18,height:18,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
@@ -291,7 +292,8 @@ export function CloudGate() {
       void loadUser(stored)
     } else {
       setReady(true)
-      if(hadFirstBoot)setBootStage('existing')
+      if(localStorage.getItem(GUEST_LOCK_KEY)==='1'){setSession({accountId:'',sessionToken:'',displayName:'IDA User'});setDesktopOpen(false)}
+      else if(hadFirstBoot)setBootStage('existing')
       else{
         setBootStage('loading')
         window.setTimeout(()=>mounted&&setBootStage('hi'),5000)
@@ -303,7 +305,7 @@ export function CloudGate() {
   useEffect(()=>{
     if(!firstBoot||session)return
     if(bootStage==='hi'){
-      const t=window.setTimeout(()=>setBootStage('working'),4000)
+      const t=window.setTimeout(()=>setBootStage('working'),5000)
       return()=>window.clearTimeout(t)
     }
     if(bootStage==='working'){
@@ -316,10 +318,10 @@ export function CloudGate() {
   if(!session){
     if(bootStage==='loading'||bootStage==='hi'||bootStage==='working'||bootStage==='install')return <BootScreen stage={bootStage}/>
     if(bootStage==='choices')return <AppChoiceScreen selected={selectedApps} setSelected={setSelectedApps} onContinue={startInstall}/>
-    if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onSkip={()=>setBootStage('existing')}/>
+    if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onSkip={()=>{try{clearLocalState();localStorage.setItem('ida-firstboot-complete-v3','1');localStorage.setItem(GUEST_LOCK_KEY,'1');localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...selectedApps]));localStorage.setItem('ida-taskbar',JSON.stringify(['DaSettings']))}catch{};writeIdaSession(null);setSession({accountId:'',sessionToken:'',displayName:'IDA User'});setDesktopOpen(false);lockDesktop()}}/>
     return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);lockDesktop()}}/>
   }
   if(!ready)return <BootScreen stage="install"/>
-  if(!desktopOpen)return <LockScreen session={session} onUnlock={async next=>{writeIdaSession(next);await loadUser(next);setSession(next);openDesktop()}}/>
+  if(!desktopOpen)return <LockScreen session={session} onUnlock={async next=>{try{localStorage.removeItem(GUEST_LOCK_KEY)}catch{};writeIdaSession(next);await loadUser(next);setSession(next);openDesktop()}}/>
   return <><DaApps onRestartToLock={lockDesktop}/>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
 }
