@@ -597,7 +597,7 @@ export function DaApps() {
 
   if (!mounted) return <div className="daapps-root" aria-hidden="true" />
   if (shutdown) return <ShutdownScreen />
-  if (sleeping) return <SleepScreen onWake={()=>setSleeping(false)} />
+  if (sleeping) return <SleepScreen onWake={()=>window.location.reload()} />
   if (restarting) return <RestartScreen />
 
   return (
