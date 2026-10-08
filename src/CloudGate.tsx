@@ -84,7 +84,7 @@ function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
       @keyframes idaSpinner{to{transform:rotate(360deg)}}
       .ida-boot-text{animation:idaBootFade 3s ease both}
     `}</style>
-    <div className={stage==='hi' ? 'ida-hi-text' : undefined} style={{textAlign:'center',animation:stage==='hi'?'none':stage==='working'?'none':'idaBootFade 3s ease both'}}>
+    <div className={stage==='hi' ? 'ida-hi-text' : undefined} style={{textAlign:'center',animation:stage==='hi'||stage==='working'?undefined:'idaBootFade 3s ease both'}}>
       {stage==='hi' ? <div style={{fontSize:'clamp(42px,6vw,68px)',fontWeight:300,letterSpacing:'-.05em'}}>Hi.</div> :
        stage==='working' ? <><div style={{fontSize:'clamp(26px,4vw,40px)',fontWeight:350,letterSpacing:'-.02em'}}>We are working on IDA</div><div style={{margin:'28px auto 0',width:20,height:20,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
        stage==='install' ? <><div style={{fontSize:24,fontWeight:350}}>{text}</div><div style={{margin:'26px auto 0',width:18,height:18,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
