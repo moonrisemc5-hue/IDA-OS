@@ -328,7 +328,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     if(type==='app'){
       const app=appForId(id)
       if(!app) return
-      if(!removeDesktopShortcut(id)) return
+      saveDesktopApps(desktopApps.filter(entry => entry !== id))
       saveTrash([...trash.filter(item => !(item.type==='app' && item.id===id)),{type:'app',id,name:appLabels[id]||app.name,app,deletedAt:Date.now()}])
       commitFolderApps(Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)])))
       Object.keys(windows).filter(k=>k===id||k===appBaseId(id)||windows[k]?.appInstanceId===id||windows[k]?.appInstanceId===appBaseId(id)).forEach(closeWindow)
