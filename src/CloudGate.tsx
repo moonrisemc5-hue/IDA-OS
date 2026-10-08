@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { createClient, type Session } from '@supabase/supabase-js'
 import { DaApps } from './App'
 
@@ -36,9 +36,9 @@ function looksLikeIdaState(state: unknown): state is CloudState {
   return !!state && typeof state === 'object' && (state as any).version === 1 && !!(state as any).keys
 }
 
-const inputStyle: React.CSSProperties = { width:'100%',boxSizing:'border-box',padding:'13px 14px',borderRadius:12,border:'1px solid rgba(255,255,255,.12)',background:'rgba(0,0,0,.22)',color:'#fff',outline:'none',fontSize:15 }
-const buttonStyle: React.CSSProperties = { width:'100%',marginTop:14,padding:'13px 14px',border:0,borderRadius:12,background:'#fff',color:'#111',fontWeight:700,cursor:'pointer' }
-const switchStyle: React.CSSProperties = { width:'100%',marginTop:10,padding:10,border:0,background:'transparent',color:'#fff',opacity:.7,cursor:'pointer' }
+const inputStyle: CSSProperties = { width:'100%',boxSizing:'border-box',padding:'13px 14px',borderRadius:12,border:'1px solid rgba(255,255,255,.12)',background:'rgba(0,0,0,.22)',color:'#fff',outline:'none',fontSize:15 }
+const buttonStyle: CSSProperties = { width:'100%',marginTop:14,padding:'13px 14px',border:0,borderRadius:12,background:'#fff',color:'#111',fontWeight:700,cursor:'pointer' }
+const switchStyle: CSSProperties = { width:'100%',marginTop:10,padding:10,border:0,background:'transparent',color:'#fff',opacity:.7,cursor:'pointer' }
 
 function AuthScreen({ initialMessage = '' }: { initialMessage?: string }) {
   const [mode, setMode] = useState<'signin'|'signup'>('signin')
@@ -60,7 +60,7 @@ function AuthScreen({ initialMessage = '' }: { initialMessage?: string }) {
       <div style={{textAlign:'center',marginBottom:24}}><div style={{fontSize:44,lineHeight:1,marginBottom:12}}>☾</div><div style={{fontSize:28,fontWeight:700}}>IDA</div><div style={{opacity:.65,marginTop:6}}>Sign in to your IDA desktop</div></div>
       <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" autoComplete="email" style={inputStyle}/>
       <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" autoComplete={mode==='signin'?'current-password':'new-password'} style={{...inputStyle,marginTop:10}} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
-      <button disabled={busy || !email || !password} onClick={()=>void submit()} style={{...buttonStyle,opacity:busy||!email||!password?.5:1}}>{busy ? 'Please wait…' : mode==='signin' ? 'Sign in' : 'Create account'}</button>
+      <button disabled={busy || !email || !password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy || !email || !password) ? .5 : 1}}>{busy ? 'Please wait…' : mode==='signin' ? 'Sign in' : 'Create account'}</button>
       <button onClick={()=>{setMode(mode==='signin'?'signup':'signin');setMessage('')}} style={switchStyle}>{mode==='signin' ? 'Create a new IDA account' : 'I already have an account'}</button>
       {message && <div style={{marginTop:14,padding:12,borderRadius:12,background:'rgba(255,255,255,.06)',fontSize:13,lineHeight:1.45,opacity:.85}}>{message}</div>}
       <div style={{marginTop:18,fontSize:11,textAlign:'center',opacity:.45}}>Your IDA data is saved separately for your account.</div>
