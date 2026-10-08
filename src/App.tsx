@@ -17,7 +17,7 @@ const FILE_KEY = 'ida-files-v2'
 const readFiles = (): UserFile[] => { try { const raw=localStorage.getItem(FILE_KEY); return raw ? JSON.parse(raw) : [] } catch { return [] } }
 const saveFiles = (files: UserFile[]) => { try { localStorage.setItem(FILE_KEY, JSON.stringify(files)) } catch {} }
 
-const appBaseId = (id:string) => id.split('::')[0].split(':').pop() || id
+const appBaseId = (id:string) => id.split('::')[0]
 const appForId = (id:string) => { const exact=APPS.find(a=>a.name===id); if(exact)return exact; const base=appBaseId(id); return APPS.find(a=>a.name===base) }
 
 const APPS: AppItem[] = [
