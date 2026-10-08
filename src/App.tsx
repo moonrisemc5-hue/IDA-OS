@@ -906,18 +906,19 @@ function SettingsPanel({ taskbarTheme, taskbarManualColor, onTaskbarTheme, onTas
 function ExternalAppPanel({url,name}:{url:string;name:string}){return <iframe className="external-app-frame" src={url} title={name} />}
 function ShutdownScreen(){return <div className="shutdown-screen"><div className="shutdown-logo">IDA</div><div className="shutdown-spinner"/><div className="shutdown-message">Shutting down IDA</div><div className="shutdown-sub">Closing IDA...</div></div>}
 function SleepScreen({onWake}:{onWake:()=>void}){return <div className="shutdown-screen"><div className="shutdown-logo">IDA</div><div className="shutdown-message">IDA is sleeping</div><button className="wake-button" onClick={onWake}>Open IDA</button></div>}
+function HilalLogo({small=false}:{small?:boolean}){return <span className={'hilal-logo '+(small?'hilal-small':'')} aria-hidden="true"><span className="hilal-crescent">☾</span></span>}
 function IdaAppIcon({name,size=28}:{name:string;size?:number}){
-  const glyph =
-    name==='DaMusic'?'♪':
-    name==='DaEconomy'?'$':
-    name==='DaCourt'?'⚖':
-    name==='DaScope'?'⌕':
-    name==='DaFile Explorer'?'▣':
-    name==='DaSettings'?'⚙':
-    name==='DaTrash'?'▥':
-    name==='DaMedia'?'▶':
-    name==='DaNotes'?'✎':
-    name==='DAPP'?'✦':'◈'
+  let glyph='◈'
+  if(name==='DaMusic') glyph='♪'
+  else if(name==='DaEconomy') glyph='$'
+  else if(name==='DaCourt') glyph='⚖'
+  else if(name==='DaScope') glyph='⌕'
+  else if(name==='DaFile Explorer') glyph='▣'
+  else if(name==='DaSettings') glyph='⚙'
+  else if(name==='DaTrash') glyph='▥'
+  else if(name==='DaMedia') glyph='▶'
+  else if(name==='DaNotes') glyph='✎'
+  else if(name==='DAPP') glyph='✦'
   return <span style={{display:'inline-grid',placeItems:'center',width:size,height:size,fontSize:size*.62,fontWeight:800,lineHeight:1,color:'currentColor',fontFamily:'Segoe UI Symbol,Segoe UI,sans-serif'}} aria-hidden="true">{glyph}</span>
 }
 function RestartScreen(){return <div className="restart-screen"><div className="restart-logo"><HilalLogo/></div><div className="restart-spinner"><span/></div><div className="restart-message">Restarting IDA</div><div className="restart-sub">Don't turn off the web</div><div className="restart-progress"><span/></div><div className="restart-status">Almost there...</div></div>}
