@@ -145,31 +145,44 @@ function AccountSetup({ selectedApps, onCreated, onExisting }: { selectedApps:st
   </div>
 }
 
-function ExistingAccount({ onSignedIn }: { onSignedIn:(session:IdaSession)=>void }) {
-  const [name,setName]=useState(''); const [password,setPassword]=useState(''); const [busy,setBusy]=useState(false); const [message,setMessage]=useState('')
+function ExistingAccount({ onSignedIn, title='Sign in to IDA', initialName='', compact=false }: { onSignedIn:(session:IdaSession)=>void; title?:string; initialName?:string; compact?:boolean }) {
+  const [name,setName]=useState(initialName); const [password,setPassword]=useState(''); const [busy,setBusy]=useState(false); const [message,setMessage]=useState('')
   const submit=async()=>{setBusy(true);setMessage('');const {data,error}=await supabase.rpc('ida_sign_in',{p_name:name.trim(),p_password:password});setBusy(false);if(error)setMessage(error.message);else if(data?.account_id&&data?.session_token){const next={accountId:data.account_id,sessionToken:data.session_token,displayName:data.display_name||name.trim()};writeIdaSession(next);onSignedIn(next)}}
-  return <div style={{...bootStyle,background:'#080b12'}}>
-    <div style={{width:'min(390px,calc(100vw - 34px))',padding:'34px 36px',borderRadius:18,background:'rgba(18,22,32,.94)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)'}}>
-      <div style={{textAlign:'center',marginBottom:24}}><Hilal small/><div style={{fontSize:25,fontWeight:600,marginTop:17}}>Sign in to IDA</div></div>
-      <label style={{fontSize:11,opacity:.55}}>NAME</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Your IDA name" style={inputStyle}/>
-      <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} type="password" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
-      <button disabled={busy||!name||!password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!password) ? .5 : 1}}>{busy?'Signing in…':'Sign in'}</button>
-      {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12}}>{message}</div>}
-    </div>
+  return <div style={{width:'100%'}}>
+    {!compact&&<div style={{textAlign:'center',marginBottom:24}}><Hilal small/><div style={{fontSize:25,fontWeight:600,marginTop:17}}>{title}</div></div>}
+    {compact&&<div style={{fontSize:20,fontWeight:600,textAlign:'center',marginBottom:18}}>{title}</div>}
+    <label style={{fontSize:11,opacity:.55}}>NAME</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Your IDA name" style={inputStyle}/>
+    <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} type="password" autoFocus style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
+    <button disabled={busy||!name||!password} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!password) ? .5 : 1}}>{busy?'Checking…':'Continue'}</button>
+    {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12}}>{message}</div>}
   </div>
 }
-
-function LockScreen({ session, onOpen }: { session:IdaSession; onOpen:()=>void }) {
+function LockScreen({ session, onUnlock, onSignOut }: { session:IdaSession; onUnlock:(next:IdaSession)=>void; onSignOut:()=>void }) {
   const [now,setNow]=useState(new Date())
+  const [unlocking,setUnlocking]=useState(false)
   useEffect(()=>{const t=window.setInterval(()=>setNow(new Date()),1000);return()=>window.clearInterval(t)},[])
   const name=session.displayName||'IDA User'
   const time=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
   const date=now.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'})
-  return <div onClick={onOpen} style={{position:'fixed',inset:0,zIndex:999999,overflow:'hidden',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',cursor:'default'}}>
-    <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.5)),url("${FIRSTBOOT_WALLPAPER}")`,backgroundSize:'cover',backgroundPosition:'center',filter:'saturate(.85)'}}/>
+  if(unlocking) return <div className="ida-unlock-screen"><style>{`
+    @keyframes idaUnlockIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+    @keyframes idaUnlockBg{from{opacity:.4}to{opacity:1}}
+    .ida-unlock-screen{position:fixed;inset:0;z-index:999999;background:#05070b;color:#fff;font-family:Segoe UI,system-ui,sans-serif;display:grid;place-items:center;overflow:hidden;animation:idaUnlockBg .45s ease both}
+    .ida-unlock-bg{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.58)),url("${FIRSTBOOT_WALLPAPER}") center/cover;filter:saturate(.85)}
+    .ida-unlock-card{position:relative;width:min(390px,calc(100vw - 34px));padding:30px 34px 26px;border-radius:18px;background:rgba(15,18,27,.82);border:1px solid rgba(255,255,255,.18);box-shadow:0 28px 90px rgba(0,0,0,.55);backdrop-filter:blur(24px);animation:idaUnlockIn .55s cubic-bezier(.2,.8,.2,1) both}
+  `}</style><div className="ida-unlock-bg"/><div className="ida-unlock-card">
+    <div style={{textAlign:'center',marginBottom:22}}><div style={{width:72,height:72,borderRadius:'50%',background:'rgba(0,0,0,.38)',border:'1px solid rgba(255,255,255,.4)',display:'grid',placeItems:'center',margin:'0 auto'}}><Hilal small/></div><div style={{fontSize:20,marginTop:13}}>{name}</div><div style={{fontSize:12,opacity:.58,marginTop:5}}>Enter your IDA password</div></div>
+    <ExistingAccount title="Unlock IDA" initialName={name} compact onSignedIn={onUnlock}/>
+  </div></div>
+  return <div onClick={()=>setUnlocking(true)} style={{position:'fixed',inset:0,zIndex:999999,overflow:'hidden',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',cursor:'default'}}>
+    <style>{`
+      @keyframes idaLockIn{from{opacity:0;transform:scale(1.025)}to{opacity:1;transform:none}}
+      @keyframes idaLockTime{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+    `}</style>
+    <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.5)),url("${FIRSTBOOT_WALLPAPER}")`,backgroundSize:'cover',backgroundPosition:'center',filter:'saturate(.85)',animation:'idaLockIn .7s ease both'}}/>
     <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at 50% 25%,transparent 0,rgba(0,0,0,.18) 45%,rgba(0,0,0,.6) 100%)'}}/>
     <div style={{position:'relative',height:'100%',display:'flex',flexDirection:'column',alignItems:'center',paddingTop:'11vh',textShadow:'0 3px 18px rgba(0,0,0,.55)'}}>
-      <div style={{fontSize:'clamp(72px,10vw,118px)',fontWeight:250,letterSpacing:'-.055em',lineHeight:1}}>{time}</div>
+      <div style={{fontSize:'clamp(72px,10vw,118px)',fontWeight:250,letterSpacing:'-.055em',lineHeight:1,animation:'idaLockTime .7s ease both'}}>{time}</div>
       <div style={{fontSize:18,opacity:.9,marginTop:12}}>{date}</div>
       <div style={{marginTop:'12vh',display:'flex',flexDirection:'column',alignItems:'center'}}>
         <div style={{width:76,height:76,borderRadius:'50%',background:'rgba(0,0,0,.38)',border:'1px solid rgba(255,255,255,.4)',display:'grid',placeItems:'center',backdropFilter:'blur(8px)'}}><Hilal small/></div>
@@ -177,11 +190,10 @@ function LockScreen({ session, onOpen }: { session:IdaSession; onOpen:()=>void }
         <div style={{fontSize:13,opacity:.7,marginTop:6}}>Press anywhere to open IDA</div>
       </div>
     </div>
-    <div style={{position:'absolute',left:22,bottom:20,fontSize:12,opacity:.75}}>IDA</div>
+    <button onClick={(e)=>{e.stopPropagation();onSignOut()}} style={{position:'absolute',left:20,bottom:18,display:'flex',alignItems:'center',gap:9,border:0,borderRadius:999,padding:'8px 12px',background:'rgba(0,0,0,.34)',backdropFilter:'blur(12px)',color:'#fff',font:'12px system-ui',cursor:'pointer'}}><Hilal small/><span>{name} · Sign out</span></button>
     <div style={{position:'absolute',right:22,bottom:20,fontSize:12,opacity:.8}}>◔  ▰  ▪</div>
   </div>
 }
-
 function AuthScreen() { return <ExistingAccount onSignedIn={()=>{}}/> }
 
 export function CloudGate() {
@@ -246,6 +258,7 @@ export function CloudGate() {
 
   const finishNewAccount=(nextSession:IdaSession,name:string,apps:string[])=>{
     try{
+      clearLocalState()
       localStorage.setItem('ida-firstboot-complete-v3','1')
       localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...apps]))
     }catch{}
@@ -300,6 +313,6 @@ export function CloudGate() {
     return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);setDesktopOpen(false)}}/>
   }
   if(!ready)return <BootScreen stage="install"/>
-  if(!desktopOpen)return <LockScreen session={session} onOpen={()=>setDesktopOpen(true)}/>
-  return <><DaApps/><div style={{position:'fixed',right:10,top:10,zIndex:99998,display:'flex',alignItems:'center',gap:8,padding:'7px 9px 7px 11px',borderRadius:999,background:'rgba(8,11,18,.7)',backdropFilter:'blur(16px)',color:'#fff',font:'12px system-ui',boxShadow:'0 6px 24px rgba(0,0,0,.25)'}}><span style={{maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',opacity:.8}}>{accountLabel}</span><button onClick={async()=>{if(session)await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);setDesktopOpen(false);setFirstBoot(false);setBootStage('existing')}} style={{border:0,borderRadius:999,padding:'5px 9px',background:'rgba(255,255,255,.1)',color:'#fff',cursor:'pointer'}}>Sign out</button></div>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
+  if(!desktopOpen)return <LockScreen session={session} onUnlock={next=>{writeIdaSession(next);setSession(next);void loadUser(next);setDesktopOpen(true)}} onSignOut={async()=>{await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);setDesktopOpen(false);setFirstBoot(false);setBootStage('existing')}}/>
+  return <><DaApps/>,display:'flex',alignItems:'center',gap:8,padding:'7px 9px 7px 11px',borderRadius:999,background:'rgba(8,11,18,.7)',backdropFilter:'blur(16px)',color:'#fff',font:'12px system-ui',boxShadow:'0 6px 24px rgba(0,0,0,.25)'}}><span style={{maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',opacity:.8}}>{accountLabel}</span><button onClick={async()=>{if(session)await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);setDesktopOpen(false);setFirstBoot(false);setBootStage('existing')}} style={{border:0,borderRadius:999,padding:'5px 9px',background:'rgba(255,255,255,.1)',color:'#fff',cursor:'pointer'}}>Sign out</button></div>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
 }
