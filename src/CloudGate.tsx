@@ -317,6 +317,6 @@ export function CloudGate() {
     return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);lockDesktop()}}/>
   }
   if(!ready)return <BootScreen stage="install"/>
-  if(!desktopOpen)return <LockScreen session={session} onUnlock={next=>{writeIdaSession(next);setSession(next);void loadUser(next);openDesktop()}} onSignOut={async()=>{await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);lockDesktop();setFirstBoot(false);setBootStage('existing')}}/>
+  if(!desktopOpen)return <LockScreen session={session} onUnlock={async next=>{writeIdaSession(next);await loadUser(next);setSession(next);openDesktop()}} onSignOut={async()=>{await supabase.rpc('ida_sign_out',{p_account_id:session.accountId,p_session_token:session.sessionToken});writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;removeStorageSync();clearLocalState();setReady(false);lockDesktop();setFirstBoot(false);setBootStage('existing')}}/>
   return <><DaApps/>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
 }
