@@ -23,13 +23,17 @@ function readLocalState(): CloudState {
   }
   return { version: 1, keys }
 }
-function applyLocalState(state: CloudState) {
+function clearLocalState() {
   const existing: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
     if (key && isSyncKey(key)) existing.push(key)
   }
   existing.forEach(key => localStorage.removeItem(key))
+}
+
+function applyLocalState(state: CloudState) {
+  clearLocalState()
   Object.entries(state.keys || {}).forEach(([key, value]) => localStorage.setItem(key, value))
 }
 function looksLikeIdaState(state: unknown): state is CloudState {
@@ -124,7 +128,7 @@ export function CloudGate() {
   useEffect(()=>{
     let mounted=true
     supabase.auth.getSession().then(({data})=>{if(!mounted)return;setSession(data.session);if(data.session)void loadUser(data.session.user.id);else setReady(true)})
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,next)=>{if(!mounted)return;setSession(next);if(next)void loadUser(next.user.id);else{activeUser.current=null;removeStorageSync();setReady(false)}})
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,next)=>{if(!mounted)return;setSession(next);if(next)void loadUser(next.user.id);else{activeUser.current=null;removeStorageSync();clearLocalState();setReady(false)}})
     return()=>{mounted=false;subscription.unsubscribe();removeStorageSync();if(saveTimer.current!==null)window.clearTimeout(saveTimer.current)}
   },[])
   const accountLabel=useMemo(()=>session?.user.email||'IDA account',[session])
