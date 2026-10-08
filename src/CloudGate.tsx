@@ -186,7 +186,6 @@ function LockScreen({ session, onUnlock, onSignOut }: { session:IdaSession; onUn
       <div style={{fontSize:'clamp(72px,10vw,118px)',fontWeight:250,letterSpacing:'-.055em',lineHeight:1,animation:'idaLockTime .7s ease both'}}>{time}</div>
       <div style={{fontSize:18,opacity:.9,marginTop:12}}>{date}</div>
       <div style={{marginTop:'12vh',display:'flex',flexDirection:'column',alignItems:'center'}}>
-        <div style={{width:76,height:76,borderRadius:'50%',background:'rgba(0,0,0,.38)',border:'1px solid rgba(255,255,255,.4)',display:'grid',placeItems:'center',backdropFilter:'blur(8px)'}}><Hilal small/></div>
         <div style={{fontSize:20,marginTop:14}}>{name}</div>
         <div style={{fontSize:13,opacity:.7,marginTop:6}}>Press anywhere to open IDA</div>
       </div>
