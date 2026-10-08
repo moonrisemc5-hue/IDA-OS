@@ -84,14 +84,36 @@ function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
       @keyframes idaSpinner{to{transform:rotate(360deg)}}
       .ida-boot-text{animation:idaBootFade 3s ease both}
     `}</style>
-    <div className={stage==='hi' ? 'ida-hi-text' : undefined} style={{textAlign:'center',animation:stage==='hi'||stage==='working'?'none':'idaBootFade 3s ease both'}}>
-      {stage==='hi' ? <div style={{fontSize:'clamp(58px,9vw,96px)',fontWeight:300,letterSpacing:'-.05em'}}>Hi.</div> :
+    <div className={stage==='hi' ? 'ida-hi-text' : undefined} style={{textAlign:'center',animation:stage==='hi'?'none':stage==='working'?'none':'idaBootFade 3s ease both'}}>
+      {stage==='hi' ? <div style={{fontSize:'clamp(42px,6vw,68px)',fontWeight:300,letterSpacing:'-.05em'}}>Hi.</div> :
        stage==='working' ? <><div style={{fontSize:'clamp(26px,4vw,40px)',fontWeight:350,letterSpacing:'-.02em'}}>We are working on IDA</div><div style={{margin:'28px auto 0',width:20,height:20,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
        stage==='install' ? <><div style={{fontSize:24,fontWeight:350}}>{text}</div><div style={{margin:'26px auto 0',width:18,height:18,border:'2px solid rgba(255,255,255,.22)',borderTopColor:'#fff',borderRadius:'50%',animation:'idaSpinner 1s linear infinite'}}/></> :
        <div className="ida-boot-text" style={{fontSize:24,fontWeight:350}}>{text}</div>}
     </div>
   </div>
 }
+
+function LanguageChoiceScreen({ selected, onSelect, onContinue }: { selected:'en'|'cs'|'vi'|'ar-YE'; onSelect:(v:'en'|'cs'|'vi'|'ar-YE')=>void; onContinue:()=>void }) {
+  const choices:[LanguageChoice, string][] = [['en','English'],['cs','Czech'],['vi','Vietnamese'],['ar-YE','Yemeni Arabic']]
+  return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.3),transparent 45%),#080b12'}}>
+    <div style={{width:'min(560px,calc(100vw - 34px))',padding:'34px 36px',borderRadius:18,background:'rgba(18,22,32,.9)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)'}}>
+      <Hilal small/>
+      <div style={{textAlign:'center',marginTop:22}}>
+        <div style={{fontSize:27,fontWeight:600}}>Choose your language</div>
+        <div style={{marginTop:7,fontSize:13,opacity:.58}}>You can change this later in IDA Settings.</div>
+      </div>
+      <div style={{display:'grid',gap:10,marginTop:25}}>
+        {choices.map(([id,label])=><button key={id} onClick={()=>onSelect(id)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 15px',borderRadius:12,border:selected===id?'1px solid rgba(255,255,255,.5)':'1px solid rgba(255,255,255,.1)',background:selected===id?'rgba(255,255,255,.1)':'rgba(255,255,255,.035)',color:'#fff',cursor:'pointer',textAlign:'left'}}>
+          <span style={{fontSize:15}}>{label}</span>
+          <span style={{width:20,height:20,borderRadius:6,border:'1px solid rgba(255,255,255,.3)',background:selected===id?'#fff':'transparent',display:'grid',placeItems:'center',color:'#111',fontSize:13}}>{selected===id?'✓':''}</span>
+        </button>)}
+      </div>
+      <button onClick={onContinue} style={{...buttonStyle,marginTop:22}}>Continue</button>
+    </div>
+  </div>
+}
+
+type LanguageChoice = 'en'|'cs'|'vi'|'ar-YE'
 
 function AppChoiceScreen({ selected, setSelected, onContinue }: { selected:string[]; setSelected:(v:string[])=>void; onContinue:()=>void }) {
   const choices=[['DaMusic','Music'],['DaEconomy','DaEconomy'],['DaCourt','DaCourt']]
@@ -204,8 +226,9 @@ export function CloudGate() {
   const [ready,setReady]=useState(false)
   const [error,setError]=useState('')
   const [firstBoot,setFirstBoot]=useState(false)
-  const [bootStage,setBootStage]=useState<'loading'|'hi'|'working'|'choices'|'install'|'account'|'existing'>('loading')
+  const [bootStage,setBootStage]=useState<'loading'|'hi'|'working'|'language'|'choices'|'install'|'account'|'existing'>('loading')
   const [selectedApps,setSelectedApps]=useState<string[]>(['DaMusic','DaEconomy','DaCourt'])
+  const [selectedLanguage,setSelectedLanguage]=useState<LanguageChoice>(()=>{try{const v=localStorage.getItem('ida-language');return v==='cs'||v==='vi'||v==='ar-YE'?v:'en'}catch{return 'en'}})
   const [desktopOpen,setDesktopOpen]=useState(false)
   const openDesktop=()=>{try{localStorage.setItem('ida-desktop-session-open-v1','1');localStorage.removeItem('ida-power-lock-v1')}catch{};setDesktopOpen(true)}
   const lockDesktop=()=>{try{localStorage.removeItem('ida-desktop-session-open-v1')}catch{};setDesktopOpen(false)}
@@ -309,7 +332,7 @@ export function CloudGate() {
       return()=>window.clearTimeout(t)
     }
     if(bootStage==='working'){
-      const t=window.setTimeout(()=>setBootStage('choices'),10000)
+      const t=window.setTimeout(()=>setBootStage('language'),10000)
       return()=>window.clearTimeout(t)
     }
   },[bootStage,firstBoot,session])
@@ -317,6 +340,7 @@ export function CloudGate() {
   const accountLabel=useMemo(()=>session?.displayName||'IDA User',[session])
   if(!session){
     if(bootStage==='loading'||bootStage==='hi'||bootStage==='working'||bootStage==='install')return <BootScreen stage={bootStage}/>
+    if(bootStage==='language')return <LanguageChoiceScreen selected={selectedLanguage} onSelect={setSelectedLanguage} onContinue={()=>{try{localStorage.setItem('ida-language',selectedLanguage)}catch{};setBootStage('choices')}}/>
     if(bootStage==='choices')return <AppChoiceScreen selected={selectedApps} setSelected={setSelectedApps} onContinue={startInstall}/>
     if(bootStage==='account')return <AccountSetup selectedApps={selectedApps} onCreated={finishNewAccount} onSkip={()=>{try{clearLocalState();localStorage.setItem('ida-firstboot-complete-v3','1');localStorage.setItem(GUEST_LOCK_KEY,'1');localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...selectedApps]));localStorage.setItem('ida-taskbar',JSON.stringify(['DaSettings']))}catch{};writeIdaSession(null);setSession({accountId:'',sessionToken:'',displayName:'IDA User'});setDesktopOpen(false);lockDesktop()}}/>
     return <ExistingAccount onSignedIn={next=>{try{localStorage.setItem('ida-firstboot-complete-v3','1')}catch{};writeIdaSession(next);setSession(next);void loadUser(next);lockDesktop()}}/>
