@@ -11,7 +11,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
 
 const ACCOUNT_SESSION_KEY = 'ida-account-session-v1'
 const SYNC_PREFIXES = ['ida-', 'daapps-']
-const isSyncKey = (key: string) => key !== ACCOUNT_SESSION_KEY && SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
+const isSyncKey = (key: string) => key !== ACCOUNT_SESSION_KEY && key !== 'ida-firstboot-complete-v3' && SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
 type IdaSession = { accountId:string; sessionToken:string; displayName:string }
 function readIdaSession(): IdaSession|null {
   try {
@@ -250,7 +250,9 @@ export function CloudGate() {
       localStorage.setItem('ida-desktop-apps',JSON.stringify(['DAPP','DaFile Explorer','DaSettings','DaTrash',...apps]))
     }catch{}
     writeIdaSession(nextSession)
+    writeIdaSession(nextSession)
     setSession(nextSession)
+    void loadUser(nextSession)
     setDesktopOpen(false)
     setBootStage('loading')
   }
