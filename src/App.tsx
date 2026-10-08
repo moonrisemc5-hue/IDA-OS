@@ -282,7 +282,6 @@ export function DaApps() {
   const saveTaskbar = (next: string[]) => { setTaskbarApps(next); try { localStorage.setItem('ida-taskbar', JSON.stringify(next)) } catch {} }
   const saveDesktopApps = (next:string[]) => { setDesktopApps(next); try { localStorage.setItem('ida-desktop-apps', JSON.stringify(next)) } catch {} }
   const removeDesktopShortcut = (id:string) => {
-    if (appBaseId(id)==='DaSettings') return false
     setDesktopApps(prev => {
       const next = prev.filter(entry => entry !== id)
       try { localStorage.setItem('ida-desktop-apps', JSON.stringify(next)) } catch {}
@@ -308,7 +307,6 @@ export function DaApps() {
   const deleteToTrash = (type:'app'|'file'|'folder', id:string) => {
     // IDA-supported apps are still ordinary desktop/file-system shortcuts.
     // Only DaSettings is protected; DaFile Explorer, DaMedia, DaNotes, etc. can have their shortcuts deleted.
-    if(type==='app' && appBaseId(id)==='DaSettings') return
     if(type==='app' && !appForId(id)) return
     if(type==='app'){
       const app=appForId(id)
