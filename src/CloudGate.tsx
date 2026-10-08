@@ -158,7 +158,7 @@ function ExistingAccount({ onSignedIn, title='Sign in to IDA', initialName='', c
     {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12}}>{message}</div>}
   </div>
 }
-function LockScreen({ session, onUnlock, onSignOut }: { session:IdaSession; onUnlock:(next:IdaSession)=>void; onSignOut:()=>void }) {
+function LockScreen({ session, onUnlock }: { session:IdaSession; onUnlock:(next:IdaSession)=>void }) {
   const [now,setNow]=useState(new Date())
   const [unlocking,setUnlocking]=useState(false)
   useEffect(()=>{const t=window.setInterval(()=>setNow(new Date()),1000);return()=>window.clearInterval(t)},[])
@@ -170,9 +170,9 @@ function LockScreen({ session, onUnlock, onSignOut }: { session:IdaSession; onUn
     @keyframes idaUnlockBg{from{opacity:.4}to{opacity:1}}
     .ida-unlock-screen{position:fixed;inset:0;z-index:999999;background:#05070b;color:#fff;font-family:Segoe UI,system-ui,sans-serif;display:grid;place-items:center;overflow:hidden;animation:idaUnlockBg .45s ease both}
     .ida-unlock-bg{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.58)),url("${FIRSTBOOT_WALLPAPER}") center/cover;filter:saturate(.85)}
-    .ida-unlock-card{position:relative;width:min(390px,calc(100vw - 34px));padding:30px 34px 26px;border-radius:18px;background:rgba(15,18,27,.82);border:1px solid rgba(255,255,255,.18);box-shadow:0 28px 90px rgba(0,0,0,.55);backdrop-filter:blur(24px);animation:idaUnlockIn .55s cubic-bezier(.2,.8,.2,1) both}
+    .ida-unlock-card{position:relative;width:min(390px,calc(100vw - 34px));padding:30px 34px 26px;border-radius:18px;background:transparent;border:0;box-shadow:none;backdrop-filter:none;animation:idaUnlockIn .55s cubic-bezier(.2,.8,.2,1) both}
   `}</style><div className="ida-unlock-bg"/><div className="ida-unlock-card">
-    <div style={{textAlign:'center',marginBottom:22}}><div style={{width:72,height:72,borderRadius:'50%',background:'rgba(0,0,0,.38)',border:'1px solid rgba(255,255,255,.4)',display:'grid',placeItems:'center',margin:'0 auto'}}><Hilal small/></div><div style={{fontSize:20,marginTop:13}}>{name}</div><div style={{fontSize:12,opacity:.58,marginTop:5}}>Enter your IDA password</div></div>
+    <div style={{textAlign:'center',marginBottom:22}}><div style={{fontSize:20}}>{name}</div><div style={{fontSize:12,opacity:.72,marginTop:5}}>Enter your IDA password</div></div>
     <ExistingAccount title="Unlock IDA" initialName={name} compact onSignedIn={onUnlock}/>
   </div></div>
   return <div onClick={()=>setUnlocking(true)} style={{position:'fixed',inset:0,zIndex:999999,overflow:'hidden',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',cursor:'default'}}>
@@ -190,8 +190,7 @@ function LockScreen({ session, onUnlock, onSignOut }: { session:IdaSession; onUn
         <div style={{fontSize:13,opacity:.7,marginTop:6}}>Press anywhere to open IDA</div>
       </div>
     </div>
-    <button onClick={(e)=>{e.stopPropagation();onSignOut()}} style={{position:'absolute',left:20,bottom:18,display:'flex',alignItems:'center',gap:9,border:0,borderRadius:999,padding:'8px 12px',background:'rgba(0,0,0,.34)',backdropFilter:'blur(12px)',color:'#fff',font:'12px system-ui',cursor:'pointer'}}><Hilal small/><span>{name} · Sign out</span></button>
-    <div style={{position:'absolute',right:22,bottom:20,fontSize:12,opacity:.8}}>◔  ▰  ▪</div>
+    <div style={{position:'absolute',right:22,bottom:20,display:'flex',alignItems:'center',gap:7,padding:'8px 11px',borderRadius:999,background:'rgba(0,0,0,.34)',backdropFilter:'blur(12px)',fontSize:12,opacity:.9}}><Wifi size={16}/><span>Wi‑Fi</span></div>
   </div>
 }
 function AuthScreen() { return <ExistingAccount onSignedIn={()=>{}}/> }
