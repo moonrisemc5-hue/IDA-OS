@@ -320,7 +320,8 @@ export function DaApps() {
       const oy = other.y / 100 * area.height
       return x < ox + size - gap && x + size - gap > ox && y < oy + size - gap && y + size - gap > oy
     }
-    for (const appName of desktopApps) if (type!=='app' || appName!==id) if (overlaps(positions[appName] || DEFAULT_POSITIONS[appName])) return false    for (const folder of folders.filter(f=>f.parent==='Desktop')) if (!(type==='folder' && folder.id===id)) {
+    for (const appName of desktopApps) if (type!=='app' || appName!==id) if (overlaps(positions[appName] || DEFAULT_POSITIONS[appName])) return false
+    for (const folder of folders.filter(f=>f.parent==='Desktop')) if (!(type==='folder' && folder.id===id)) {
       const index = folders.filter(f=>f.parent==='Desktop').findIndex(f=>f.id===folder.id)
       const other = filePositions[folder.id] || {x:5+(index%5)*15,y:34+Math.floor(index/5)*14}
       if (overlaps(other)) return false
