@@ -833,7 +833,7 @@ function DaScopeSearch(){
       <button className="dascope-browser-back" onClick={()=>setGoogleUrl(null)} aria-label="Back to DaScope">←</button>
       <DaScopeLogo size={30}/><strong>DaScope</strong>
     </div>
-    <iframe className="dascope-google-frame" src={googleUrl} title="Google in DaScope"/>
+    <iframe className="dascope-google-frame" src={googleUrl} title="Google in DaScope" onError={()=>setGoogleUrl(null)}/>
   </div>;
   return <div className="dascope-search-shell">
     <div className="dascope-search-head"><DaScopeLogo size={48}/><div><strong>DaScope</strong><span>Search the web, simply.</span></div></div>
