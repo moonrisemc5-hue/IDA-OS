@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ChevronDown, ChevronUp, Download, Gauge, Settings as Gear, Music2, Film, Trash2,
+  ChevronDown, ChevronUp, Download, Gauge, Settings as Gear, Music2, Film, Trash2, Moon,
   Minus, Pause, Play, Scale, Search, Settings2, SlidersHorizontal, Maximize2, ArrowUpDown,
   SunMedium, Volume2, VolumeX, Wifi, BatteryFull, Power, Folder, Sparkles, X, FileText, Clipboard, Scissors
 } from 'lucide-react'
@@ -16,6 +16,9 @@ type ExplorerFolder = string
 const FILE_KEY = 'ida-files-v2'
 const readFiles = (): UserFile[] => { try { const raw=localStorage.getItem(FILE_KEY); return raw ? JSON.parse(raw) : [] } catch { return [] } }
 const saveFiles = (files: UserFile[]) => { try { localStorage.setItem(FILE_KEY, JSON.stringify(files)) } catch {} }
+
+const appBaseId = (id:string) => id.split('::')[0]
+const appForId = (id:string) => APPS.find(a=>a.name===appBaseId(id))
 
 const APPS: AppItem[] = [
   { name: 'DAPP', kind: 'store', tone: 'violet' },
@@ -295,11 +298,11 @@ export function DaApps() {
   const saveTrash = (next:typeof trash) => { setTrash(next); try { localStorage.setItem('ida-trash-v1', JSON.stringify(next)) } catch {} }
   const deleteToTrash = (type:'app'|'file'|'folder', id:string) => {
     if(type==='app' && (id==='DaTrash' || id==='DaSettings' || id.startsWith('DaTrash:'))) return
-    if(type==='app'){ const app=APPS.find(a=>a.name===id); if(!app)return; saveTrash([...trash,{type:'app',id,name:appLabels[id]||id,app,deletedAt:Date.now()}]); saveDesktopApps(desktopApps.filter(n=>n!==id)); closeWindow(id) }
+    if(type==='app'){ const app=appForId(id); if(!app)return; saveTrash([...trash,{type:'app',id,name:appLabels[id]||app.name,app,deletedAt:Date.now()}]); saveDesktopApps(desktopApps.filter(n=>n!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)]))); Object.keys(windows).filter(k=>k===id||windows[k]?.appInstanceId===id).forEach(closeWindow) }
     else if(type==='folder'){ const folder=folders.find(f=>f.id===id); if(!folder)return; saveTrash([...trash,{type:'folder',id,name:folder.name,folder,deletedAt:Date.now()}]); commitFolders(folders.filter(f=>f.id!==id)); commitFolderApps(Object.fromEntries(Object.entries(folderApps).filter(([k])=>k!==id))); closeWindow(id) }
     else { const file=files.find(f=>f.id===id); if(!file)return; saveTrash([...trash,{type:'file',id,name:file.name,file,deletedAt:Date.now()}]); commitFiles(files.filter(f=>f.id!==id)); const nextNotes={...notes}; delete nextNotes[id]; updateNotes(nextNotes); closeWindow(id) }
   }
-  const restoreFromTrash = (item:typeof trash[number]) => { if(item.type==='app'&&item.id!=='DaTrash'&&item.app)saveDesktopApps(desktopApps.includes(item.id)?desktopApps:[...desktopApps,item.id]); if(item.type==='file'&&item.file)commitFiles([...files,item.file]); if(item.type==='folder'&&item.folder)commitFolders([...folders,item.folder]); saveTrash(trash.filter(t=>!(t.type===item.type&&t.id===item.id))) }
+  const restoreFromTrash = (item:typeof trash[number]) => { if(item.type==='app'&&item.id!=='DaTrash'&&item.app){const exists=desktopApps.includes(item.id); if(!exists)saveDesktopApps([...desktopApps,item.id])} if(item.type==='file'&&item.file)commitFiles([...files,item.file]); if(item.type==='folder'&&item.folder)commitFolders([...folders,item.folder]); saveTrash(trash.filter(t=>!(t.type===item.type&&t.id===item.id))) }
   const emptyTrash = () => {
     const permanentlyDeletedApps = new Set(trash.filter(item=>item.type==='app' && item.id!=='DaTrash' && item.id!=='DaSettings').map(item=>item.id))
     if (permanentlyDeletedApps.size) saveTaskbar(taskbarApps.filter(name=>!permanentlyDeletedApps.has(name)))
@@ -317,8 +320,7 @@ export function DaApps() {
       const oy = other.y / 100 * area.height
       return x < ox + size - gap && x + size - gap > ox && y < oy + size - gap && y + size - gap > oy
     }
-    for (const appName of desktopApps) if (type!=='app' || appName!==id) if (overlaps(positions[appName] || DEFAULT_POSITIONS[appName])) return false
-    for (const folder of folders.filter(f=>f.parent==='Desktop')) if (!(type==='folder' && folder.id===id)) {
+    for (const appName of desktopApps) if (type!=='app' || appName!==id) if (overlaps(positions[appName] || DEFAULT_POSITIONS[appName])) return false    for (const folder of folders.filter(f=>f.parent==='Desktop')) if (!(type==='folder' && folder.id===id)) {
       const index = folders.filter(f=>f.parent==='Desktop').findIndex(f=>f.id===folder.id)
       const other = filePositions[folder.id] || {x:5+(index%5)*15,y:34+Math.floor(index/5)*14}
       if (overlaps(other)) return false
@@ -350,7 +352,7 @@ export function DaApps() {
         if(target==='Desktop'){ commitFolderApps(cleaned); if(!desktopApps.includes(clipboard.id)) saveDesktopApps([...desktopApps,clipboard.id]) }
         else { commitFolderApps({...cleaned,[target]:[...new Set([...(cleaned[target]||[]),clipboard.id])]}); saveDesktopApps(desktopApps.filter(n=>n!==clipboard.id)) }
       } else if(target==='Desktop'){ const copyId=clipboard.id+'::copy-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5); saveDesktopApps([...desktopApps,copyId]) }
-      else { const current=folderApps[target]||[]; if(!current.includes(clipboard.id)) commitFolderApps({...folderApps,[target]:[...current,clipboard.id]}) }
+      else { const current=folderApps[target]||[]; const copyId=clipboard.id+'::copy-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5); commitFolderApps({...folderApps,[target]:[...current,copyId]}) }
     } else {
       const source=files.find(f=>f.id===clipboard.id)
       if(source){
@@ -371,16 +373,16 @@ export function DaApps() {
   const copyDraggedAppToDesktop = (id:string) => { if (!APPS.some(a=>a.name===id)) return; const copyId=id+'::copy-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5); saveDesktopApps([...desktopApps,copyId]) }
   const moveDraggedItem = (type:'app'|'file'|'folder', id:string, target:string) => {
     if (type==='app') {
-      const baseId=id.split('::')[0]
-      const cleaned=Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id && n!==baseId)]))
+      const baseId=appBaseId(id)
+      const cleaned=Object.fromEntries(Object.entries(folderApps).map(([k,items])=>[k,items.filter(n=>n!==id)]))
       if (target==='Desktop') {
-        const restored=desktopApps.includes(id)?desktopApps:desktopApps.includes(baseId)?desktopApps:[...desktopApps,baseId]
+        const restored=desktopApps.includes(id)?desktopApps:[...desktopApps,id]
         saveDesktopApps(restored)
         commitFolderApps(cleaned)
       } else if (files.some(f=>f.id===target) || folders.some(f=>f.id===target)) {
         const existing=cleaned[target]||[]
-        commitFolderApps({...cleaned,[target]:[...new Set([...existing,baseId])]})
-        saveDesktopApps(desktopApps.filter(entry=>entry!==id && entry!==baseId))
+        commitFolderApps({...cleaned,[target]:[...new Set([...existing,id])]})
+        saveDesktopApps(desktopApps.filter(entry=>entry!==id))
       }
       return
     }
@@ -418,6 +420,8 @@ export function DaApps() {
     const explorer=APPS.find(a=>a.name==='DaFile Explorer'); if(explorer)openApp(explorer)
   }
   const openWebAppInstance = (app: AppItem, allowMultiple=false) => {
+    const appId=app.name; const baseApp=appForId(appId); if(!baseApp||baseApp.kind!=='external'||!baseApp.url) return
+    app={...baseApp,name:appId}
     if(app.kind!=='external'||!app.url) return
     if(!allowMultiple){
       const existing=Object.entries(windows).filter(([k,w])=>k===app.name||(w?.taskbarInstance===true&&w?.appName===app.name)).sort((a,b)=>(b[1]?.z||0)-(a[1]?.z||0))[0]
@@ -425,17 +429,19 @@ export function DaApps() {
     }
     const k=(allowMultiple?'desktop:':'taskbar:')+app.name+':'+Date.now()
     const instanceUrl=app.url+(app.url.includes('?')?'&':'?')+'idaInstance='+encodeURIComponent(k)
-    setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'external',appName:app.name,minimized:false,maximized:false,x:35+(Object.keys(prev).length%4)*24,y:30+(Object.keys(prev).length%3)*20,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,externalUrl:instanceUrl,taskbarInstance:!allowMultiple}}})
+    setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'external',appName:app.name,minimized:false,maximized:false,x:35+(Object.keys(prev).length%4)*24,y:30+(Object.keys(prev).length%3)*20,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,externalUrl:instanceUrl,taskbarInstance:!allowMultiple,appInstanceId:appId}}})
     setActiveWindow(k)
   }
   const openApp = (app: AppItem, desktopInstance=false) => {
+    const requestedId=app.name; const baseApp=appForId(requestedId); if(!baseApp)return
+    app={...baseApp,name:requestedId}
     setContextMenu(null); setStartOpen(false); setSearchOpen(false)
-    if (app.kind==='store') { const k='DAPP'; setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:prev[k]?{...prev[k],minimized:false,z:maxZ+1}:{kind:'store',appName:'DAPP',minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,980),height:Math.min(window.innerHeight-90,680),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow(k); return }
-    if (app.kind==='trash') { setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,DaTrash:prev.DaTrash?{...prev.DaTrash,minimized:false,z:maxZ+1}:{kind:'trash',appName:'DaTrash',minimized:false,maximized:false,x:60,y:45,width:Math.min(window.innerWidth-40,900),height:Math.min(window.innerHeight-90,620),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow('DaTrash'); return }
-    if (app.kind==='music' && desktopInstance) { openApp(app,false); return }
-    if (app.kind==='scope') { const k=(desktopInstance?'desktop:':'taskbar:')+'DaScope:'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'scope',appName:'DaScope',minimized:false,maximized:false,x:45,y:35,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance}}});setActiveWindow(k);return }
-    const k = desktopInstance ? `desktop:${app.name}:${Date.now()}` : app.name
-    setWindows(prev => { const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0)); const existing=prev[k]; return {...prev,[k]:existing?{...existing,minimized:false,z:maxZ+1}:{kind:app.kind,appName:app.name,minimized:false,maximized:false,x:20 + Object.keys(prev).length*18,y:18 + Object.keys(prev).length*18,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance}} })
+    if (app.kind==='store') { const k=requestedId==='DAPP'?'DAPP':'desktop:'+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:prev[k]?{...prev[k],minimized:false,z:maxZ+1}:{kind:'store',appName:'DAPP',minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,980),height:Math.min(window.innerHeight-90,680),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow(k); return }
+    if (app.kind==='trash' && requestedId==='DaTrash') { setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,DaTrash:prev.DaTrash?{...prev.DaTrash,minimized:false,z:maxZ+1}:{kind:'trash',appName:'DaTrash',minimized:false,maximized:false,x:60,y:45,width:Math.min(window.innerWidth-40,900),height:Math.min(window.innerHeight-90,620),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow('DaTrash'); return }
+    if (app.kind==='music' && desktopInstance) { const base={...baseApp,name:'DaMusic'}; openApp(base,false); return }
+    if (app.kind==='scope') { const k=(desktopInstance?'desktop:':'taskbar:')+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'scope',appName:'DaScope',minimized:false,maximized:false,x:45,y:35,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance}}});setActiveWindow(k);return }
+    const k = desktopInstance ? `desktop:${requestedId}:${Date.now()}` : requestedId
+    setWindows(prev => { const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0)); const existing=prev[k]; return {...prev,[k]:existing?{...existing,minimized:false,z:maxZ+1}:{kind:app.kind,appName:app.name,minimized:false,maximized:false,x:20 + Object.keys(prev).length*18,y:18 + Object.keys(prev).length*18,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance,appInstanceId:requestedId}} })
     setActiveWindow(k)
   }
   const patchWindow = (key:string, patch:any) => setWindows(prev => {
@@ -637,23 +643,22 @@ export function DaApps() {
         const q=desktopMarqueeRef.current;desktopMarqueeRef.current={sx:0,sy:0,button:0,dragged:false,active:false}
         if(q?.active&&q.dragged&&q.button===2){const hit=e.currentTarget.querySelector<HTMLElement>('.app-tile-selected,.desktop-file-tile.app-tile-selected');if(hit){const appName=hit.getAttribute('aria-label')||'';const app=APPS.find(a=>a.name===appName);const id=hit.getAttribute('data-drop-folder')||'';const file=files.find(f=>f.id===id);const folderItem=folders.find(f=>f.id===id);setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',app,file,folderItem,folder:'Desktop'})}}
         setDesktopMarquee(null)
-      }} onContextMenu={(e)=>{e.preventDefault();e.stopPropagation();if(desktop&&!desktopMarqueeRef.current.dragged&&e.target===e.currentTarget)setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',folder:'Desktop'})}}>
-        {desktopMarquee && <div className="desktop-selection-marquee" style={{left:desktopMarquee.x,top:desktopMarquee.y,width:desktopMarquee.w,height:desktopMarquee.h}} aria-hidden="true" />}
-        {desktopApps.map((desktopEntry,desktopIndex) => { const appName=desktopEntry.split('::')[0]; const app=APPS.find(a=>a.name===appName); if(!app)return null; const basePos=positions[app.name]||DEFAULT_POSITIONS[app.name]||{x:3,y:4}; const isCopy=desktopEntry.includes('::copy-'); const displayPos=isCopy&&!positions[desktopEntry]?{x:Math.min(82,basePos.x+Math.min(12,desktopIndex*3)),y:Math.min(82,basePos.y+Math.min(12,desktopIndex*2))}:positions[desktopEntry]||basePos; return (
+      }} onContextMenu={(e)=>{e.preventDefault();e.stopPropagation();if(desktop&&!desktopMarqueeRef.current.dragged&&e.target===e.currentTarget)setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',folder:'Desktop'})}}>        {desktopMarquee && <div className="desktop-selection-marquee" style={{left:desktopMarquee.x,top:desktopMarquee.y,width:desktopMarquee.w,height:desktopMarquee.h}} aria-hidden="true" />}
+        {desktopApps.map((desktopEntry,desktopIndex) => { const appName=appBaseId(desktopEntry); const app=appForId(desktopEntry); if(!app)return null; const basePos=positions[app.name]||DEFAULT_POSITIONS[app.name]||{x:3,y:4}; const isCopy=desktopEntry.includes('::copy-'); const displayPos=isCopy&&!positions[desktopEntry]?{x:Math.min(82,basePos.x+Math.min(12,desktopIndex*3)),y:Math.min(82,basePos.y+Math.min(12,desktopIndex*2))}:positions[desktopEntry]||basePos; return (
           <AppTile
             key={desktopEntry}
             app={app}
-            displayName={appLabels[app.name] || app.name}
+            displayName={appLabels[desktopEntry] || appLabels[app.name] || app.name}
             position={displayPos}
             editMode={editMode}
             onEdit={() => setEditMode(true)}
-            onOpen={() => app.name==='DaSettings' ? openApp(app,false) : app.kind==='external' ? openWebAppInstance(app,true) : openApp(app,true)}
+            onOpen={() => { if(app.name==='DaScope') openApp({...app,name:desktopEntry},true); else if(app.name==='DaSettings') openApp(app,false); else if(app.kind==='external') openWebAppInstance({...app,name:desktopEntry},true); else openApp({...app,name:desktopEntry},true) }}
             selected={selectedApp === app.name || selectedDesktopApps.includes(desktopEntry) || selectedDesktopApps.includes(app.name)}
             onSelect={() => { setSelectedApp(app.name); setSelectedDesktopItem(null); setSelectedDesktopApps([desktopEntry]); setSelectedDesktopIds([]) }}
             onMove={(pos) => moveDesktopItem('app',desktopEntry,pos)}
             onDropTarget={(target) => moveDraggedItem('app',desktopEntry,target)}
             
-            onContext={(x,y) => desktop && setContextMenu({x,y,scope:'desktop',app,folder:'Desktop'})}
+            onContext={(x,y) => desktop && setContextMenu({x,y,scope:'desktop',app:{...app,name:desktopEntry},folder:'Desktop'})}
             scale={desktop ? iconScale : 1}
           />
         )})}
@@ -667,7 +672,7 @@ export function DaApps() {
       {controlOpen && <ControlCenter brightness={brightness} setBrightness={setBrightness} internetOn={internetOn} setInternetOn={setInternetState} volume={volume} setVolume={setVolume} onVolumeChange={(v)=>{setVolume(v);playVolumeTest(v)}} batteryLevel={batteryLevel} batteryCharging={batteryCharging} onClose={() => setControlOpen(false)} />}
 
       {Object.entries(windows).map(([key, win]) => {
-        const app = APPS.find(a => a.name === key) || (win.kind==='external' && win.appName ? APPS.find(a=>a.name===win.appName) : null) || (win.kind==='media' ? ({name:'DaMedia',kind:'media',tone:'blue'} as AppItem) : win.kind==='notes' ? ({name:'DaNotes',kind:'notes',tone:'slate'} as AppItem) : win.kind==='explorer' ? ({name:folders.find(f=>f.id===win.folderId)?.name||'File',kind:'explorer',tone:'blue'} as AppItem) : (win.fileId ? ({name:files.find(f=>f.id===win.fileId)?.name||key,kind:'external',tone:'blue'} as AppItem) : null))
+        const app = appForId(key) || (win.kind==='external' && win.appName ? appForId(win.appName) : null) || (win.kind==='media' ? ({name:'DaMedia',kind:'media',tone:'blue'} as AppItem) : win.kind==='notes' ? ({name:'DaNotes',kind:'notes',tone:'slate'} as AppItem) : win.kind==='explorer' ? ({name:folders.find(f=>f.id===win.folderId)?.name||'File',kind:'explorer',tone:'blue'} as AppItem) : (win.fileId ? ({name:files.find(f=>f.id===win.fileId)?.name||key,kind:'external',tone:'blue'} as AppItem) : null))
         if (!app) return null
         const userFile = win.fileId ? files.find(f=>f.id===win.fileId) : undefined
         return <WindowFrame key={key} app={app} state={win} active={activeWindow===key} onContextMenu={win.externalUrl ? undefined : (x,y)=>{setContextMenu({x,y,scope:'window',windowKey:key});setStartOpen(false);setSearchOpen(false);setPowerMenu(false)}} onFocus={()=>focusWindow(key)} onPatch={(p)=>patchWindow(key,p)} onMinimize={()=>patchWindow(key,{minimized:true})} onClose={()=>closeWindow(key)} onMaximize={()=>patchWindow(key,{maximized:!win.maximized})}>
@@ -793,7 +798,7 @@ function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove,
 }
 
 function DappLogo({size=38}:{size?:number}){return <span className="dapp-logo" style={{width:size,height:size}}><span className="dapp-logo-core">D</span><span className="dapp-logo-orbit orbit-a"/><span className="dapp-logo-orbit orbit-b"/></span>}
-function DaScopeLogo({size=38}:{size?:number}){return <span className="dascope-logo" style={{width:size,height:size}} aria-hidden="true"><span className="dascope-moon">☾</span></span>}
+function DaScopeLogo({size=38}:{size?:number}){return <span className="dascope-logo" style={{width:size,height:size}} aria-hidden="true"><Moon size={size*0.86} strokeWidth={2.35}/></span>}
 function DaScopeSearch(){const [query,setQuery]=useState('');const [searched,setSearched]=useState('');const [loading,setLoading]=useState(false);const submit=()=>{const q=query.trim();if(!q)return;setLoading(true);setSearched(q);window.setTimeout(()=>setLoading(false),650)};return <div className="dascope-search-shell"><div className="dascope-search-head"><DaScopeLogo size={48}/><div><strong>DaScope</strong><span>Search the web, simply.</span></div></div><form className="dascope-searchbar" onSubmit={e=>{e.preventDefault();submit()}}><Search size={19}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search the web..." autoFocus/><button type="submit" aria-label="Search"><Search size={17}/></button></form>{loading?<div className="dascope-results-loading"><div className="dascope-loader"/><span>Searching the web...</span></div>:searched?<div className="dascope-results"><div className="dascope-results-top"><strong>Results for “{searched}”</strong><span>Google-powered results will appear here</span></div>{['Web results','News & updates','Images & more'].map((label,i)=><a key={label} className="dascope-result" href={'https://www.google.com/search?q='+encodeURIComponent(searched+' '+label)} target="_blank" rel="noreferrer"><div className="dascope-result-dot">{i+1}</div><div><strong>{label} · {searched}</strong><span>Google search results for {searched}. Connect a Google Programmable Search Engine to populate live results here.</span><small>google.com</small></div><span className="dascope-result-arrow">↗</span></a>)}</div>:<div className="dascope-empty"><DaScopeLogo size={72}/><strong>What are you looking for?</strong><span>Search websites, ideas, news, and more.</span></div>}</div>}
 function IdaAppIcon({name,size=28}:{name:string;size?:number}){return name==='DAPP'?<DappLogo size={size}/>:name==='DaScope'?<DaScopeLogo size={size}/>:name==='DaEconomy'?<BankIcon size={size}/>:name==='DaCourt'?<Scale size={size}/>:name==='DaMusic'?<Music2 size={size}/>:name==='DaFile Explorer'?<Folder size={size}/>:name==='DaNotes'?<FileText size={size}/>:name==='DaTrash'?<Trash2 size={size}/>:name==='DaSettings'?<Gear size={size}/>:name==='DaMedia'?<Film size={size}/>:<Folder size={size}/>} 
 
