@@ -190,11 +190,12 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
         const restored = JSON.parse(savedWindows)
         const rawWindows = restored && typeof restored === 'object' ? restored : {}
         const normalizedWindows = Object.fromEntries(Object.entries(rawWindows).map(([key, value]: [string, any]) => {
-          const namedApp = APPS.find(a => a.name === key || a.name === value?.appName)
-          if (namedApp?.kind === 'external' && value?.kind !== 'external') {
-            return [key, {...value, kind:'external', appName:namedApp.name, externalUrl:namedApp.url, taskbarInstance:value?.taskbarInstance ?? true, appInstanceId:namedApp.name}]
+          const keyAppName = key.startsWith('taskbar:') || key.startsWith('desktop:') ? key.split(':')[1] : key.split('::')[0]
+          const namedApp = APPS.find(a => a.name === key || a.name === value?.appName || a.name === keyAppName)
+          if (namedApp?.kind === 'external') {
+            return [key, {...value, kind:'external', appName:namedApp.name, externalUrl:value?.externalUrl || namedApp.url, taskbarInstance:value?.taskbarInstance ?? true, appInstanceId:value?.appInstanceId || namedApp.name}]
           }
-          if (namedApp?.kind === 'scope' && value?.kind !== 'scope') {
+          if (namedApp?.kind === 'scope') {
             return [key, {...value, kind:'scope', appName:'DaScope', taskbarInstance:value?.taskbarInstance ?? true, appInstanceId:'DaScope'}]
           }
           return [key, value]
@@ -711,7 +712,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
       {desktop && <IDATaskbar taskbarTheme={taskbarTheme} taskbarManualColor={taskbarManualColor} onReorder={saveTaskbar} onLogoDrop={copyDraggedAppToDesktop} apps={taskbarApps} openApps={Object.keys(windows)} windowsForTaskbar={windows} windowLabels={Object.fromEntries(Object.entries(windows).filter(([k])=>k.includes(':')||k==='DaTrash').map(([k,w])=>[k,w.kind==='external'?(w.appName||k):w.kind==='explorer'?(folders.find(f=>f.id===w.folderId)?.name||'File'):k==='DaTrash'?'DaTrash':files.find(f=>f.id===w.fileId)?.name||'Window']))} active={activeWindow} clock={clock} onWindow={(k)=>{ const w=windows[k]; if(!w) return; if(activeWindow===k && !w.minimized){ patchWindow(k,{minimized:true}); setActiveWindow(null); } else { focusWindow(k); } }}
         onStart={()=>{setSearchOpen(false);setPowerMenu(false);setStartOpen(v=>!v)}}
         onSearch={()=>{setStartOpen(false);setPowerMenu(false);setSearchOpen(v=>!v)}}
-        onApp={(n)=>{const existing=Object.entries(windows).filter(([k,w])=>k===n || (w?.taskbarInstance===true&&w?.appName===n)).sort((a,b)=>(b[1]?.z||0)-(a[1]?.z||0))[0];if(existing){const [k,w]=existing;if(activeWindow===k&&!w.minimized){patchWindow(k,{minimized:true});setActiveWindow(null)}else{focusWindow(k)}return}const a=APPS.find(x=>x.name===n);if(a)openApp(a)}}
+        onApp={(n)=>{const existing=Object.entries(windows).filter(([k,w])=>k===n || (w?.taskbarInstance===true&&w?.appName===n)).sort((a,b)=>(b[1]?.z||0)-(a[1]?.z||0))[0];if(existing){const [k,w]=existing;const app=APPS.find(x=>x.name===n);if(app?.kind==='external'&&(w?.kind!=='external'||!w?.externalUrl))patchWindow(k,{kind:'external',appName:app.name,externalUrl:app.url,taskbarInstance:true,appInstanceId:app.name,minimized:false});if(activeWindow===k&&!w.minimized){patchWindow(k,{minimized:true});setActiveWindow(null)}else{focusWindow(k)}return}const a=APPS.find(x=>x.name===n);if(a)openApp(a)}}
         onControl={()=>setControlOpen(v=>!v)}
         language={language}
         languageMenuOpen={languageMenuOpen}
