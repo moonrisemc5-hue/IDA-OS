@@ -897,8 +897,6 @@ function WindowFrame({app,state,active,onFocus,onPatch,onMinimize,onClose,onMaxi
       return next
     })
   }
-    })
-  }
   return <section ref={ref} className={'app-window desktop-window '+(active?'window-active ':'')+(immersive?'window-immersive ':'')+(closing?'window-closing':'')} style={{display:state.minimized?'none':undefined,left:immersive?0:(state.maximized?0:state.x),top:immersive?0:(state.maximized?0:state.y),right:immersive?0:(state.maximized?0:'auto'),bottom:immersive?0:(state.maximized?48:'auto'),width:immersive||state.maximized?'auto':state.width,height:immersive||state.maximized?'auto':state.height,zIndex:immersive?2147480001:Math.min(Number(state.z)||1,2147480000)}} onPointerDown={onFocus} onMouseMove={handleImmersiveMouseMove} onContextMenu={e=>{if(onContextMenu){e.preventDefault();e.stopPropagation();onContextMenu(e.clientX,e.clientY)}}} onContextMenuCapture={e=>{if((e.target as HTMLElement).closest('.desktop-context,.explorer-card,.desktop-file-tile,.app-tile,.explorer-main,.explorer-file-view,.trash-card')) return;if(onContextMenu){e.preventDefault();e.stopPropagation();onContextMenu(e.clientX,e.clientY)}}}>
     <div className={'window-bar '+(immersive && !chromeVisible ? 'chrome-hidden' : '')}>
       <div className="window-drag-area" onPointerDown={down} onPointerMove={move} onPointerUp={()=>drag.current=null} onDoubleClick={onMaximize}>
