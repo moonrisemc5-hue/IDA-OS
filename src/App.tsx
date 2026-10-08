@@ -629,9 +629,9 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
         if (target.closest('.app-window')) return
         const tile = target.closest('.app-tile') as HTMLElement | null
         if (tile) {
-          const name = tile.getAttribute('aria-label')
-          const app = APPS.find(a=>a.name===name)
-          if (app) { e.preventDefault(); e.stopPropagation(); setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',app,folder:'Desktop'}); return }
+          const id = tile.getAttribute('data-app-id') || tile.getAttribute('aria-label') || ''
+          const app = appForId(id)
+          if (app) { e.preventDefault(); e.stopPropagation(); setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',app:{...app,name:id},appId:id,folder:'Desktop'}); return }
         }
         const folderTile = target.closest('.desktop-folder-tile') as HTMLElement | null
         const fileTile = target.closest('.desktop-file-tile') as HTMLElement | null
@@ -672,11 +672,11 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
         if(w<5&&h<5)return
         q.dragged=true;const x=Math.min(q.sx,ex),y=Math.min(q.sy,ey);setDesktopMarquee({x,y,w,h,button:q.button})
         const box={l:r.left+x,t:r.top+y,r:r.left+x+w,b:r.top+y+h};const ids:string[]=[];const appsIn:string[]=[]
-        e.currentTarget.querySelectorAll<HTMLElement>('.desktop-file-tile,.app-tile').forEach(el=>{const b=el.getBoundingClientRect();if(b.right>=box.l&&b.left<=box.r&&b.bottom>=box.t&&b.top<=box.b){if(el.classList.contains('app-tile'))appsIn.push(el.getAttribute('aria-label')||'');else ids.push(el.getAttribute('data-drop-folder')||'')}})
+        e.currentTarget.querySelectorAll<HTMLElement>('.desktop-file-tile,.app-tile').forEach(el=>{const b=el.getBoundingClientRect();if(b.right>=box.l&&b.left<=box.r&&b.bottom>=box.t&&b.top<=box.b){if(el.classList.contains('app-tile'))appsIn.push(el.getAttribute('data-app-id')||el.getAttribute('aria-label')||'');else ids.push(el.getAttribute('data-drop-folder')||'')}})
         setSelectedDesktopIds(ids.filter(Boolean));setSelectedDesktopApps(appsIn.filter(Boolean))
       }} onPointerUp={(e)=>{
         const q=desktopMarqueeRef.current;desktopMarqueeRef.current={sx:0,sy:0,button:0,dragged:false,active:false}
-        if(q?.active&&q.dragged&&q.button===2){const hit=e.currentTarget.querySelector<HTMLElement>('.app-tile-selected,.desktop-file-tile.app-tile-selected');if(hit){const appName=hit.getAttribute('aria-label')||'';const app=APPS.find(a=>a.name===appName);const id=hit.getAttribute('data-drop-folder')||'';const file=files.find(f=>f.id===id);const folderItem=folders.find(f=>f.id===id);setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',app,file,folderItem,folder:'Desktop'})}}
+        if(q?.active&&q.dragged&&q.button===2){const hit=e.currentTarget.querySelector<HTMLElement>('.app-tile-selected,.desktop-file-tile.app-tile-selected');if(hit){const appId=hit.getAttribute('data-app-id')||hit.getAttribute('aria-label')||'';const app=appForId(appId);const id=hit.getAttribute('data-drop-folder')||'';const file=files.find(f=>f.id===id);const folderItem=folders.find(f=>f.id===id);setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',app:app?{...app,name:appId}:undefined,appId:appId||undefined,file,folderItem,folder:'Desktop'})}}
         setDesktopMarquee(null)
       }} onContextMenu={(e)=>{e.preventDefault();e.stopPropagation();if(desktop&&!desktopMarqueeRef.current.dragged&&e.target===e.currentTarget)setContextMenu({x:e.clientX,y:e.clientY,scope:'desktop',folder:'Desktop'})}}>        {desktopMarquee && <div className="desktop-selection-marquee" style={{left:desktopMarquee.x,top:desktopMarquee.y,width:desktopMarquee.w,height:desktopMarquee.h}} aria-hidden="true" />}
         {desktopApps.map((desktopEntry,desktopIndex) => { const appName=appBaseId(desktopEntry); const app=appForId(desktopEntry); if(!app)return null; const basePos=positions[app.name]||DEFAULT_POSITIONS[app.name]||{x:3,y:4}; const isCopy=desktopEntry.includes('::copy-'); const displayPos=isCopy&&!positions[desktopEntry]?{x:Math.min(82,basePos.x+Math.min(12,desktopIndex*3)),y:Math.min(82,basePos.y+Math.min(12,desktopIndex*2))}:positions[desktopEntry]||basePos; return (
@@ -695,6 +695,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
             
             onContext={(x,y) => desktop && setContextMenu({x,y,scope:'desktop',app:{...app,name:desktopEntry},appId:desktopEntry,folder:'Desktop'})}
             scale={desktop ? iconScale : 1}
+            shortcutId={desktopEntry}
           />
         )})}
         {desktop && folders.filter(f=>f.parent==='Desktop').map((folder,index)=>{const savedPos=filePositions[folder.id];const pos=savedPos&&!(savedPos.x===5&&savedPos.y===34)?savedPos:{x:18+(index%5)*14,y:10+Math.floor(index/5)*14};return <DesktopFolderTile key={folder.id} folder={folder} scale={iconScale} left={pos.x} top={pos.y} selected={selectedDesktopItem?.type==='folder'&&selectedDesktopItem.id===folder.id || selectedDesktopIds.includes(folder.id)} onSelect={()=>{setSelectedApp(null);setSelectedDesktopItem({type:'folder',id:folder.id});setSelectedDesktopIds([folder.id]);setSelectedDesktopApps([])}} onOpen={()=>openExplorerFolder(folder.id)} onContext={(x,y)=>setContextMenu({x,y,scope:'desktop',folderItem:folder,folder:'Desktop'})} onMove={(p)=>moveDesktopItem('folder',folder.id,p)} onDropTarget={(target)=>moveDraggedItem('folder',folder.id,target)} />})}
@@ -827,6 +828,7 @@ function AppTile({ app, displayName, position, editMode, onEdit, onOpen, onMove,
       onPointerCancel={() => { dragging.current = false }}
       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContext(e.clientX,e.clientY) }}
       aria-label={app.name}
+      data-app-id={shortcutId||app.name}
     >
       <span className={`app-icon tone-${app.tone}`}>
         <IdaAppIcon name={app.name} size={38}/>
