@@ -197,7 +197,10 @@ function ExistingAccount({ onSignedIn, title='Sign in to IDA', initialName='', c
     {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12}}>{message}</div>}
   </div>
 }
+function playLockWelcomeChime(){try{const AudioContextClass=window.AudioContext||(window as any).webkitAudioContext;if(!AudioContextClass)return;const ctx=new AudioContextClass();const start=ctx.currentTime;const master=ctx.createGain();const lowpass=ctx.createBiquadFilter();lowpass.type='lowpass';lowpass.frequency.setValueAtTime(1800,start);master.gain.setValueAtTime(0.0001,start);master.gain.linearRampToValueAtTime(0.22,start+0.32);master.gain.exponentialRampToValueAtTime(0.0001,start+2.25);lowpass.connect(master);master.connect(ctx.destination);const notes=[{f:392,t:0,d:1.65,v:.26},{f:523.25,t:.18,d:1.7,v:.19},{f:659.25,t:.42,d:1.45,v:.11}];for(const n of notes){const osc=ctx.createOscillator();const env=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(n.f,start+n.t);osc.frequency.exponentialRampToValueAtTime(n.f*.997,start+n.t+n.d);env.gain.setValueAtTime(.0001,start+n.t);env.gain.linearRampToValueAtTime(n.v,start+n.t+.22);env.gain.exponentialRampToValueAtTime(.0001,start+n.t+n.d);osc.connect(env);env.connect(lowpass);osc.start(start+n.t);osc.stop(start+n.t+n.d+.03)}void ctx.resume().catch(()=>{});window.setTimeout(()=>{void ctx.close().catch(()=>{})},2800)}catch{}}
+
 function LockScreen({ session, onUnlock }: { session:IdaSession; onUnlock:(next:IdaSession)=>void }) {
+  useEffect(()=>{playLockWelcomeChime()},[])
   const [now,setNow]=useState(new Date())
   const [wifiOn,setWifiOn]=useState(()=>{try{return localStorage.getItem('ida-internet-on')!=='0'}catch{return true}})
   const [unlocking,setUnlocking]=useState(false)
