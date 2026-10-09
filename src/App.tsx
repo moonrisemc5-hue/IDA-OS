@@ -140,7 +140,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [windows, setWindows] = useState<Record<string, any>>({})
   const [activeWindow, setActiveWindow] = useState<string|null>(null)
   const [windowsHydrated, setWindowsHydrated] = useState(false)
-  const [iconScale, setIconScale] = useState(1)
+  const [iconScale, setIconScale] = useState(1.1)
   const [clock, setClock] = useState(new Date())
   const [powerMenu, setPowerMenu] = useState(false)
   const [sleeping, setSleeping] = useState(false)
@@ -402,9 +402,33 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     return true
   }
   const moveDesktopItem = (type:'app'|'file'|'folder', id:string, pos:Position) => {
+    // Apps move freely while dragging, then settle into the nearest empty desktop grid slot.
+    // This avoids the old "barrier" feeling when a drag briefly crosses another icon.
+    if (type==='app') {
+      const area = document.querySelector('.home-screen')?.getBoundingClientRect()
+      if (area && area.width > 0 && area.height > 0) {
+        const tileW = 92 * iconScale
+        const tileH = 92 * iconScale
+        const stepX = Math.max(7, (tileW / area.width) * 100 + 1.5)
+        const stepY = Math.max(10, (tileH / area.height) * 100 + 1.5)
+        const candidates: Array<{p:Position;distance:number}> = []
+        for (let y=2; y<=Math.max(2, 91-stepY); y+=stepY) {
+          for (let x=2; x<=Math.max(2, 96-stepX); x+=stepX) {
+            const candidate={x,y}
+            if (!canPlaceDesktopTile('app',id,candidate)) continue
+            const dx=(candidate.x-pos.x)*area.width/100
+            const dy=(candidate.y-pos.y)*area.height/100
+            candidates.push({p:candidate,distance:dx*dx+dy*dy})
+          }
+        }
+        candidates.sort((a,b)=>a.distance-b.distance)
+        if (candidates[0]) { savePositions({...positions,[id]:candidates[0].p}); return }
+      }
+      if (canPlaceDesktopTile('app',id,pos)) savePositions({...positions,[id]:pos})
+      return
+    }
     if (!canPlaceDesktopTile(type,id,pos)) return
-    if (type==='app') savePositions({...positions,[id]:pos})
-    else saveFilePositions({...filePositions,[id]:pos})
+    saveFilePositions({...filePositions,[id]:pos})
   }
   const pasteClipboard = (location:ExplorerFolder='Desktop') => {
     if(!clipboard) return
@@ -853,7 +877,7 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     <button
       ref={tileRef}
       className={`app-tile ${selected ? 'app-tile-selected' : ''}`}
-      style={{ left: `${(dragPos||position).x}%`, top: `${(dragPos||position).y}%`, ['--scale' as string]: scale }}
+      style={{ left: `${(dragging.current ? position : (dragPos||position)).x}%`, top: `${(dragging.current ? position : (dragPos||position)).y}%`, ['--scale' as string]: scale }}
       onPointerDown={pointerDown}
       onPointerMove={pointerMove}
       onPointerUp={pointerUp}
