@@ -120,7 +120,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [files, setFiles] = useState<UserFile[]>([])
   const [folders, setFolders] = useState<UserFolder[]>([])
   const [folderApps, setFolderApps] = useState<Record<string,string[]>>({})
-  const [desktopApps, setDesktopApps] = useState<string[]>(['DAPP','DaEconomy','DaCourt','DaMusic','DaFile Explorer','DaSettings','DaTrash','Daculator','DaRaw'])
+  const [desktopApps, setDesktopApps] = useState<string[]>(['DAPP','DaEconomy','DaCourt','DaMusic','DaFile Explorer','DaSettings','DaTrash','Daculator'])
   const [clipboard, setClipboard] = useState<{type:'app'|'file'|'folder';id:string;mode:'copy'|'cut'}|null>(null)
   const [trash, setTrash] = useState<Array<{type:'app'|'file'|'folder';id:string;name:string;app?:AppItem;file?:UserFile;folder?:UserFolder;deletedAt:number}>>([])
   const [appLabels, setAppLabels] = useState<Record<string,string>>({})
@@ -347,7 +347,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     return true
   }
   const isDappInstalled = (name:string) => {
-    if(['DaSettings','DaTrash','DaMedia','DaRaw','DAPP'].includes(name)) return true
+    if(['DaSettings','DaTrash','DaMedia','DAPP'].includes(name)) return true
     const hasShortcut = desktopApps.some(x=>x.split('::')[0]===name) || Object.values(folderApps).some(items=>items.some(x=>x.split('::')[0]===name))
     const hasTrash = trash.some(t=>t.type==='app' && t.id.split('::')[0]===name)
     return hasShortcut || hasTrash
