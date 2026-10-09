@@ -1087,12 +1087,12 @@ function MusicPanel({ volume }: { volume: number }) {
           let peak=0;
           for(let j=start;j<Math.min(end,data.length);j++)peak=Math.max(peak,data[j]);
           const energy=Math.max(0,Math.min(1,(peak-7)/175));
-          const target=3+Math.pow(energy,0.72)*40;
+          const target=3+Math.pow(energy,0.72)*32;
           const previous=visualizerBarsRef.current[i]??3;
           const response=target>previous?0.88:0.22;
           const height=previous+(target-previous)*response;
           visualizerBarsRef.current[i]=height;
-          return Math.max(3,Math.min(44,height));
+          return Math.max(3,Math.min(36,height));
         });
         // Keep analysis smooth while limiting React renders to ~30fps.
         if(timestamp-lastUiUpdate>=33){setVisualizerBars(next);lastUiUpdate=timestamp}
