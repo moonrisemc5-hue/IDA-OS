@@ -278,7 +278,7 @@ export function CloudGate() {
     setReady(false);setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
     const localBeforeCloud=readLocalState()
     const {data,error:loadError}=await supabase.rpc('ida_load_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken})
-    if(loadError){setError(loadError.message);writeIdaSession(null);setSession(null);activeUser.current=null;activeSessionToken.current=null;setReady(false);return}
+    if(loadError){setError('Cloud sync is temporarily unavailable. Your IDA sign-in and local desktop are being kept.');installStorageSync();setReady(true);return}
     if(data&&looksLikeIdaState(data))applyLocalState(data)
     else if(Object.keys(localBeforeCloud.keys).length)await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
     installStorageSync();setReady(true)
