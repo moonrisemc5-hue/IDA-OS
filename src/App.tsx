@@ -570,7 +570,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
 
   const openPowerMenu = () => { setSearchOpen(false); setPowerMenu(v=>!v); setStartOpen(true) }
   const markPowerLock = () => { try { localStorage.setItem('ida-power-lock-v1','1') } catch {} }
-  const shutdownIDA = () => { markPowerLock(); setPowerMenu(false); setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setShutdown(true); window.setTimeout(() => window.location.replace('about:blank'), 1800) }
+  const clearOpenAppsForPowerOff = () => { setWindows({}); setActiveWindow(null); try { localStorage.removeItem('ida-open-windows-v1'); localStorage.removeItem('ida-active-window-v1') } catch {} }
+  const shutdownIDA = () => { clearOpenAppsForPowerOff(); markPowerLock(); setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setShutdown(true); window.setTimeout(() => window.location.replace('about:blank'), 1800) }
   const sleepIDA = () => { markPowerLock(); setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setSleeping(true) }
   const refreshIDA = () => {
     try {
@@ -596,6 +597,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   }
 
   const restartIDA = () => {
+    clearOpenAppsForPowerOff()
     setPowerMenu(false)
     setStartOpen(false)
     setSearchOpen(false)
