@@ -90,6 +90,7 @@ const TRACKS: Array<{ title:string; artist:string; src:string; image?:string }> 
 export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [mounted, setMounted] = useState(false)
   const [globalNowPlaying, setGlobalNowPlaying] = useState<{title:string;artist:string;image?:string}|null>(null)
+  const [globalNowPlayingVisible, setGlobalNowPlayingVisible] = useState(false)
   const [positions, setPositions] = useState(DEFAULT_POSITIONS)
   const [wallpaper, setWallpaper] = useState(WALLPAPERS['Moonlit Dunes'])
   const [previousWallpaper, setPreviousWallpaper] = useState<string | null>(null)
@@ -218,14 +219,27 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   }, [])
 
   useEffect(() => {
+    let hideTimer: number | undefined
+    let removeTimer: number | undefined
     const onNowPlaying = (event: Event) => {
       const detail = (event as CustomEvent<{title:string;artist:string;image?:string}>).detail
       if (!detail) return
+      if (hideTimer !== undefined) window.clearTimeout(hideTimer)
+      if (removeTimer !== undefined) window.clearTimeout(removeTimer)
       setGlobalNowPlaying(detail)
-      window.setTimeout(() => setGlobalNowPlaying(current => current === detail ? null : current), 4200)
+      setGlobalNowPlayingVisible(false)
+      requestAnimationFrame(() => requestAnimationFrame(() => setGlobalNowPlayingVisible(true)))
+      hideTimer = window.setTimeout(() => {
+        setGlobalNowPlayingVisible(false)
+        removeTimer = window.setTimeout(() => setGlobalNowPlaying(current => current === detail ? null : current), 460)
+      }, 4200)
     }
     window.addEventListener('ida-now-playing', onNowPlaying)
-    return () => window.removeEventListener('ida-now-playing', onNowPlaying)
+    return () => {
+      window.removeEventListener('ida-now-playing', onNowPlaying)
+      if (hideTimer !== undefined) window.clearTimeout(hideTimer)
+      if (removeTimer !== undefined) window.clearTimeout(removeTimer)
+    }
   }, [])
 
   useEffect(() => {
@@ -729,7 +743,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
         })}
       </div>
 
-      {globalNowPlaying && <div role="status" aria-live="polite" style={{position:'fixed',right:22,bottom:78,zIndex:2147483647,width:300,maxWidth:'calc(100vw - 44px)',display:'flex',alignItems:'center',gap:12,padding:12,background:'#242630',color:'#fff',border:'1px solid #41434e',borderRadius:14,boxShadow:'0 12px 38px #0008',pointerEvents:'none',animation:'idaNowPlayingIn .25s ease-out'}}><style>{'@keyframes idaNowPlayingIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>{globalNowPlaying.image?<img src={globalNowPlaying.image} alt="" style={{width:54,height:54,objectFit:'cover',borderRadius:8,flexShrink:0}}/>:<Music2 size={26}/>}<div style={{minWidth:0,flex:1}}><div style={{fontSize:10,fontWeight:800,letterSpacing:1.2,color:'#b6bac5',marginBottom:4}}>NOW PLAYING</div><div style={{fontSize:14,fontWeight:750,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{globalNowPlaying.title}</div><div style={{fontSize:12,color:'#b6bac5',marginTop:3}}>{globalNowPlaying.artist}</div></div></div>}
+      {globalNowPlaying && <div role="status" aria-live="polite" style={{position:'fixed',right:22,bottom:78,zIndex:2147483647,width:300,maxWidth:'calc(100vw - 44px)',display:'flex',alignItems:'center',gap:12,padding:12,background:'#242630',color:'#fff',border:'1px solid #41434e',borderRadius:14,boxShadow:'0 12px 38px #0008',pointerEvents:'none',opacity:globalNowPlayingVisible?1:0,transform:globalNowPlayingVisible?'translateX(0) scale(1)':'translateX(90px) scale(.97)',transition:'opacity 420ms cubic-bezier(.22,1,.36,1), transform 460ms cubic-bezier(.22,1,.36,1)',willChange:'transform, opacity'}}>{globalNowPlaying.image?<img src={globalNowPlaying.image} alt="" style={{width:54,height:54,objectFit:'cover',borderRadius:8,flexShrink:0}}/>:<Music2 size={26}/>}<div style={{minWidth:0,flex:1}}><div style={{fontSize:10,fontWeight:800,letterSpacing:1.2,color:'#b6bac5',marginBottom:4}}>NOW PLAYING</div><div style={{fontSize:14,fontWeight:750,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{globalNowPlaying.title}</div><div style={{fontSize:12,color:'#b6bac5',marginTop:3}}>{globalNowPlaying.artist}</div></div></div>}
 
       {controlOpen && <ControlCenter brightness={brightness} setBrightness={(v)=>{setBrightness(v);try{localStorage.setItem('ida-brightness',String(v))}catch{}}} internetOn={internetOn} setInternetOn={setInternetState} volume={volume} setVolume={(v)=>{setVolume(v);try{localStorage.setItem('ida-volume',String(v))}catch{}}} onVolumeChange={(v)=>{setVolume(v);try{localStorage.setItem('ida-volume',String(v))}catch{};playVolumeTest(v)}} batteryLevel={batteryLevel} batteryCharging={batteryCharging} onClose={() => setControlOpen(false)} />}
 
