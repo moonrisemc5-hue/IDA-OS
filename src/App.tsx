@@ -105,6 +105,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [globalNowPlayingVisible, setGlobalNowPlayingVisible] = useState(false)
   const [positions, setPositions] = useState(DEFAULT_POSITIONS)
   const [wallpaper, setWallpaper] = useState(WALLPAPERS['Moonlit Dunes'])
+  const wallpaperRef = useRef(wallpaper)
+  wallpaperRef.current = wallpaper
   const [previousWallpaper, setPreviousWallpaper] = useState<string | null>(null)
   const [wallpaperRotation, setWallpaperRotation] = useState(true)
   const [wallpaperFade, setWallpaperFade] = useState(true)
@@ -588,7 +590,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     const rotation=includeOwnWallpaper&&customWallpaper?[...entries,['My wallpaper',customWallpaper] as [string,string]]:entries
     const rotate=()=>{
       if(disposed||rotation.length<2)return
-      const current=rotation.findIndex(([,value])=>value===wallpaper)
+      const current=rotation.findIndex(([,value])=>value===wallpaperRef.current)
       const next=rotation[(current+1+rotation.length)%rotation.length]
       if(!next)return
       const image=new Image()
@@ -608,7 +610,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     }
     const timer=window.setInterval(rotate,30000)
     return()=>{disposed=true;window.clearInterval(timer);if(fadeTimer!==undefined)window.clearTimeout(fadeTimer);setPreviousWallpaper(null)}
-  }, [mounted, wallpaperRotation, wallpaper, wallpaperFade, includeOwnWallpaper, customWallpaper])
+  }, [mounted, wallpaperRotation, wallpaperFade, includeOwnWallpaper, customWallpaper])
 
   const setTaskbarThemeMode = (theme:'default'|'aurora'|'sunset'|'ocean'|'manual') => {
     setTaskbarTheme(theme)
