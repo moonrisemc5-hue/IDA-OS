@@ -90,7 +90,7 @@ const UI_TRANSLATIONS: Record<'cs'|'vi'|'ar-YE', Record<string,string>> = {
   }
 }
 
-const TRACKS: Array<{ title:string; artist:string; src:string; image?:string }> = [{ title:'Shelter', artist:'IDA Defaults', src:'/IDA-OS/music/Shelter.mp3', image:'/IDA-OS/music/shelter-cover.svg' }, { title:'Mina Mintip', artist:'IDA Defaults', src:'/IDA-OS/music/Mina%20Mintip.mp3', image:'/IDA-OS/music/mina-mintip-cover.svg' }, { title:'Kompa Pasion', artist:'IDA Defaults', src:'/IDA-OS/music/kompa-pasion.mp3', image:'/IDA-OS/music/kompa-pasion-cover.svg' }, { title:'Send them off', artist:'IDA Defaults', src:'/IDA-OS/music/send-them-off.mp3', image:'/IDA-OS/music/send-them-off-cover.svg' }, { title:'Fireflies', artist:'IDA Defaults', src:'/IDA-OS/music/fireflies.mp3', image:'/IDA-OS/music/fireflies-cover.jpg' }, { title:'Infinite Amethyst', artist:'IDA Defaults', src:'/IDA-OS/music/Infinite%20Amethyst.mp3', image:'/IDA-OS/music/infinite-amethyst-cover.svg' }, { title:'Tuff Chinese Rap', artist:'IDA Defaults', src:'/IDA-OS/music/Tuff%20Chinese%20Rap.mp3', image:'/IDA-OS/music/tuff-chinese-rap-cover.svg' }, { title:'Gut Genug', artist:'IDA Defaults', src:'/IDA-OS/music/Gut%20Genug.mp3', image:'/IDA-OS/music/gut-genug-cover.svg' }, { title:'Papaoutai', artist:'IDA Defaults', src:'/IDA-OS/music/Papaoutai.mp3', image:'/IDA-OS/music/papaoutai-cover.svg' }, { title:'Casanova', artist:'IDA Defaults', src:'/IDA-OS/music/Casanova.mp3', image:'/IDA-OS/music/casanova-cover.svg' }, { title:'Dancin', artist:'IDA Defaults', src:'/IDA-OS/music/Dancin.mp3', image:'/IDA-OS/music/dancin-cover.svg' }]
+const TRACKS: Array<{ title:string; artist:string; src:string; image?:string }> = [{ title:'Shelter', artist:'IDA Default', src:'/IDA-OS/music/Shelter.mp3', image:'/IDA-OS/music/shelter-cover.svg' }, { title:'Mina Mintip', artist:'IDA Default', src:'/IDA-OS/music/Mina%20Mintip.mp3', image:'/IDA-OS/music/mina-mintip-cover.svg' }, { title:'Kompa Pasion', artist:'IDA Default', src:'/IDA-OS/music/kompa-pasion.mp3', image:'/IDA-OS/music/kompa-pasion-cover.svg' }, { title:'Send them off', artist:'IDA Default', src:'/IDA-OS/music/send-them-off.mp3', image:'/IDA-OS/music/send-them-off-cover.svg' }, { title:'Fireflies', artist:'IDA Default', src:'/IDA-OS/music/fireflies.mp3', image:'/IDA-OS/music/fireflies-cover.jpg' }, { title:'Infinite Amethyst', artist:'IDA Default', src:'/IDA-OS/music/Infinite%20Amethyst.mp3', image:'/IDA-OS/music/infinite-amethyst-cover.svg' }, { title:'Tuff Chinese Rap', artist:'IDA Default', src:'/IDA-OS/music/Tuff%20Chinese%20Rap.mp3', image:'/IDA-OS/music/tuff-chinese-rap-cover.svg' }, { title:'Gut Genug', artist:'IDA Default', src:'/IDA-OS/music/Gut%20Genug.mp3', image:'/IDA-OS/music/gut-genug-cover.svg' }, { title:'Papaoutai', artist:'IDA Default', src:'/IDA-OS/music/Papaoutai.mp3', image:'/IDA-OS/music/papaoutai-cover.svg' }, { title:'Casanova', artist:'IDA Default', src:'/IDA-OS/music/Casanova.mp3', image:'/IDA-OS/music/casanova-cover.svg' }, { title:'Dancin', artist:'IDA Default', src:'/IDA-OS/music/Dancin.mp3', image:'/IDA-OS/music/dancin-cover.svg' }, { title:'MEGALOVANIA', artist:'IDA Default', src:'/IDA-OS/music/MEGALOVANIA.mp3', image:'/IDA-OS/music/megalovania-cover.svg' }]
 
 export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [mounted, setMounted] = useState(false)
@@ -1087,12 +1087,12 @@ function MusicPanel({ volume }: { volume: number }) {
           let peak=0;
           for(let j=start;j<Math.min(end,data.length);j++)peak=Math.max(peak,data[j]);
           const energy=Math.max(0,Math.min(1,(peak-7)/175));
-          const target=3+Math.pow(energy,0.72)*56;
+          const target=3+Math.pow(energy,0.72)*40;
           const previous=visualizerBarsRef.current[i]??3;
           const response=target>previous?0.88:0.22;
           const height=previous+(target-previous)*response;
           visualizerBarsRef.current[i]=height;
-          return Math.max(3,Math.min(60,height));
+          return Math.max(3,Math.min(44,height));
         });
         // Keep analysis smooth while limiting React renders to ~30fps.
         if(timestamp-lastUiUpdate>=33){setVisualizerBars(next);lastUiUpdate=timestamp}
@@ -1104,7 +1104,7 @@ function MusicPanel({ volume }: { volume: number }) {
   },[playing,track]);
   useEffect(()=>{if(audioRef.current&&currentTime>0){const a=audioRef.current;const restore=()=>{if(Math.abs(a.currentTime-currentTime)>1)a.currentTime=Math.min(currentTime,a.duration||currentTime)};if(a.readyState>=1)restore();else a.addEventListener('loadedmetadata',restore,{once:true});return()=>a.removeEventListener('loadedmetadata',restore)}},[]);
   useEffect(()=>()=>{if(toastTimer.current)clearTimeout(toastTimer.current)},[]);
-  const showTrackToast=(index:number)=>{const t=TRACKS[index];if(!t)return;const detail={title:t.title,artist:'IDA Defaults',image:t.image};setToast(detail);window.dispatchEvent(new CustomEvent('ida-now-playing',{detail}));if(toastTimer.current)clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToast(null),4200)};
+  const showTrackToast=(index:number)=>{const t=TRACKS[index];if(!t)return;const detail={title:t.title,artist:'IDA Default',image:t.image};setToast(detail);window.dispatchEvent(new CustomEvent('ida-now-playing',{detail}));if(toastTimer.current)clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToast(null),4200)};
   const toggle=()=>{if(!audioRef.current||!current)return;if(playing){audioRef.current.pause();setPlaying(false)}else{audioRef.current.play().then(()=>setPlaying(true)).catch(()=>setPlaying(false))}};
   const selectTrack=(index:number,autoPlay=false,notify=false)=>{setTrack(index);setCurrentTime(0);setDuration(0);setPlaying(autoPlay);if(notify)showTrackToast(index)};
   const seek=(value:number)=>{if(!audioRef.current)return;audioRef.current.currentTime=value;setCurrentTime(value)};
