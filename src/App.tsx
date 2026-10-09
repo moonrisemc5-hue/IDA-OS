@@ -1172,9 +1172,9 @@ function DaculatorPanel(){
       if(!s)throw Error('Enter a function first');
       // Make common handwritten input unambiguous before the symbolic parser sees it.
       // In particular, x^2sin(x) must mean x^2 * sin(x), not x^(2sin(x)).
-      s=s.replace(/(\\d)(?=(?:sin|cos|tan|ln|log|exp|sqrt|abs)\\s*\\()/gi,'$1*')
-         .replace(/(\\d)(x|\\()/gi,'$1*$2')
-         .replace(/(x|\\))(?=\\d)/gi,'$1*')
+      s=s.replace(/(\d)(?=(?:sin|cos|tan|ln|log|exp|sqrt|abs)\s*\()/gi,'$1*')
+         .replace(/(\d)(x|\()/gi,'$1*$2')
+         .replace(/(x|\))(?=\d)/gi,'$1*')
          .replace(/(x|\\))(?=(?:sin|cos|tan|ln|log|exp|sqrt|abs)\\s*\\()/gi,'$1*');
       const expression=nerdamer(s).text();
       const derivative=nerdamer.diff(expression,'x').text();
