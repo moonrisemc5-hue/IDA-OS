@@ -1,5 +1,5 @@
 import React,{useEffect,useRef,useState} from 'react'
-import {Brush,Pencil,PaintBucket,SprayCan,Eraser,Undo2,Redo2,Save,FolderOpen,Plus,Minus,Pipette,Type,Slash,Square,Circle,Highlighter,Triangle,Diamond,Star,ArrowRight,Import,Image as ImageIcon,X,Check,RotateCcw} from 'lucide-react'
+import {Brush,Pencil,PaintBucket,SprayCan,Eraser,Undo2,Redo2,Save,FolderOpen,Plus,Minus,Pipette,Type,Slash,Square,Circle,Highlighter,Triangle,Diamond,Star,ArrowRight,Import,Image as ImageIcon,X,Check} from 'lucide-react'
 import './daraw.css'
 
 type Point={x:number;y:number}
@@ -11,7 +11,6 @@ export default function DaRawPanel({photos=[],onSavePng,onImportImage}:Props){
  const canvas=useRef<HTMLCanvasElement>(null),preview=useRef<HTMLCanvasElement>(null),file=useRef<HTMLInputElement>(null)
  const [tool,T]=useState('brush'),[color,C]=useState('#20212b'),[size,S]=useState(8),[zoom,Z]=useState(100),[filled,F]=useState(false),[name,N]=useState('Untitled artwork'),[toast,Q]=useState(''),[showPhotos,SP]=useState(false)
  const [undo,U]=useState<string[]>([]),[redo,R]=useState<string[]>([]),[drawing,D]=useState(false),[start,A]=useState<Point|null>(null),[last,L]=useState<Point|null>(null),[textAt,TA]=useState<Point|null>(null),[text,TX]=useState('Hello!'),[showText,ST]=useState(false)
- const [localImportBusy,LIB]=useState(false)
  const ctx=()=>canvas.current?.getContext('2d'),pctx=()=>preview.current?.getContext('2d')
  const say=(s:string)=>{Q(s);window.setTimeout(()=>Q(''),1900)}
  useEffect(()=>{const g=ctx();if(g){g.fillStyle='#fff';g.fillRect(0,0,canvas.current!.width,canvas.current!.height)}},[])
