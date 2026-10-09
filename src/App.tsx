@@ -85,7 +85,7 @@ const UI_TRANSLATIONS: Record<'cs'|'vi'|'ar-YE', Record<string,string>> = {
   }
 }
 
-const TRACKS: Array<{ title:string; artist:string; src:string; image?:string }> = []
+const TRACKS: Array<{ title:string; artist:string; src:string; image?:string }> = [{ title:'Kompa Pasion', artist:'IDA Defaults', src:'/IDA-OS/music/kompa-pasion.mp3', image:'/IDA-OS/music/kompa-pasion-cover.svg' }]
 
 export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [mounted, setMounted] = useState(false)
