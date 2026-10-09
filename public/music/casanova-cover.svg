@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<defs>
+ <linearGradient id="pinksky" x1="0" y1="0" x2=".15" y2="1"><stop offset="0" stop-color="#f20bea"/><stop offset=".32" stop-color="#dc08e9"/><stop offset=".7" stop-color="#b813cf"/><stop offset="1" stop-color="#8b168f"/></linearGradient>
+ <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff7bfb" stop-opacity=".08"/><stop offset="1" stop-color="#ff8aff" stop-opacity="0"/></linearGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="20"/></filter>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .2 0 0 0 0 .5 0 0 0 .12 0"/></filter>
+</defs>
+<rect width="1000" height="1000" fill="url(#pinksky)"/>
+<ellipse cx="500" cy="640" rx="680" ry="220" fill="#ed39e8" opacity=".25" filter="url(#soft)"/>
+<rect width="1000" height="1000" fill="url(#haze)"/>
+<!-- layered distant ridge haze -->
+<path d="M0 690Q110 661 210 679T400 684T610 665T815 681T1000 650V1000H0Z" fill="#541050" opacity=".24"/>
+<path d="M0 740Q100 700 175 711Q255 724 312 748Q353 765 400 744Q436 726 462 746Q490 768 545 757Q650 720 750 730Q830 730 890 754Q951 775 1000 762V1000H0Z" fill="#21051f" opacity=".65"/>
+<!-- dark silhouette of rolling hills -->
+<path d="M0 778L30 768 62 751 92 729 122 713 156 694 188 682 217 670 244 664 272 666 300 675 326 691 354 710 381 725 405 733 425 739 447 727 469 716 491 722 516 736 540 745 566 750 596 740 627 729 654 722 681 716 713 714 744 717 774 713 800 709 826 714 848 711 872 723 894 735 918 742 942 751 970 762 1000 778V1000H0Z" fill="#09020a"/>
+<!-- a barely visible foreground ridge adds depth -->
+<path d="M0 866Q175 850 322 875T625 864T1000 879V1000H0Z" fill="#070107" opacity=".42"/>
+<rect width="1000" height="1000" filter="url(#grain)" opacity=".2"/>
+<rect x="32" y="32" width="936" height="936" fill="none" stroke="#ffc7ff" stroke-opacity=".16" stroke-width="2"/>
+<text x="64" y="825" font-family="Arial,sans-serif" font-size="24" letter-spacing="10" fill="#ffd8ff" opacity=".9">IDA DEFAULTS</text>
+<text x="55" y="926" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="100" letter-spacing="2" fill="#fff0ff">CASANOVA</text>
+</svg>
