@@ -196,3 +196,5 @@
 .dac-line-params{display:flex;gap:12px;flex-wrap:wrap;margin:-5px 0 14px}.dac-line-params label{display:flex;align-items:center;gap:9px;color:#bcb5d2;font-size:12px}.dac-line-params input{width:84px;min-width:0;padding:8px 10px;border:1px solid #a78bfa35;border-radius:8px;background:#111019;color:#f5f3ff;outline:none}.dac-line-params input:focus{border-color:#b9a2ff}
 
 .dac-graph{overscroll-behavior:contain}
+
+.dac-calculus-steps{margin-top:14px;padding:14px;border:1px solid #a78bfa26;border-radius:12px;background:#ffffff04}.dac-calculus-steps>strong{display:block;margin-bottom:10px;font-size:12px;color:#ddd4ff}.dac-calculus-steps>div{display:flex;align-items:flex-start;gap:10px;margin:9px 0;color:#aaa6bd;font-size:12px;line-height:1.55}.dac-calculus-steps>div>span{display:grid;place-items:center;flex:0 0 22px;height:22px;border-radius:7px;background:#a78bfa18;color:#c4b5fd;font-size:10px;font-weight:700}.dac-calculus-steps p{margin:1px 0 0}
