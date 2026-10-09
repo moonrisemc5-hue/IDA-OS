@@ -72,7 +72,8 @@ const DAPP_CATALOG: DappCatalogItem[] = [
   {name:'DaNotes',tagline:'Write it down. Keep it close.',description:'A simple notes workspace for ideas, plans, reminders, and anything else you want to keep inside IDA.',category:'Productivity',tone:'amber'},
   {name:'DaTV',tagline:'Your videos, with a TV icon',description:'Watch videos with DaTV. YouTube may need to open in your browser because some sites block embedded playback.',category:'Entertainment',tone:'red'},
   {name:'DaDrift',tagline:'Drift, race, and beat your records',description:'DaDrift is a racing game focused on drifting around tracks, controlling your car, and chasing better times. Upload the DaDrift.html game file to enable playing it inside IDA.',category:'Games',tone:'blue'},
-  {name:'Daculator',tagline:'A calculator with a little extra power',description:'A polished everyday calculator with an animated scientific mode for powers, roots, trigonometry, logarithms, constants, and parentheses.',category:'Productivity',tone:'violet'}, 
+  {name:'Daculator',tagline:'A calculator with a little extra power',description:'A polished everyday calculator with an animated scientific mode for powers, roots, trigonometry, logarithms, constants, and parentheses.',category:'Productivity',tone:'violet'},
+  {name:'DaRaw',tagline:'Your colourful digital canvas',description:'A paint studio with pencil, brush, marker, spray, eraser, fill bucket, shapes, text, colour picker, adjustable brush size, undo and redo, image import, zoom and PNG export.',category:'Creativity',tone:'violet'}, 
 ]
 
 const WALLPAPERS: Record<string, string> = {
@@ -119,7 +120,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [files, setFiles] = useState<UserFile[]>([])
   const [folders, setFolders] = useState<UserFolder[]>([])
   const [folderApps, setFolderApps] = useState<Record<string,string[]>>({})
-  const [desktopApps, setDesktopApps] = useState<string[]>(['DAPP','DaEconomy','DaCourt','DaMusic','DaFile Explorer','DaSettings','DaTrash','Daculator'])
+  const [desktopApps, setDesktopApps] = useState<string[]>(['DAPP','DaEconomy','DaCourt','DaMusic','DaFile Explorer','DaSettings','DaTrash','Daculator','DaRaw'])
   const [clipboard, setClipboard] = useState<{type:'app'|'file'|'folder';id:string;mode:'copy'|'cut'}|null>(null)
   const [trash, setTrash] = useState<Array<{type:'app'|'file'|'folder';id:string;name:string;app?:AppItem;file?:UserFile;folder?:UserFolder;deletedAt:number}>>([])
   const [appLabels, setAppLabels] = useState<Record<string,string>>({})
@@ -346,7 +347,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     return true
   }
   const isDappInstalled = (name:string) => {
-    if(['DaSettings','DaTrash','DaMedia','DAPP'].includes(name)) return true
+    if(['DaSettings','DaTrash','DaMedia','DaRaw','DAPP'].includes(name)) return true
     const hasShortcut = desktopApps.some(x=>x.split('::')[0]===name) || Object.values(folderApps).some(items=>items.some(x=>x.split('::')[0]===name))
     const hasTrash = trash.some(t=>t.type==='app' && t.id.split('::')[0]===name)
     return hasShortcut || hasTrash
