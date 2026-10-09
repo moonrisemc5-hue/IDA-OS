@@ -189,8 +189,10 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
       const savedLabels = localStorage.getItem('ida-app-labels'); if (savedLabels) setAppLabels(JSON.parse(savedLabels))
       const savedNotes = localStorage.getItem('ida-notes-v2'); if (savedNotes) setNotes(JSON.parse(savedNotes))
       const savedTrash = localStorage.getItem('ida-trash-v1'); if (savedTrash) setTrash(JSON.parse(savedTrash))
-      const savedWindows = localStorage.getItem('ida-open-windows-v1')
-      const savedActiveWindow = localStorage.getItem('ida-active-window-v1')
+      const clearSavedWindows = localStorage.getItem('ida-clear-open-windows-on-start-v1') === '1'
+      if (clearSavedWindows) { try { localStorage.removeItem('ida-open-windows-v1'); localStorage.removeItem('ida-active-window-v1'); localStorage.removeItem('ida-clear-open-windows-on-start-v1') } catch {} }
+      const savedWindows = clearSavedWindows ? null : localStorage.getItem('ida-open-windows-v1')
+      const savedActiveWindow = clearSavedWindows ? null : localStorage.getItem('ida-active-window-v1')
       if (savedWindows) {
         const restored = JSON.parse(savedWindows)
         const rawWindows = restored && typeof restored === 'object' ? restored : {}
@@ -570,7 +572,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
 
   const openPowerMenu = () => { setSearchOpen(false); setPowerMenu(v=>!v); setStartOpen(true) }
   const markPowerLock = () => { try { localStorage.setItem('ida-power-lock-v1','1') } catch {} }
-  const clearOpenAppsForPowerOff = () => { setWindows({}); setActiveWindow(null); try { localStorage.removeItem('ida-open-windows-v1'); localStorage.removeItem('ida-active-window-v1') } catch {} }
+  const clearOpenAppsForPowerOff = () => { try { localStorage.setItem('ida-open-windows-v1', '{}'); localStorage.removeItem('ida-active-window-v1'); localStorage.setItem('ida-clear-open-windows-on-start-v1', '1') } catch {} setWindows({}); setActiveWindow(null) }
   const shutdownIDA = () => { clearOpenAppsForPowerOff(); markPowerLock(); setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setShutdown(true); window.setTimeout(() => window.location.replace('about:blank'), 1800) }
   const sleepIDA = () => { markPowerLock(); setPowerMenu(false); setStartOpen(false); setSearchOpen(false); setContextMenu(null); setSleeping(true) }
   const refreshIDA = () => {
