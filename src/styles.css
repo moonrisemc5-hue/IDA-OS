@@ -157,3 +157,14 @@
 .dac-run-calculus{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:1px solid #d4c5ff;border-radius:11px;background:linear-gradient(120deg,#b8a1ff,#8060d8);color:#171122;font-size:13px;font-weight:850;cursor:pointer;transition:transform .2s,filter .2s}.dac-run-calculus:hover{transform:translateY(-2px);filter:brightness(1.08)}.dac-run-calculus:active{transform:translateY(1px)}
 .dac-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.dac-results>div{display:flex;flex-direction:column;gap:8px;min-width:0;padding:14px;border:1px solid #a78bfa2b;border-radius:12px;background:#a78bfa0c}.dac-results small{font-size:10px;color:#a7a0bf}.dac-results strong{font-size:clamp(19px,3vw,27px);font-weight:500;overflow-wrap:anywhere;color:#e5dcff}.dac-results em{font-size:10px;color:#89839f;font-style:normal}.dac-results p{grid-column:1/-1;color:#ff9aa8;font-size:11px}
 @media(max-width:620px){.dac-math-tool{padding:12px}.dac-tool-heading{align-items:flex-start}.dac-calculus-inputs{grid-template-columns:1fr}.dac-calculus-inputs label{grid-template-columns:1fr 1fr;align-items:center}.dac-results{grid-template-columns:1fr}.dac-tool-tabs button{font-size:11px;padding:9px 4px}}
+
+
+/* Daculator graph: Desmos-inspired coordinate plane and live trace readout. */
+.dac-graph{cursor:crosshair;touch-action:pan-y;user-select:none;background:#101019}
+.dac-graph svg text{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:none}
+.dac-trace-readout{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:4px;padding:9px 11px;border:1px solid #c4b5fd55;border-radius:10px;background:#171525eF;box-shadow:0 8px 22px #0005;pointer-events:none;backdrop-filter:blur(12px)}
+.dac-trace-readout strong{font:700 13px ui-monospace,SFMono-Regular,Consolas,monospace;color:#e7ddff}
+.dac-trace-readout small{font-size:9px;color:#aaa2c4}
+.dac-symbolic-results{grid-template-columns:1fr}
+.dac-symbolic-results>div{align-items:flex-start}
+.dac-symbolic-results strong{font:500 16px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:normal;overflow-wrap:anywhere}
