@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ChevronDown, ChevronUp, Download, Gauge, CarFront, Settings as Gear, Music2, Film, Trash2, Moon,
+  ChevronDown, ChevronUp, ChevronRight, Download, Gauge, CarFront, Settings as Gear, Music2, Film, Trash2, Moon,
   Minus, Pause, Play, Scale, Search, Settings2, SlidersHorizontal, Maximize2, ArrowUpDown,
   SunMedium, Volume2, VolumeX, Wifi, BatteryFull, Power, Folder, Sparkles, X, FileText, Clipboard, Scissors, Tv, SkipBack, SkipForward, ListMusic, Calculator, Sigma
 } from 'lucide-react'
@@ -116,7 +116,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [files, setFiles] = useState<UserFile[]>([])
   const [folders, setFolders] = useState<UserFolder[]>([])
   const [folderApps, setFolderApps] = useState<Record<string,string[]>>({})
-  const [desktopApps, setDesktopApps] = useState<string[]>(['DAPP','DaEconomy','DaCourt','DaMusic','DaFile Explorer','DaSettings','DaTrash'])
+  const [desktopApps, setDesktopApps] = useState<string[]>(['DAPP','DaEconomy','DaCourt','DaMusic','DaFile Explorer','DaSettings','DaTrash','Daculator'])
   const [clipboard, setClipboard] = useState<{type:'app'|'file'|'folder';id:string;mode:'copy'|'cut'}|null>(null)
   const [trash, setTrash] = useState<Array<{type:'app'|'file'|'folder';id:string;name:string;app?:AppItem;file?:UserFile;folder?:UserFolder;deletedAt:number}>>([])
   const [appLabels, setAppLabels] = useState<Record<string,string>>({})
@@ -1148,7 +1148,7 @@ function DaculatorPanel(){
   const calculate=()=>{try{const result=pretty(safeEvaluate(display));setHistory(old=>[display+' = '+result,...old].slice(0,8));setDisplay(result);setJustEvaluated(true)}catch{setDisplay('Error');setJustEvaluated(true)}};
   const unary=(fn:(n:number)=>number,label:string)=>{try{const result=pretty(fn(safeEvaluate(display)));setHistory(old=>[label+'('+display+') = '+result,...old].slice(0,8));setDisplay(result);setJustEvaluated(true)}catch{setDisplay('Error');setJustEvaluated(true)}};
   const key=(label:string,kind='number',action?:()=>void)=> <button key={label} className={'dac-key dac-'+kind} onClick={action||(()=>append(label))}>{label}</button>;
-  return <div className="daculator-shell"><div className="dac-topline"><div className="dac-brand"><span className="dac-brand-icon"><Calculator size={21}/></span><div><strong>Daculator</strong><small>CALCULATE SOMETHING GREAT</small></div></div><button className={'dac-mode-toggle '+(advanced?'active':'')} onClick={()=>setAdvanced(v=>!v)} aria-label={advanced?'Switch to basic calculator':'Open advanced calculator'}><span>{advanced?'Basic':'Advanced'}</span><ChevronDown size={18} className={advanced?'dac-arrow-open':''}/></button></div>
+  return <div className="daculator-shell"><div className="dac-topline"><div className="dac-brand"><span className="dac-brand-icon"><Calculator size={21}/></span><div><strong>Daculator</strong><small>CALCULATE SOMETHING GREAT</small></div></div><button className={'dac-mode-toggle '+(advanced?'active':'')} onClick={()=>setAdvanced(v=>!v)} aria-label={advanced?'Switch to basic calculator':'Open advanced calculator'}><span>{advanced?'Basic':'Advanced'}</span><ChevronRight size={18} className={advanced?'dac-arrow-open':''}/></button></div>
     <div className="dac-display"><div className="dac-display-meta"><span>{advanced?'SCIENTIFIC MODE':'STANDARD MODE'}</span><button onClick={()=>setAngle(a=>a==='DEG'?'RAD':'DEG')}>{angle}</button></div><div className="dac-expression" title={display}>{display}</div><div className="dac-hint">Ready when you are</div></div>
     <div className="dac-body"><div className="dac-keypad">{advanced&&<div className="dac-scientific">{key('sin(','function',()=>append('sin('))}{key('cos(','function',()=>append('cos('))}{key('tan(','function',()=>append('tan('))}{key('√','function',()=>unary(Math.sqrt,'√'))}{key('x²','function',()=>unary(n=>n*n,'x²'))}{key('xʸ','function',()=>append('^'))}{key('log(','function',()=>append('log('))}{key('ln(','function',()=>append('ln('))}{key('(','function',()=>append('('))}{key(')','function',()=>append(')'))}{key('π','function',()=>append('π'))}{key('e','function',()=>append('e'))}{key('!','function',()=>append('!'))}{key('1/x','function',()=>unary(n=>1/n,'1/x'))}{key('±','function',()=>unary(n=>-n,'±'))}</div>}
       <div className="dac-standard">{key('AC','clear',clear)}{key('⌫','clear',()=>setDisplay(v=>v==='Error'||v.length<=1?'0':v.slice(0,-1)))}{key('%','function',()=>append('%'))}{key('÷','operator',()=>append('÷'))}{key('7')}{key('8')}{key('9')}{key('×','operator',()=>append('×'))}{key('4')}{key('5')}{key('6')}{key('−','operator',()=>append('−'))}{key('1')}{key('2')}{key('3')}{key('+','operator',()=>append('+'))}{key('±','function',()=>unary(n=>-n,'±'))}{key('0')}{key('.')}{key('=','equals',calculate)}</div>
