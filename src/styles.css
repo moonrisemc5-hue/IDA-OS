@@ -65,3 +65,10 @@
 .damusic-visualizer:not(.is-playing) span{opacity:.48;box-shadow:none}
 @media(prefers-reduced-motion:reduce){.damusic-visualizer span{transition:none}}
 @media(max-width:520px){.music-hero{gap:12px;padding:18px;flex-wrap:wrap}.music-art{width:82px;height:82px;flex-basis:82px;border-radius:17px}.damusic-visualizer{width:calc(100% - 36px);margin:0 18px 8px;height:88px;gap:2px}.damusic-visualizer span{max-width:9px}}
+
+/* DaMusic layout: keep cover and title at their original height; spectrum fills the remaining row. */
+.music-hero{display:flex;align-items:center;gap:18px;flex-wrap:nowrap;min-height:132px;padding:22px 24px;box-sizing:border-box}
+.music-hero .music-art{flex:0 0 88px;width:88px;height:88px}
+.music-hero>div:nth-child(2){flex:0 1 230px;min-width:145px}
+.music-hero .damusic-visualizer{flex:1 1 0;width:auto;min-width:120px;height:112px;margin:0;padding:4px 0 5px;gap:3px}
+@media(max-width:620px){.music-hero{flex-wrap:wrap;gap:14px;padding:18px}.music-hero>div:nth-child(2){flex:1 1 140px;min-width:120px}.music-hero .damusic-visualizer{flex:1 0 100%;width:100%;min-width:0;height:88px;margin:0}}
