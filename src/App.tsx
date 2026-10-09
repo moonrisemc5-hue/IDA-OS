@@ -1027,7 +1027,7 @@ function MusicPanel({ volume }: { volume: number }) {
   const audioContextRef=useRef<AudioContext|null>(null);
   const analyserRef=useRef<AnalyserNode|null>(null);
   const audioSourceRef=useRef<MediaElementAudioSourceNode|null>(null);
-  const [visualizerBars,setVisualizerBars]=useState<number[]>(()=>Array.from({length:64},()=>3));
+  const [visualizerBars,setVisualizerBars]=useState<number[]>(()=>Array.from({length:96},()=>3));
   const visualizerBarsRef=useRef<number[]>(Array.from({length:64},()=>3));
   const [track,setTrack]=useState(()=>{try{return Math.max(0,Math.min(TRACKS.length-1,Number(JSON.parse(localStorage.getItem('ida-music-state')||'{}').track)||0))}catch{return 0}});
   const [playing,setPlaying]=useState(false);
@@ -1078,7 +1078,7 @@ function MusicPanel({ volume }: { volume: number }) {
       try{
         if(context?.state==='suspended')void context.resume().catch(()=>{});
         analyser.getByteFrequencyData(data);
-        const count=64;
+        const count=96;
         const next=Array.from({length:count},(_,i)=>{
           // Use the strongest energy in each logarithmic band; averaging bins made
           // quieter tracks look almost flat even while the analyser was working.
@@ -1087,12 +1087,12 @@ function MusicPanel({ volume }: { volume: number }) {
           let peak=0;
           for(let j=start;j<Math.min(end,data.length);j++)peak=Math.max(peak,data[j]);
           const energy=Math.max(0,Math.min(1,(peak-7)/175));
-          const target=3+Math.pow(energy,0.72)*92;
+          const target=3+Math.pow(energy,0.72)*56;
           const previous=visualizerBarsRef.current[i]??3;
           const response=target>previous?0.88:0.22;
           const height=previous+(target-previous)*response;
           visualizerBarsRef.current[i]=height;
-          return Math.max(3,Math.min(96,height));
+          return Math.max(3,Math.min(60,height));
         });
         // Keep analysis smooth while limiting React renders to ~30fps.
         if(timestamp-lastUiUpdate>=33){setVisualizerBars(next);lastUiUpdate=timestamp}
