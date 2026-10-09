@@ -90,7 +90,7 @@ const UI_TRANSLATIONS: Record<'cs'|'vi'|'ar-YE', Record<string,string>> = {
   }
 }
 
-const TRACKS: Array<{ title:string; artist:string; src:string; image?:string }> = [{ title:'Kompa Pasion', artist:'IDA Defaults', src:'/IDA-OS/music/kompa-pasion.mp3', image:'/IDA-OS/music/kompa-pasion-cover.svg' }, { title:'Send them off', artist:'IDA Defaults', src:'/IDA-OS/music/send-them-off.mp3', image:'/IDA-OS/music/send-them-off-cover.svg' }, { title:'Fireflies', artist:'IDA Defaults', src:'/IDA-OS/music/fireflies.mp3', image:'/IDA-OS/music/fireflies-cover.jpg' }]
+const TRACKS: Array<{ title:string; artist:string; src:string; image?:string }> = [{ title:'Kompa Pasion', artist:'IDA Defaults', src:'/IDA-OS/music/kompa-pasion.mp3', image:'/IDA-OS/music/kompa-pasion-cover.svg' }, { title:'Send them off', artist:'IDA Defaults', src:'/IDA-OS/music/send-them-off.mp3', image:'/IDA-OS/music/send-them-off-cover.svg' }, { title:'Fireflies', artist:'IDA Defaults', src:'/IDA-OS/music/fireflies.mp3', image:'/IDA-OS/music/fireflies-cover.jpg' }, { title:'Infinite Amethyst', artist:'IDA Defaults', src:'/IDA-OS/music/infinite-amethyst.mp3', image:'/IDA-OS/music/infinite-amethyst-cover.svg' }]
 
 export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [mounted, setMounted] = useState(false)
