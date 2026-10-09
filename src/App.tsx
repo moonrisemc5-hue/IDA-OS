@@ -41,16 +41,21 @@ const APPS: AppItem[] = [
 ]
 
 const DEFAULT_POSITIONS: Record<string, Position> = {
-  DAPP: { x: 3, y: 4 },
-  DaEconomy: { x: 3, y: 13 },
-  DaCourt: { x: 3, y: 22 },
-  DaMusic: { x: 3, y: 31 },
-  DaScope: { x: 3, y: 40 },
-  'DaFile Explorer': { x: 3, y: 40 },
-  DaSettings: { x: 3, y: 49 },
-  DaTrash: { x: 3, y: 58 },
-  DaNotes: { x: 3, y: 67 },
-  DaMedia: { x: 3, y: 76 },
+  // Use two tidy columns with enough vertical room for the icon tile at default scale.
+  // Keeping every built-in app on its own slot also prevents fresh accounts from
+  // inheriting the old DaScope / File Explorer overlap.
+  DAPP: { x: 3, y: 3 },
+  DaEconomy: { x: 3, y: 19 },
+  DaCourt: { x: 3, y: 35 },
+  DaMusic: { x: 3, y: 51 },
+  DaScope: { x: 3, y: 67 },
+  'DaFile Explorer': { x: 3, y: 83 },
+  DaSettings: { x: 14, y: 3 },
+  DaTrash: { x: 14, y: 19 },
+  DaNotes: { x: 14, y: 35 },
+  DaMedia: { x: 14, y: 51 },
+  DaTV: { x: 14, y: 67 },
+  DaDrift: { x: 14, y: 83 },
 }
 
 type DappCatalogItem = { name:string; tagline:string; description:string; category:string; tone:'yellow'|'violet'|'blue'|'slate'|'red'|'amber' }
