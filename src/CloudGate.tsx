@@ -157,12 +157,15 @@ function SetupFlag({ code }: { code:'en'|'cs'|'vi'|'ar-YE' }) {
 function SetupAppLogo({ id }: { id:string }) {
   const tile:CSSProperties = id==='DaMusic'
     ? {background:'linear-gradient(145deg,#302247,#130e20)',color:'#c4b5fd'}
+    : id==='DaRaw'
+    ? {background:'linear-gradient(145deg,#39275b,#171126)',color:'#d8b4fe'}
     : id==='DaEconomy'
     ? {background:'linear-gradient(145deg,#151515,#060606)',color:'#facc15'}
     : {background:'linear-gradient(145deg,#151515,#060606)',color:'#facc15'}
   const size=32
   return <span aria-hidden="true" style={{width:44,height:44,flexShrink:0,display:'grid',placeItems:'center',borderRadius:12,...tile,boxShadow:'0 8px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.1)'}}>
     {id==='DaMusic' ? <Music2 size={size} strokeWidth={2.2}/> :
+     id==='DaRaw' ? <span style={{fontSize:31,lineHeight:1}}>🖌️</span> :
      id==='DaCourt' ? <Scale size={size} strokeWidth={2.2}/> :
      <svg viewBox="0 0 48 48" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
        <path d="M6 19 24 9l18 10"/><path d="M9 20h30"/><path d="M11 39h26"/><path d="M13 21v15M21 21v15M27 21v15M35 21v15"/><path d="M7 39h34"/>
@@ -170,7 +173,7 @@ function SetupAppLogo({ id }: { id:string }) {
   </span>
 }
 function AppChoiceScreen({ selected, setSelected, onContinue }: { selected:string[]; setSelected:(v:string[])=>void; onContinue:()=>void }) {
-  const choices=[['DaMusic','Music','Your playlists and music, right on the desktop.'],['DaEconomy','DaEconomy','Your DaBoys bank, balance, and economy.'],['DaCourt','DaCourt','Trials, cases, and the courtroom.']]
+  const choices=[['DaMusic','Music','Your playlists and music, right on the desktop.'],['DaEconomy','DaEconomy','Your DaBoys bank, balance, and economy.'],['DaCourt','DaCourt','Trials, cases, and the courtroom.'],['DaRaw','DaRaw','Draw, paint, and save your own pictures in IDA.']]
   const toggle=(name:string)=>setSelected(selected.includes(name)?selected.filter(x=>x!==name):[...selected,name])
   return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.3),transparent 45%),#080b12',padding:16,boxSizing:'border-box'}}>
     <style>{'@keyframes idaChoiceIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes idaLogoFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(-2deg)}}.ida-app-choice{animation:idaChoiceIn .48s cubic-bezier(.2,.8,.2,1) both;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s}.ida-app-choice:hover{transform:translateY(-2px);box-shadow:0 10px 28px #0003}.ida-app-choice[aria-pressed=true]{box-shadow:0 0 0 2px #b9d0ff15,0 8px 22px #0002}.ida-app-choice:hover .ida-choice-logo{animation:idaLogoFloat .8s ease-in-out infinite}@media(prefers-reduced-motion:reduce){.ida-app-choice,.ida-choice-logo{animation:none!important;transition:none!important}}'}</style>
@@ -288,7 +291,7 @@ export function CloudGate() {
   const [error,setError]=useState('')
   const [firstBoot,setFirstBoot]=useState(false)
   const [bootStage,setBootStage]=useState<'loading'|'hi'|'working'|'language'|'guide'|'choices'|'install'|'account'|'existing'>('loading')
-  const [selectedApps,setSelectedApps]=useState<string[]>(['DaMusic','DaEconomy','DaCourt'])
+  const [selectedApps,setSelectedApps]=useState<string[]>(['DaMusic','DaEconomy','DaCourt','DaRaw'])
   const [selectedLanguage,setSelectedLanguage]=useState<LanguageChoice>(()=>{try{const v=localStorage.getItem('ida-language');return v==='cs'||v==='vi'||v==='ar-YE'?v:'en'}catch{return 'en'}})
   const [guideStep,setGuideStep]=useState(0)
   const [desktopOpen,setDesktopOpen]=useState(false)
