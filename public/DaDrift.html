@@ -60,7 +60,7 @@ input{font:800 30px 'Arial Black',monospace;text-align:center;letter-spacing:8px
 const cv=document.getElementById('c'),ctx=cv.getContext('2d'),ov=document.getElementById('ov'),ovc=document.getElementById('ovc');
 const TAU=Math.PI*2,clamp=(v,a,b)=>v<a?a:v>b?b:v,wrap=a=>{while(a>Math.PI)a-=TAU;while(a<-Math.PI)a+=TAU;return a};
 const fmt=s=>Math.floor(s/60)+':'+(s%60).toFixed(2).padStart(5,'0');
-let W,H,DPR;function rs(){DPR=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR}addEventListener('resize',rs);rs();
+let W,H,DPR;function rs(){DPR=Math.min(devicePixelRatio||1,1.35);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR}addEventListener('resize',rs);rs();
 let LAPS=3;const RW=200,LIM=105,MAXV=1250;
 /* ---------- TRACK ---------- */
 const MAPN=['Meadow Circuit','Desert Speedway','Jungle Serpent','Cherry Blossom','Pine Forest','Frozen Tundra'],OPT={laps:3,map:0,night:0};let NIGHT=0,NC=null;
@@ -381,8 +381,8 @@ ov.onclick=e=>{const el=e.target.closest('[data-a]');if(!el||el.disabled)return;
 function finish(){state='done';me.ai=true;const L=rank(),p=L.indexOf(me)+1,pr=(cars.length>1&&p===cars.length)?0:prize(LO,p);SV.m+=pr;sv();
  showOv(`<h2>${(['','1ST 🏆','2ND','3RD'][p]||p+'TH')}</h2><p class="sub">Time ${fmt(me.fin)} · Best lap ${fmt(best)}</p><div class="money">+$${pr} · Total $${SV.m}</div><ol>${L.map((c,i)=>`<li style="color:${c===me?'#ffd60a':'#fff'}">${i+1}. ${esc(c.name)}</li>`).join('')}</ol><div class="row"><button data-a="again">RACE AGAIN</button><button class="b2" data-a="main">MENU</button></div>`)}
 
-let last=performance.now();
-function frame(n){const dt=Math.min(.033,(n-last)/1000);last=n;step(dt);draw();if(ov.style.display!=='none')r3();RS.style.display=(state==='race'||state==='count')?'block':'none';if(performance.now()-rt>2200)RS.textContent='RESIGN';TC.style.display=(DEV==='mobile'&&(state==='race'||state==='count'))?'flex':'none';BO.style.background=me.nc>0?'rgba(255,59,48,.6)':'';requestAnimationFrame(frame)}
+let last=performance.now(),lastDraw=0;
+function frame(n){if(document.hidden){last=n;lastDraw=n;requestAnimationFrame(frame);return}if(n-lastDraw<1000/30){requestAnimationFrame(frame);return}const dt=Math.min(.033,(n-last)/1000);last=n;lastDraw=n;step(dt);draw();if(ov.style.display!=='none')r3();RS.style.display=(state==='race'||state==='count')?'block':'none';if(performance.now()-rt>2200)RS.textContent='RESIGN';TC.style.display=(DEV==='mobile'&&(state==='race'||state==='count'))?'flex':'none';BO.style.background=me.nc>0?'rgba(255,59,48,.6)':'';requestAnimationFrame(frame)}
 /* ---------- mobile controls + boot sequence ---------- */
 let JX=0,DEV=null,dv=0;const TC=document.getElementById('tc'),js=document.getElementById('js'),jk=document.getElementById('jk');
 function jm(e){const r=js.getBoundingClientRect(),R=r.width/2;let dx=(e.clientX-r.left-R)/R,dy=(e.clientY-r.top-R)/R;const d=Math.hypot(dx,dy);if(d>1){dx/=d;dy/=d}JX=Math.abs(dx)<.08?0:dx;jk.style.transform=`translate(${dx*R*.6}px,${dy*R*.6}px)`}
