@@ -74,7 +74,7 @@ class IdaDesktopBoundary extends Component<{children:ReactNode},{failed:boolean}
       <div>
         <div style={{fontSize:24,fontWeight:600}}>IDA recovered from an app error</div>
         <div style={{marginTop:8,opacity:.7,fontSize:13}}>Your account and files are safe. Reset the saved open-window layout to continue.</div>
-        <button onClick={() => { try { localStorage.removeItem('ida-open-windows-v1'); localStorage.removeItem('ida-active-window-v1') } catch {} location.reload() }} style={{marginTop:18,padding:'11px 18px',border:0,borderRadius:10,cursor:'pointer',fontWeight:700}}>Continue to IDA</button>
+        <button onClick={() => { try { localStorage.removeItem('ida-open-windows-v1'); localStorage.removeItem('ida-active-window-v1'); sessionStorage.setItem('ida-reset-window-layout-once','1') } catch {} location.reload() }} style={{marginTop:18,padding:'11px 18px',border:0,borderRadius:10,cursor:'pointer',fontWeight:700}}>Continue to IDA</button>
       </div>
     </div>
   }
@@ -292,10 +292,31 @@ export function CloudGate() {
   const loadUser=async(nextSession:IdaSession)=>{
     setReady(false);setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
     const localBeforeCloud=readLocalState()
+    let resetWindowLayout=false
+    try { resetWindowLayout=sessionStorage.getItem('ida-reset-window-layout-once')==='1' } catch {}
     const {data,error:loadError}=await supabase.rpc('ida_load_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken})
-    if(loadError){setError('Cloud sync is temporarily unavailable. Your IDA sign-in and local desktop are being kept.');installStorageSync();setReady(true);return}
-    if(data&&looksLikeIdaState(data))applyLocalState(data)
-    else if(Object.keys(localBeforeCloud.keys).length)await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
+    if(loadError){
+      if(resetWindowLayout){
+        try { sessionStorage.removeItem('ida-reset-window-layout-once') } catch {}
+      }
+      setError('Cloud sync is temporarily unavailable. Your IDA sign-in and local desktop are being kept.');installStorageSync();setReady(true);return
+    }
+    if(data&&looksLikeIdaState(data)){
+      let stateToApply=data
+      if(resetWindowLayout){
+        const repaired:CloudState={...data,keys:{...data.keys}}
+        delete repaired.keys['ida-open-windows-v1']
+        delete repaired.keys['ida-active-window-v1']
+        stateToApply=repaired
+        await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:repaired})
+      }
+      applyLocalState(stateToApply)
+    } else if(Object.keys(localBeforeCloud.keys).length){
+      await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
+    }
+    if(resetWindowLayout){
+      try { sessionStorage.removeItem('ida-reset-window-layout-once') } catch {}
+    }
     installStorageSync();setReady(true)
   }
 
