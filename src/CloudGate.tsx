@@ -65,6 +65,21 @@ const switchStyle: CSSProperties = { width:'100%',marginTop:12,padding:9,border:
 
 const FIRSTBOOT_WALLPAPER = 'https://images.pexels.com/photos/7025657/pexels-photo-7025657.jpeg?cs=srgb&dl=pexels-nasimgs-7025657.jpg&fm=jpg'
 
+class IdaDesktopBoundary extends Component<{children:ReactNode},{failed:boolean}> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  render() {
+    if (!this.state.failed) return this.props.children
+    return <div style={{position:'fixed',inset:0,zIndex:999999,display:'grid',placeItems:'center',background:'#05070b',color:'#fff',fontFamily:'Segoe UI,system-ui,sans-serif',textAlign:'center',padding:24}}>
+      <div>
+        <div style={{fontSize:24,fontWeight:600}}>IDA recovered from an app error</div>
+        <div style={{marginTop:8,opacity:.7,fontSize:13}}>Your account and files are safe. Reset the saved open-window layout to continue.</div>
+        <button onClick={() => { try { localStorage.removeItem('ida-open-windows-v1'); localStorage.removeItem('ida-active-window-v1') } catch {} location.reload() }} style={{marginTop:18,padding:'11px 18px',border:0,borderRadius:10,cursor:'pointer',fontWeight:700}}>Continue to IDA</button>
+      </div>
+    </div>
+  }
+}
+
 function Hilal({ small=false }: { small?: boolean }) {
   const s=small?42:58
   return <div style={{position:'relative',width:s,height:s,margin:'0 auto'}}>
@@ -348,5 +363,5 @@ export function CloudGate() {
   }
   if(!ready)return <BootScreen stage="install"/>
   if(!desktopOpen)return <LockScreen session={session} onUnlock={async next=>{try{localStorage.removeItem(GUEST_LOCK_KEY)}catch{};writeIdaSession(next);await loadUser(next);setSession(next);openDesktop()}}/>
-  return <><DaApps onRestartToLock={lockDesktop}/>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
+  return <><IdaDesktopBoundary><DaApps onRestartToLock={lockDesktop}/></IdaDesktopBoundary>{error&&<div style={{position:'fixed',right:10,bottom:60,zIndex:99998,padding:'8px 12px',borderRadius:10,background:'rgba(150,30,30,.85)',color:'#fff',font:'12px system-ui'}}>Cloud save error: {error}</div>}</>
 }
