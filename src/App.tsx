@@ -409,8 +409,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
       if (area && area.width > 0 && area.height > 0) {
         const tileW = 92 * iconScale
         const tileH = 92 * iconScale
-        const stepX = Math.max(7, (tileW / area.width) * 100 + 1.5)
-        const stepY = Math.max(10, (tileH / area.height) * 100 + 1.5)
+        const stepX = Math.max(7, (tileW / area.width) * 100 + 0.5)
+        const stepY = Math.max(10, (tileH / area.height) * 100 + 0.5)
         const candidates: Array<{p:Position;distance:number}> = []
         for (let y=2; y<=Math.max(2, 91-stepY); y+=stepY) {
           for (let x=2; x<=Math.max(2, 96-stepX); x+=stepX) {
