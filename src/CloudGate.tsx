@@ -324,7 +324,7 @@ export function CloudGate() {
   const scheduleSave=()=>{
     if(!activeUser.current)return
     if(saveTimer.current!==null)window.clearTimeout(saveTimer.current)
-    saveTimer.current=window.setTimeout(()=>{saveTimer.current=null;void saveNow()},650)
+    saveTimer.current=window.setTimeout(()=>{saveTimer.current=null;void saveNow()},180)
   }
   const installStorageSync=()=>{
     if(originalMethods.current)return
