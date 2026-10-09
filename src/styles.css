@@ -181,3 +181,14 @@
 .dac-trace-readout{padding:8px 10px;border-radius:9px;background:#1b1928ed;border-color:#b9a2ff3d}
 .dac-trace-readout strong{font-size:12px;font-weight:600}
 .dac-trace-readout small{font-size:10px}
+
+
+/* Thin, calm graph controls and pan/zoom cursor states. */
+.dac-graph{cursor:grab;touch-action:none}
+.dac-graph.is-panning{cursor:grabbing}
+.dac-graph svg polyline{stroke-width:.28!important}
+.dac-graph svg path{vector-effect:non-scaling-stroke}
+.dac-graph-controls{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:5px;padding:5px;border:1px solid #ffffff18;border-radius:10px;background:#171622e8;backdrop-filter:blur(8px)}
+.dac-graph-controls button{width:30px;height:30px;border:0;border-radius:7px;background:#ffffff0b;color:#ded5fa;font-size:19px;line-height:1;cursor:pointer}
+.dac-graph-controls button:hover{background:#b9a2ff25}
+.dac-trace-readout{pointer-events:none}
