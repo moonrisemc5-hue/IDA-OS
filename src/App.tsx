@@ -856,12 +856,11 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
       onEdit()
       tileRef.current?.setPointerCapture(e.pointerId)
       if (tileRef.current) {
+        // Move the actual tile under the pointer instead of showing a separate ghost.
         tileRef.current.style.cursor = 'grabbing'
-        tileRef.current.style.opacity = '.22'
-        const g=tileRef.current.cloneNode(true) as HTMLElement
-        const r=tileRef.current.getBoundingClientRect()
-        g.classList.add('ida-drag-ghost'); g.style.position='fixed'; g.style.left='0'; g.style.top='0'; g.style.width=r.width+'px'; g.style.height=r.height+'px'; g.style.margin='0'; g.style.pointerEvents='none'; g.style.zIndex='2147483647'; g.style.opacity='.58'
-        document.body.appendChild(g); ghostRef.current=g
+        tileRef.current.style.opacity = '.88'
+        tileRef.current.style.zIndex = '2147483000'
+        tileRef.current.style.pointerEvents = 'none'
       }
     }
     if (!dragging.current || !tileRef.current) return
@@ -873,13 +872,11 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     const x = Math.min(maxX, Math.max(0, e.clientX - parent.left - offset.current.x))
     const y = Math.min(maxY, Math.max(0, e.clientY - parent.top - offset.current.y))
     setDragPos({ x: (x / parent.width) * 100, y: (y / parent.height) * 100 })
-    if(ghostRef.current){
-      ghostRef.current.style.transform=`translate3d(${e.clientX-offset.current.x}px,${e.clientY-offset.current.y}px,0)`
+    {
       const hit=(document.elementFromPoint(e.clientX,e.clientY) as HTMLElement|null)
       const folder=hit?.closest('[data-drop-folder]')
       const occupied=hit?.closest('.app-tile,.desktop-file-tile') && !folder
-      ghostRef.current.classList.toggle('ida-drop-forbidden',!!occupied)
-      document.body.style.cursor=occupied?'not-allowed':''
+      document.body.style.cursor=occupied?'not-allowed':'grabbing'
     }
   }
 
@@ -888,7 +885,7 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     const wasDragging = dragging.current
     dragging.current = false
     if (tileRef.current?.hasPointerCapture(e.pointerId)) tileRef.current.releasePointerCapture(e.pointerId)
-    if (tileRef.current) { tileRef.current.style.cursor = editMode ? 'grab' : 'pointer'; tileRef.current.style.opacity='' }
+    if (tileRef.current) { tileRef.current.style.cursor = editMode ? 'grab' : 'pointer'; tileRef.current.style.opacity=''; tileRef.current.style.zIndex=''; tileRef.current.style.pointerEvents='' }
     clearGhost()
     if (wasDragging) {
       // Use the actual release point, not dragPos from React state: the last
@@ -913,7 +910,7 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     <button
       ref={tileRef}
       className={`app-tile ${selected ? 'app-tile-selected' : ''}`}
-      style={{ left: `${(dragging.current ? position : (dragPos||position)).x}%`, top: `${(dragging.current ? position : (dragPos||position)).y}%`, ['--scale' as string]: scale }}
+      style={{ left: `${(dragPos||position).x}%`, top: `${(dragPos||position).y}%`, ['--scale' as string]: scale }}
       onPointerDown={pointerDown}
       onPointerMove={pointerMove}
       onPointerUp={pointerUp}
@@ -925,7 +922,7 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
         ;(tileRef.current as any)._idaLastClick = Date.now()
       }}
       onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); onOpen() }}
-      onPointerCancel={() => { dragging.current = false }}
+      onPointerCancel={() => { dragging.current = false; setDragPos(null); clearGhost(); if(tileRef.current){tileRef.current.style.cursor=editMode?'grab':'pointer';tileRef.current.style.opacity='';tileRef.current.style.zIndex='';tileRef.current.style.pointerEvents=''} }}
       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContext(e.clientX,e.clientY) }}
       aria-label={app.name}
       data-app-id={shortcutId||app.name}
