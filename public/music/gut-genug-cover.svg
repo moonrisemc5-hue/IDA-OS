@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<defs>
+ <radialGradient id="bg" cx="57%" cy="36%" r="80%"><stop stop-color="#242424"/><stop offset=".48" stop-color="#0c0c0c"/><stop offset="1" stop-color="#020202"/></radialGradient>
+ <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0f0f0"/><stop offset=".3" stop-color="#999"/><stop offset=".7" stop-color="#4d4d4d"/><stop offset="1" stop-color="#161616"/></linearGradient>
+ <linearGradient id="jacket" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#555"/><stop offset=".25" stop-color="#171717"/><stop offset=".48" stop-color="#080808"/><stop offset=".68" stop-color="#292929"/><stop offset="1" stop-color="#030303"/></linearGradient>
+ <linearGradient id="lens" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#202020"/><stop offset="1" stop-color="#050505"/></linearGradient>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 .15 0"/></filter>
+ <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1000" height="1000" fill="url(#bg)"/>
+<ellipse cx="610" cy="330" rx="280" ry="300" fill="#888" opacity=".09" filter="url(#soft)"/>
+<!-- shoulders and glossy leather jacket -->
+<path d="M105 1000Q128 775 226 638Q292 550 414 530L610 525Q758 555 831 676Q922 825 946 1000Z" fill="url(#jacket)"/>
+<path d="M225 680Q294 619 366 602L329 747 270 889 210 1000H120Q153 798 225 680Z" fill="#111" stroke="#5c5c5c" stroke-width="5"/>
+<path d="M245 705Q280 743 310 778M218 785Q271 810 292 862M193 872Q240 892 255 930M724 633Q798 700 816 786L860 1000H947Q916 800 829 680Q781 622 724 600Z" fill="none" stroke="#777" stroke-opacity=".58" stroke-width="9"/>
+<path d="M278 642L398 594 433 683 350 773 301 909" fill="none" stroke="#999" stroke-opacity=".35" stroke-width="7"/>
+<path d="M706 614L638 692 682 789 745 851" fill="none" stroke="#777" stroke-opacity=".5" stroke-width="6"/>
+<!-- neck -->
+<path d="M462 470L462 602Q510 651 576 601L585 475Z" fill="url(#skin)"/>
+<path d="M462 520Q520 573 582 518L580 582Q518 624 466 582Z" fill="#111"/>
+<!-- head and ears -->
+<path d="M399 228Q413 121 521 109Q627 113 658 217L649 365Q631 449 564 494Q521 517 477 488Q413 446 398 360Z" fill="url(#skin)"/>
+<ellipse cx="398" cy="326" rx="22" ry="49" fill="#777"/><ellipse cx="654" cy="321" rx="19" ry="45" fill="#555"/>
+<!-- hair, short textured -->
+<path d="M390 277Q372 194 417 143Q450 92 516 95Q594 88 638 145Q672 193 656 278L637 229 615 193 590 179 562 157 527 175 489 163 460 186 427 199 410 246Z" fill="#090909" stroke="#b7b7b7" stroke-opacity=".45" stroke-width="10"/>
+<path d="M404 191l18 -35m-1 61 22 -50m3 18 19 -45m8 31 21 -51m13 38 17 -46m8 49 13 -43m13 54 12 -36m9 49 17 -28m9 38 18 -25" stroke="#bdbdbd" stroke-width="7" stroke-linecap="round" opacity=".75"/>
+<!-- face shadows -->
+<path d="M409 286Q440 254 478 278L480 309Q445 300 417 326Z" fill="#171717"/>
+<path d="M548 278Q590 253 626 283L617 323Q585 302 548 309Z" fill="#111"/>
+<path d="M426 338Q457 351 481 338M548 338Q577 351 604 337" fill="none" stroke="#dedede" stroke-width="9" stroke-linecap="round"/>
+<!-- eyeglasses: thick round black frames -->
+<g stroke="#050505" stroke-width="12" fill="url(#lens)">
+ <rect x="410" y="276" width="91" height="67" rx="26" transform="rotate(-4 455 310)"/>
+ <rect x="534" y="274" width="91" height="67" rx="26" transform="rotate(4 580 307)"/>
+ <path d="M500 302Q517 291 535 301" fill="none" stroke-width="10"/>
+ <path d="M408 291L390 282M624 289L645 281" fill="none" stroke-width="8"/>
+</g>
+<g fill="none" stroke="#eee" stroke-width="5" opacity=".7"><path d="M423 289Q450 277 480 289"/><path d="M548 287Q578 276 608 289"/></g>
+<ellipse cx="457" cy="311" rx="7" ry="10" fill="#eee"/><ellipse cx="580" cy="309" rx="7" ry="10" fill="#eee"/>
+<!-- nose and moustache -->
+<path d="M513 314Q502 360 488 382Q510 398 535 383" fill="none" stroke="#222" stroke-width="11" stroke-linecap="round"/>
+<path d="M463 393Q483 374 505 388Q520 378 540 387Q562 376 578 395Q563 418 536 414L506 408Q481 419 463 393Z" fill="#090909"/>
+<!-- lips and subtle mouth -->
+<path d="M485 433Q515 420 543 432Q525 450 503 445Z" fill="#d1d1d1" opacity=".75"/>
+<path d="M488 433Q516 438 541 432" fill="none" stroke="#101010" stroke-width="7"/>
+<!-- jacket zipper highlights -->
+<path d="M672 604Q608 657 604 736L643 824" fill="none" stroke="#c9c9c9" stroke-width="4" opacity=".65"/>
+<path d="M605 734l15 9m-8 15 15 9m-8 15 15 9" stroke="#eee" stroke-width="4" opacity=".55"/>
+<!-- title treatment along bottom -->
+<rect x="0" y="820" width="1000" height="180" fill="#050505" opacity=".78"/>
+<path d="M62 850H202" stroke="#bfbfbf" stroke-width="3"/>
+<text x="64" y="888" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="8" fill="#bcbcbc">IDA DEFAULTS</text>
+<text x="56" y="960" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="84" letter-spacing="1" fill="#f0f0f0">GUT GENUG</text>
+<text x="940" y="890" font-family="Arial, Helvetica, sans-serif" font-size="19" letter-spacing="4" text-anchor="end" fill="#999">IDA • 06</text>
+<rect width="1000" height="1000" filter="url(#grain)" opacity=".16"/>
+</svg>
