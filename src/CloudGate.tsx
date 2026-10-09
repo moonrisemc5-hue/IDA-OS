@@ -155,14 +155,16 @@ function SetupFlag({ code }: { code:'en'|'cs'|'vi'|'ar-YE' }) {
   </span>
 }
 function SetupAppLogo({ id }: { id:string }) {
-  const tone:CSSProperties = id==='DaMusic'
+  const tile:CSSProperties = id==='DaMusic'
     ? {background:'linear-gradient(145deg,#302247,#130e20)',color:'#c4b5fd'}
+    : id==='DaEconomy'
+    ? {background:'linear-gradient(145deg,#151515,#060606)',color:'#facc15'}
     : {background:'linear-gradient(145deg,#151515,#060606)',color:'#facc15'}
-  const iconSize=31
-  return <span aria-hidden="true" style={{width:48,height:48,flexShrink:0,display:'grid',placeItems:'center',borderRadius:13,...tone,boxShadow:'0 8px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.12)'}}>
-    {id==='DaMusic' ? <Music2 size={iconSize} strokeWidth={2.2}/> :
-     id==='DaCourt' ? <Scale size={iconSize} strokeWidth={2.2}/> :
-     <svg viewBox="0 0 48 48" width={iconSize} height={iconSize} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  const size=32
+  return <span aria-hidden="true" style={{width:44,height:44,flexShrink:0,display:'grid',placeItems:'center',borderRadius:12,...tile,boxShadow:'0 8px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.1)'}}>
+    {id==='DaMusic' ? <Music2 size={size} strokeWidth={2.2}/> :
+     id==='DaCourt' ? <Scale size={size} strokeWidth={2.2}/> :
+     <svg viewBox="0 0 48 48" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
        <path d="M6 19 24 9l18 10"/><path d="M9 20h30"/><path d="M11 39h26"/><path d="M13 21v15M21 21v15M27 21v15M35 21v15"/><path d="M7 39h34"/>
      </svg>}
   </span>
