@@ -183,7 +183,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
       const savedTaskbarColor = localStorage.getItem('ida-taskbar-manual-color')
       if (savedTaskbarTheme && ['default','aurora','sunset','ocean','manual'].includes(savedTaskbarTheme)) setTaskbarTheme(savedTaskbarTheme)
       if (savedTaskbarColor) setTaskbarManualColor(savedTaskbarColor)
-      const savedScale = localStorage.getItem('ida-icon-scale'); if (savedScale) setIconScale(Number(savedScale))
+      const savedScale = localStorage.getItem('ida-icon-scale'); if (savedScale) { const parsed=Number(savedScale); setIconScale([0.75,0.9,1.1,1.3].includes(parsed)?parsed:1.1) }
       setFiles(readFiles())
       const savedFolders = localStorage.getItem('ida-folders-v1'); if(savedFolders) setFolders(JSON.parse(savedFolders))
       const savedFolderApps = localStorage.getItem('ida-folder-apps-v1'); if(savedFolderApps) setFolderApps(JSON.parse(savedFolderApps))
