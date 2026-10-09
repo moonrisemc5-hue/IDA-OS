@@ -1,7 +1,7 @@
 import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { DaApps } from './App'
-import { Wifi } from 'lucide-react'
+import { Wifi, Music2, Scale } from 'lucide-react'
 
 const SUPABASE_URL = 'https://roxnnwrmgbxnhmwjolep.supabase.co'
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_-x-g50GLtgo3Ut9fcNbStA_OUz4eBjw'
@@ -155,9 +155,17 @@ function SetupFlag({ code }: { code:'en'|'cs'|'vi'|'ar-YE' }) {
   </span>
 }
 function SetupAppLogo({ id }: { id:string }) {
-  const styles:Record<string,{bg:string;fg:string;symbol:string}>={DaMusic:{bg:'linear-gradient(145deg,#a78bfa,#6d28d9)',fg:'#fff',symbol:'♫'},DaEconomy:{bg:'linear-gradient(145deg,#facc15,#d97706)',fg:'#372400',symbol:'$'},DaCourt:{bg:'linear-gradient(145deg,#fb7185,#be123c)',fg:'#fff',symbol:'⚖'}}
-  const v=styles[id]||styles.DaMusic
-  return <span aria-hidden="true" style={{width:48,height:48,flexShrink:0,display:'grid',placeItems:'center',borderRadius:14,background:v.bg,color:v.fg,fontSize:id==='DaCourt'?25:29,fontWeight:800,boxShadow:'0 5px 16px #0004,inset 0 1px #ffffff55',border:'1px solid #ffffff35',textShadow:'0 1px 4px #0002'}}>{v.symbol}</span>
+  const tone:CSSProperties = id==='DaMusic'
+    ? {background:'linear-gradient(145deg,#302247,#130e20)',color:'#c4b5fd'}
+    : {background:'linear-gradient(145deg,#151515,#060606)',color:'#facc15'}
+  const iconSize=31
+  return <span aria-hidden="true" style={{width:48,height:48,flexShrink:0,display:'grid',placeItems:'center',borderRadius:13,...tone,boxShadow:'0 8px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.12)'}}>
+    {id==='DaMusic' ? <Music2 size={iconSize} strokeWidth={2.2}/> :
+     id==='DaCourt' ? <Scale size={iconSize} strokeWidth={2.2}/> :
+     <svg viewBox="0 0 48 48" width={iconSize} height={iconSize} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+       <path d="M6 19 24 9l18 10"/><path d="M9 20h30"/><path d="M11 39h26"/><path d="M13 21v15M21 21v15M27 21v15M35 21v15"/><path d="M7 39h34"/>
+     </svg>}
+  </span>
 }
 function AppChoiceScreen({ selected, setSelected, onContinue }: { selected:string[]; setSelected:(v:string[])=>void; onContinue:()=>void }) {
   const choices=[['DaMusic','Music','Your playlists and music, right on the desktop.'],['DaEconomy','DaEconomy','Your DaBoys bank, balance, and economy.'],['DaCourt','DaCourt','Trials, cases, and the courtroom.']]
