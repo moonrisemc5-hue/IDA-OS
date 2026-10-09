@@ -77,3 +77,14 @@
 .music-panel-content>.damusic-visualizer{display:flex;align-items:flex-end;justify-content:space-between;gap:3px;width:calc(78% - 26px);height:112px;min-width:0;flex:0 0 auto;overflow:hidden;padding:4px 2px 5px;margin:0 24px 8px 22%;box-sizing:border-box}
 .music-panel-content>.damusic-visualizer span{display:block;flex:1 1 0;min-width:2px;max-width:16px;border-radius:999px 999px 2px 2px;transform-origin:bottom center;opacity:.98;box-shadow:0 0 7px currentColor;transition:height 28ms linear}
 @media(max-width:620px){.music-panel-content>.damusic-visualizer{width:calc(100% - 36px);margin:0 18px 8px;height:88px;gap:2px}.music-panel-content>.damusic-visualizer span{max-width:10px}}
+
+/* DaMusic final alignment: generous cover/title row, short spectrum spanning from the left edge. */
+.music-hero{display:flex;align-items:center;gap:22px;flex-wrap:nowrap;min-height:174px;padding:30px 26px 22px;box-sizing:border-box}
+.music-hero .music-art{flex:0 0 112px;width:112px;height:112px;border-radius:22px;overflow:hidden}
+.music-hero>div:nth-child(2){flex:0 1 330px;min-width:170px}
+.music-hero .eyebrow{font-size:12px;letter-spacing:1.5px}
+.music-hero h2{font-size:30px;line-height:1.12;margin:8px 0 5px}
+.music-hero p{font-size:16px;margin:0}
+.music-panel-content>.damusic-visualizer{display:flex;align-items:flex-end;justify-content:space-between;gap:3px;width:calc(100% - 52px);height:44px;min-width:0;flex:0 0 auto;overflow:hidden;padding:3px 1px 4px;margin:0 26px 10px;box-sizing:border-box}
+.music-panel-content>.damusic-visualizer span{display:block;flex:1 1 0;min-width:2px;max-width:14px;border-radius:999px 999px 2px 2px;transform-origin:bottom center;opacity:.98;box-shadow:0 0 5px currentColor;transition:height 28ms linear}
+@media(max-width:620px){.music-hero{flex-wrap:wrap;gap:14px;padding:22px 18px 16px;min-height:0}.music-hero .music-art{width:92px;height:92px;flex-basis:92px}.music-hero>div:nth-child(2){flex:1 1 140px;min-width:120px}.music-hero h2{font-size:24px}.music-panel-content>.damusic-visualizer{width:calc(100% - 36px);margin:0 18px 8px;height:36px;gap:2px}.music-panel-content>.damusic-visualizer span{max-width:10px}}
