@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#100b18"/><stop offset=".5" stop-color="#35101d"/><stop offset="1" stop-color="#080b12"/></linearGradient>
+  <linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffcf9c"/><stop offset=".4" stop-color="#ff3d49"/><stop offset="1" stop-color="#a40025"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe8b0"/><stop offset="1" stop-color="#bd7844"/></linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="12"/></filter>
+  <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" stroke="#ffb5a2" stroke-opacity=".09" stroke-width="2"/></pattern>
+</defs>
+<rect width="1000" height="1000" fill="url(#bg)"/><rect width="1000" height="1000" fill="url(#grid)"/>
+<circle cx="730" cy="310" r="190" fill="#ff263f" opacity=".13" filter="url(#glow)"/><circle cx="730" cy="310" r="148" fill="none" stroke="#ff5b56" stroke-width="3" opacity=".65"/><circle cx="730" cy="310" r="125" fill="none" stroke="#f3bd8c" stroke-width="1.5" opacity=".4"/>
+<path d="M0 720L90 640 90 520 150 520 150 600 205 600 205 455 270 455 270 570 325 570 325 490 390 490 390 650 450 650 450 535 510 535 510 615 575 615 575 445 650 445 650 610 705 610 705 500 765 500 765 640 830 640 830 535 890 535 890 620 950 620 1000 570V1000H0Z" fill="#090a12"/>
+<path d="M0 770L120 710 120 670 170 670 170 715 250 715 250 660 300 660 300 735 390 735 390 680 440 680 440 745 540 745 540 680 600 680 600 730 680 730 680 660 740 660 740 720 830 720 830 670 900 670 900 730 1000 690" fill="none" stroke="#ff3349" stroke-width="4" opacity=".6"/>
+<!-- stylized pagoda -->
+<g transform="translate(118 180)" fill="url(#gold)" opacity=".92">
+ <path d="M-15 400H205L180 375H10Z"/><path d="M5 375H185L165 350H25Z"/><path d="M25 350H165L150 325H40Z"/>
+ <path d="M-30 325L95 275 220 325 190 330 95 298 0 330Z"/><path d="M5 270L95 228 185 270 160 276 95 248 30 276Z"/>
+ <path d="M35 225L95 195 155 225 137 231 95 210 53 231Z"/><path d="M90 195V115H100V195Z"/><path d="M95 110L82 128H108Z"/>
+ <path d="M20 400V335H32V400ZM158 400V335H170V400ZM48 400V305H60V400ZM130 400V305H142V400Z"/>
+</g>
+<!-- brush-stroke dragon / energy ribbon -->
+<path d="M360 160C490 90 535 220 470 275S375 350 465 400 670 420 620 505 440 535 490 610 700 665 810 570" fill="none" stroke="#ff2445" stroke-width="36" stroke-linecap="round" opacity=".22" filter="url(#glow)"/>
+<path d="M360 160C490 90 535 220 470 275S375 350 465 400 670 420 620 505 440 535 490 610 700 665 810 570" fill="none" stroke="url(#red)" stroke-width="10" stroke-linecap="round"/>
+<path d="M350 165l-30 -20 12 37 -33 14 40 4M806 570l36 -7 -17 27 26 20" fill="none" stroke="#ffd3a0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#ffe0ad"><circle cx="470" cy="275" r="7"/><circle cx="620" cy="505" r="7"/><circle cx="490" cy="610" r="7"/></g>
+<text x="54" y="795" fill="#f6e5d6" font-family="Arial, Helvetica, sans-serif" font-size="28" letter-spacing="10">IDA DEFAULTS • MUSIC SERIES</text>
+<text x="48" y="875" fill="#fff3e8" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="80" font-weight="900" letter-spacing="-2">TUFF CHINESE</text>
+<text x="48" y="956" fill="url(#red)" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="96" font-weight="900" letter-spacing="5">RAP</text>
+<path d="M790 810H946M790 826H910" stroke="#ff5260" stroke-width="4" opacity=".8"/>
+<text x="945" y="865" fill="#f1cda8" font-family="Arial, sans-serif" font-size="18" text-anchor="end" letter-spacing="5">VOL. 05</text>
+</svg>
