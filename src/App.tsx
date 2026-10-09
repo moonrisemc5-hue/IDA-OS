@@ -893,7 +893,17 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     if (tileRef.current) { tileRef.current.style.cursor = editMode ? 'grab' : 'pointer'; tileRef.current.style.opacity='' }
     clearGhost()
     if (wasDragging) {
-      const finalPos = dragPos
+      // Compute the drop location from the actual pointer-up coordinates. React may
+      // batch the last pointer-move state update, leaving dragPos one frame behind.
+      const parent = tileRef.current?.parentElement?.getBoundingClientRect()
+      const tile = tileRef.current
+      const finalPos = parent && tile ? (() => {
+        const maxX = Math.max(0, parent.width - tile.offsetWidth)
+        const maxY = Math.max(0, parent.height - tile.offsetHeight)
+        const x = Math.min(maxX, Math.max(0, e.clientX - parent.left - offset.current.x))
+        const y = Math.min(maxY, Math.max(0, e.clientY - parent.top - offset.current.y))
+        return { x: (x / parent.width) * 100, y: (y / parent.height) * 100 }
+      })() : dragPos
       const target=(document.elementFromPoint(e.clientX,e.clientY) as HTMLElement|null)?.closest('[data-drop-folder]')?.getAttribute('data-drop-folder')
       if(target) onDropTarget(target)
       else if(finalPos) onMove(finalPos)
