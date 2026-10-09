@@ -572,19 +572,32 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   }
 
   useEffect(() => {
-    if (!mounted || !wallpaperRotation) return
-    const entries = Object.entries(WALLPAPERS)
-    const rotation = includeOwnWallpaper && customWallpaper ? [...entries, ['My wallpaper', customWallpaper] as [string,string]] : entries
-    const timer = window.setInterval(() => {
-      const current = rotation.findIndex(([,value]) => value === wallpaper)
-      const next = rotation[(current + 1 + rotation.length) % rotation.length]
-      if (!next) return
-      if (wallpaperFade) setPreviousWallpaper(wallpaper)
-      setWallpaper(next[1])
-      window.setTimeout(() => setPreviousWallpaper(null), wallpaperFade ? 5200 : 0)
-      try { localStorage.setItem('daapps-wallpaper', next[0] === 'My wallpaper' ? '' : next[0]) } catch {}
-    }, 10000)
-    return () => window.clearInterval(timer)
+    if (!mounted || !wallpaperRotation) { setPreviousWallpaper(null); return }
+    let fadeTimer:number|undefined, disposed=false
+    const entries=Object.entries(WALLPAPERS)
+    const rotation=includeOwnWallpaper&&customWallpaper?[...entries,['My wallpaper',customWallpaper] as [string,string]]:entries
+    const rotate=()=>{
+      if(disposed||rotation.length<2)return
+      const current=rotation.findIndex(([,value])=>value===wallpaper)
+      const next=rotation[(current+1+rotation.length)%rotation.length]
+      if(!next)return
+      const image=new Image()
+      const apply=()=>{
+        if(disposed)return
+        if(fadeTimer!==undefined)window.clearTimeout(fadeTimer)
+        if(wallpaperFade)setPreviousWallpaper(wallpaper)
+        setWallpaper(next[1])
+        if(wallpaperFade)fadeTimer=window.setTimeout(()=>{if(!disposed)setPreviousWallpaper(null)},10000)
+        else setPreviousWallpaper(null)
+        try{localStorage.setItem('daapps-wallpaper',next[0]==='My wallpaper'?'':next[0])}catch{}
+      }
+      image.onload=apply
+      image.onerror=()=>{if(!disposed){setWallpaper(next[1]);setPreviousWallpaper(null)}}
+      image.src=next[1]
+      if(image.complete&&image.naturalWidth>0)apply()
+    }
+    const timer=window.setInterval(rotate,30000)
+    return()=>{disposed=true;window.clearInterval(timer);if(fadeTimer!==undefined)window.clearTimeout(fadeTimer);setPreviousWallpaper(null)}
   }, [mounted, wallpaperRotation, wallpaper, wallpaperFade, includeOwnWallpaper, customWallpaper])
 
   const setTaskbarThemeMode = (theme:'default'|'aurora'|'sunset'|'ocean'|'manual') => {
@@ -965,17 +978,18 @@ function IdaAppIcon({name,size=28}:{name:string;size?:number}){return name==='DA
 function DappStore({internetOn,installed,onInstall,onUninstall,onOpen}:{internetOn:boolean;installed:(name:string)=>boolean;onInstall:(name:string)=>void;onUninstall:(name:string)=>void;onOpen:(name:string)=>void}){
   const [query,setQuery]=useState(''); const [selected,setSelected]=useState<DappCatalogItem|null>(null); const [installing,setInstalling]=useState<string|null>(null); const [uninstalling,setUninstalling]=useState<string|null>(null); const [progress,setProgress]=useState(0); const [confirm,setConfirm]=useState<string|null>(null); const [voterId,setVoterId]=useState('')
   const results=DAPP_CATALOG.filter(a=>(a.name+' '+a.description+' '+a.category).toLowerCase().includes(query.toLowerCase()))
-  const getLocalRatings=()=>{try{return JSON.parse(localStorage.getItem('ida-dapp-ratings')||'{}')}catch{return {}}}
+  // v2 resets the legacy inflated ratings and stores one vote per browser per app.
+  const getLocalRatings=():Record<string,Array<{voterId:string;rating:number}>>=>{try{const v=JSON.parse(localStorage.getItem('ida-dapp-ratings-v2')||'{}');return v&&typeof v==='object'?v:{}}catch{return {}}}
   const ratings=getLocalRatings()
-  const appRatings=(selected&&ratings[selected.name])||[]
+  const appRatings:Array<{voterId:string;rating:number}>=(selected&&Array.isArray(ratings[selected.name])?ratings[selected.name]:[])
   const total=appRatings.length
-  const average=total?appRatings.reduce((a:number,b:number)=>a+b,0)/total:0
-  const breakdown={one:appRatings.filter((n:number)=>n===1).length,two:appRatings.filter((n:number)=>n===2).length,three:appRatings.filter((n:number)=>n===3).length,four:appRatings.filter((n:number)=>n===4).length,five:appRatings.filter((n:number)=>n===5).length}
-  const myRating=selected&&voterId?Number(localStorage.getItem('ida-rating-'+selected.name+'-'+voterId)||0):0
-  useEffect(()=>{try{let id=localStorage.getItem('dapp-voter-id');if(!id){id='voter-'+crypto.randomUUID();localStorage.setItem('dapp-voter-id',id)}setVoterId(id)}catch{setVoterId('voter-'+Math.random().toString(36).slice(2))}},[])
+  const average=total?appRatings.reduce((sum,v)=>sum+v.rating,0)/total:0
+  const breakdown={one:appRatings.filter(v=>v.rating===1).length,two:appRatings.filter(v=>v.rating===2).length,three:appRatings.filter(v=>v.rating===3).length,four:appRatings.filter(v=>v.rating===4).length,five:appRatings.filter(v=>v.rating===5).length}
+  const myRating=selected&&voterId?(appRatings.find(v=>v.voterId===voterId)?.rating||0):0
+  useEffect(()=>{try{let id=localStorage.getItem('dapp-voter-id');if(!id){id='voter-'+(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2));localStorage.setItem('dapp-voter-id',id)}setVoterId(id)}catch{setVoterId('voter-'+Math.random().toString(36).slice(2))}},[])
   const startInstall=(name:string)=>{if(installing||uninstalling||!internetOn)return;setInstalling(name);setProgress(0);let p=0;const timer=window.setInterval(()=>{p=Math.min(100,p+Math.floor(Math.random()*13)+5);setProgress(p);if(p>=100){window.clearInterval(timer);setInstalling(null);setProgress(0);onInstall(name)}},180)}
   const startUninstall=(name:string)=>{if(uninstalling||installing)return;setConfirm(null);setUninstalling(name);setProgress(0);let p=0;const timer=window.setInterval(()=>{p=Math.min(100,p+Math.floor(Math.random()*10)+7);setProgress(p);if(p>=100){window.clearInterval(timer);setUninstalling(null);setProgress(0);onUninstall(name)}},120)}
-  const submitRating=(name:string,n:number)=>{if(!internetOn||!voterId)return;try{const all=getLocalRatings();all[name]=[...(all[name]||[]),n];localStorage.setItem('ida-dapp-ratings',JSON.stringify(all));localStorage.setItem('ida-rating-'+name+'-'+voterId,String(n));setSelected(prev=>prev?{...prev}:prev)}catch{}}
+  const submitRating=(name:string,n:number)=>{if(!internetOn||!voterId||!Number.isInteger(n)||n<1||n>5)return;try{const all=getLocalRatings();const votes=Array.isArray(all[name])?all[name]:[];const i=votes.findIndex(v=>v&&v.voterId===voterId);const vote={voterId,rating:n};all[name]=i>=0?votes.map((v,j)=>j===i?vote:v):[...votes,vote];localStorage.setItem('ida-dapp-ratings-v2',JSON.stringify(all));setSelected(prev=>prev?{...prev}:prev)}catch{}}
   const icon=(name:string,size=34)=><span className={'dapp-icon-tone tone-'+(DAPP_CATALOG.find(x=>x.name===name)?.tone||'blue')}><IdaAppIcon name={name} size={size}/></span>
   return <div className="dapp-shell">{!internetOn?<div className="dapp-offline-screen"><DappLogo size={72}/><div className="dapp-offline-spinner"/><strong>Connection lost</strong><span>Turn on Wi‑Fi to reconnect to DAPP.</span><small>DAPP will keep waiting here until the connection returns.</small></div>:selected?<><div className="dapp-top"><button className="dapp-back" onClick={()=>setSelected(null)}>← <span>Back</span></button><div className="dapp-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search apps..."/></div></div><div className="dapp-detail"><div className="dapp-detail-hero"><div className="dapp-big-icon">{icon(selected.name,62)}</div><div className="dapp-detail-main"><h1>{selected.name}</h1><p className="dapp-tagline">{selected.tagline}</p><div className="dapp-meta"><span>{total?('★ '+average.toFixed(1)+' · '+total+' '+(total===1?'rating':'ratings')):'☆ No ratings yet'}</span><span>{selected.category}</span></div><div className="dapp-action">{installing===selected.name?<div className="dapp-installing"><div><strong>Installing...</strong><span>{progress}%</span></div><div className="dapp-progress"><i style={{width:progress+'%'}}/></div><small>Preparing {selected.name} for IDA</small></div>:uninstalling===selected.name?<div className="dapp-installing dapp-uninstalling"><div><strong>Uninstalling...</strong><span>{progress}%</span></div><div className="dapp-progress"><i style={{width:progress+'%'}}/></div><small>Removing {selected.name} from IDA...</small></div>:installed(selected.name)?<button className="dapp-uninstall" onClick={()=>setConfirm(selected.name)}>Uninstall</button>:<button className="dapp-install" disabled={!internetOn} onClick={()=>startInstall(selected.name)}><Download size={17}/> Install</button>}</div></div></div><section className="dapp-description"><h2>Description</h2><p>{selected.description}</p><h2>Ratings</h2><div className="dapp-rating-summary"><strong>{total?average.toFixed(1):'—'}</strong><div><div className="dapp-stars-static">{[1,2,3,4,5].map(n=><span key={n} className={average>=n-.25?'filled':''}>★</span>)}</div><small>{total?(total+' '+(total===1?'vote':'votes')):'No votes yet'}</small></div></div><div className="dapp-rating-breakdown">{([5,4,3,2,1] as const).map(n=>{const count=breakdown[['one','two','three','four','five'][n-1] as keyof typeof breakdown];const pct=total?count/total*100:0;return <div className="dapp-rating-row" key={n}><span>{n}</span><div><i style={{width:pct+'%'}}/></div><small>{count}</small></div>})}</div><h2 className="dapp-rate-title">Rate this app</h2><div className="dapp-stars">{[1,2,3,4,5].map(n=><button key={n} disabled={!internetOn||!voterId} className={n<=(myRating||0)?'active':''} onClick={()=>submitRating(selected.name,n)}>★</button>)}</div><small className="dapp-your-rating">{myRating?('Your rating: '+myRating+'/5'):'Choose a star to rate'}</small></section></div>{confirm&&<div className="dapp-confirm"><div><strong>Uninstall {confirm}?</strong><p>This removes the app from the IDA desktop, folders, taskbar, open windows, and DaTrash. You can install it again from DAPP anytime.</p><button onClick={()=>setConfirm(null)}>Cancel</button><button className="danger" onClick={()=>startUninstall(confirm)}>Uninstall</button></div></div>}</>:<><div className="dapp-header"><div className="dapp-brand"><DappLogo size={46}/><div><strong>DAPP</strong><span>IDA App Store</span></div></div><div className="dapp-search dapp-search-wide"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search apps..."/></div></div><div className="dapp-content"><div className="dapp-heading"><div><span className="eyebrow">IDA</span><h1>Discover apps</h1><p>Install apps into IDA and keep them wherever you organize them.</p></div><span className="dapp-count">{results.length} apps</span></div><div className="dapp-grid">{results.map((a,i)=><button key={a.name} style={{animationDelay:(i*55)+'ms'}} className="dapp-card" onClick={()=>setSelected(a)}><div className="dapp-card-top"><div className="dapp-card-icon">{icon(a.name,40)}</div><div><strong>{a.name}</strong><small>{a.tagline}</small></div></div></button>)}</div></div></>}</div>
 }
