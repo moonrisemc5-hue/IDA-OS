@@ -168,3 +168,16 @@
 .dac-symbolic-results{grid-template-columns:1fr}
 .dac-symbolic-results>div{align-items:flex-start}
 .dac-symbolic-results strong{font:500 16px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:normal;overflow-wrap:anywhere}
+
+
+/* Refined graph typography: keep axes and grid crisp instead of chunky. */
+.dac-graph{background:#101019;border:1px solid #ffffff10;border-radius:14px}
+.dac-graph svg{shape-rendering:geometricPrecision}
+.dac-graph svg text{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:2.05px;font-weight:400;letter-spacing:0;fill:#aaa6bd}
+.dac-graph svg path[stroke="#d4c5ff99"]{stroke:#a89bc4;stroke-width:.22}
+.dac-graph svg polyline{stroke-width:.42;stroke-linecap:round;stroke-linejoin:round}
+.dac-graph svg circle{r:.72}
+.dac-graph svg path[stroke="#ffffff85"]{stroke:#c8b8fa;stroke-width:.22;stroke-dasharray:.7 1}
+.dac-trace-readout{padding:8px 10px;border-radius:9px;background:#1b1928ed;border-color:#b9a2ff3d}
+.dac-trace-readout strong{font-size:12px;font-weight:600}
+.dac-trace-readout small{font-size:10px}
