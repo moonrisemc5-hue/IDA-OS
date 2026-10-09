@@ -12,8 +12,10 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
 
 const ACCOUNT_SESSION_KEY = 'ida-account-session-v1'
 const GUEST_LOCK_KEY = 'ida-guest-lock-v1'
+// Track unsynced local edits without including the marker in the cloud snapshot.
+const CLOUD_DIRTY_KEY = 'ida-cloud-dirty-account-v1'
 const SYNC_PREFIXES = ['ida-', 'daapps-']
-const isSyncKey = (key: string) => key !== ACCOUNT_SESSION_KEY && key !== GUEST_LOCK_KEY && key !== 'ida-firstboot-complete-v3' && SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
+const isSyncKey = (key: string) => key !== ACCOUNT_SESSION_KEY && key !== GUEST_LOCK_KEY && key !== CLOUD_DIRTY_KEY && key !== 'ida-firstboot-complete-v3' && SYNC_PREFIXES.some(prefix => key.startsWith(prefix))
 type IdaSession = { accountId:string; sessionToken:string; displayName:string }
 function readIdaSession(): IdaSession|null {
   try {
@@ -308,8 +310,14 @@ export function CloudGate() {
     saving.current=true
     try{
       const state=readLocalState()
+      const snapshot=JSON.stringify(state)
       const {error:saveError}=await supabase.rpc('ida_save_state',{p_account_id:userId,p_session_token:activeSessionToken.current,p_state:state})
       if(saveError)setError(saveError.message)
+      else {
+        setError('')
+        // Do not clear the marker if a newer edit happened while this save was in flight.
+        if(localStorage.getItem(CLOUD_DIRTY_KEY)===userId && JSON.stringify(readLocalState())===snapshot) localStorage.removeItem(CLOUD_DIRTY_KEY)
+      }
     }catch(e){setError(e instanceof Error?e.message:'Could not save IDA data.')}
     finally{saving.current=false;if(queued.current){queued.current=false;void saveNow()}}
   }
@@ -323,9 +331,9 @@ export function CloudGate() {
     const storage=window.localStorage
     const original={setItem:storage.setItem.bind(storage),removeItem:storage.removeItem.bind(storage),clear:storage.clear.bind(storage)}
     originalMethods.current=original
-    storage.setItem=((key:string,value:string)=>{original.setItem(key,value);if(isSyncKey(key))scheduleSave()}) as Storage['setItem']
-    storage.removeItem=((key:string)=>{original.removeItem(key);if(isSyncKey(key))scheduleSave()}) as Storage['removeItem']
-    storage.clear=(()=>{original.clear();scheduleSave()}) as Storage['clear']
+    storage.setItem=((key:string,value:string)=>{original.setItem(key,value);if(isSyncKey(key)){if(activeUser.current)original.setItem(CLOUD_DIRTY_KEY,activeUser.current);scheduleSave()}}) as Storage['setItem']
+    storage.removeItem=((key:string)=>{original.removeItem(key);if(isSyncKey(key)){if(activeUser.current)original.setItem(CLOUD_DIRTY_KEY,activeUser.current);scheduleSave()}}) as Storage['removeItem']
+    storage.clear=(()=>{original.clear();if(activeUser.current)original.setItem(CLOUD_DIRTY_KEY,activeUser.current);scheduleSave()}) as Storage['clear']
   }
   const removeStorageSync=()=>{
     const original=originalMethods.current
@@ -339,6 +347,7 @@ export function CloudGate() {
   const loadUser=async(nextSession:IdaSession)=>{
     setReady(false);setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
     const localBeforeCloud=readLocalState()
+    const localChangesPending=localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId
     let resetWindowLayout=false
     try { resetWindowLayout=sessionStorage.getItem('ida-reset-window-layout-once')==='1' } catch {}
     const {data,error:loadError}=await supabase.rpc('ida_load_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken})
@@ -348,7 +357,7 @@ export function CloudGate() {
       }
       setError('Cloud sync is temporarily unavailable. Your IDA sign-in and local desktop are being kept.');installStorageSync();setReady(true);return
     }
-    if(data&&looksLikeIdaState(data)){
+    if(data&&looksLikeIdaState(data)&&!localChangesPending){
       let stateToApply=data
       if(resetWindowLayout){
         const repaired:CloudState={...data,keys:{...data.keys}}
@@ -358,8 +367,11 @@ export function CloudGate() {
         await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:repaired})
       }
       applyLocalState(stateToApply)
-    } else if(Object.keys(localBeforeCloud.keys).length){
-      await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
+    } else if(Object.keys(localBeforeCloud.keys).length || localChangesPending){
+      // Preserve newer local edits instead of replacing them with an older cloud snapshot.
+      const {error:saveError}=await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
+      if(saveError)setError(saveError.message)
+      else if(localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId) localStorage.removeItem(CLOUD_DIRTY_KEY)
     }
     if(resetWindowLayout){
       try { sessionStorage.removeItem('ida-reset-window-layout-once') } catch {}
