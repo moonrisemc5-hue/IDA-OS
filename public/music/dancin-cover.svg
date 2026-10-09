@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<defs>
+ <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#c7b0ee"/><stop offset="1" stop-color="#9b8ad4"/></linearGradient>
+ <linearGradient id="shirt" x2="0" y2="1"><stop stop-color="#d82d8c"/><stop offset="1" stop-color="#861052"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="2.4"/></filter>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .6 0 0 0 .12 0"/></filter>
+</defs>
+<rect width="1000" height="1000" fill="url(#wall)"/>
+<!-- purple tiled wall -->
+<g stroke="#3a217e" stroke-width="10" opacity=".82" fill="none">
+<path d="M0 130H1000M0 300H1000M0 470H1000M0 640H1000M0 810H1000"/>
+<path d="M80 0V1000M300 0V1000M520 0V1000M740 0V1000M960 0V1000"/>
+</g>
+<g fill="#6e5ba5" opacity=".55"><circle cx="220" cy="75" r="5"/><circle cx="414" cy="215" r="4"/><circle cx="650" cy="90" r="5"/><circle cx="880" cy="240" r="5"/><circle cx="175" cy="390" r="5"/><circle cx="585" cy="375" r="4"/><circle cx="845" cy="565" r="5"/><circle cx="360" cy="740" r="4"/></g>
+<!-- hanging speaker -->
+<path d="M145 0L145 80" stroke="#18044e" stroke-width="14"/>
+<path d="M85 62Q145 16 208 62L225 99 218 225Q214 274 174 289L116 285Q79 272 76 229L72 110Z" fill="#211064" stroke="#170647" stroke-width="12"/>
+<path d="M117 86L182 78 183 100 116 108Z" fill="#b59cf0"/>
+<g fill="#6550c7"><ellipse cx="139" cy="155" rx="13" ry="18"/><ellipse cx="113" cy="205" rx="12" ry="19"/><ellipse cx="168" cy="204" rx="14" ry="19"/><ellipse cx="139" cy="238" rx="12" ry="17"/><ellipse cx="183" cy="244" rx="11" ry="15"/></g>
+<!-- dancing cartoon man, inspired by the reference -->
+<path d="M400 1000Q390 900 430 790L480 675 650 670Q735 745 780 1000Z" fill="url(#shirt)" stroke="#39104d" stroke-width="12"/>
+<path d="M468 695Q430 650 393 634Q359 620 336 643L301 681Q281 706 306 724L355 748Q379 760 404 742L462 786Z" fill="#ed9c96" stroke="#57255c" stroke-width="10" stroke-linejoin="round"/>
+<path d="M302 680Q273 662 262 688Q253 711 281 730L321 752Q341 756 352 740L339 720 315 709Z" fill="#ed9c96" stroke="#57255c" stroke-width="9"/>
+<path d="M664 714Q725 679 774 700Q813 718 844 746L883 781Q896 803 876 820L851 832Q830 836 810 818L754 784 690 792Z" fill="#ed9c96" stroke="#57255c" stroke-width="10" stroke-linejoin="round"/>
+<path d="M844 785Q875 768 897 792L917 819Q925 834 909 845L883 853Q863 850 850 833L836 813Z" fill="#ed9c96" stroke="#57255c" stroke-width="9"/>
+<!-- head and neck -->
+<path d="M500 650L503 590 641 571 673 669Q615 723 537 678Z" fill="#d98280" stroke="#57255c" stroke-width="10"/>
+<path d="M454 205Q460 127 547 111Q622 96 676 154Q712 192 700 291L684 408Q675 482 621 527Q576 557 524 532Q461 502 442 438L421 344Q412 279 454 205Z" fill="#f2a6a0" stroke="#57255c" stroke-width="12"/>
+<!-- spiky hair -->
+<path d="M441 221L421 170 455 184 468 128 496 164 520 116 540 156 566 124 582 166 614 141 625 184 661 173 666 220" fill="#18103e" stroke="#57255c" stroke-width="10" stroke-linejoin="round"/>
+<!-- closed eyes and nose -->
+<path d="M448 302Q482 324 510 302M542 307Q574 330 606 306" fill="none" stroke="#5b2b53" stroke-width="12" stroke-linecap="round"/>
+<path d="M530 301Q517 340 490 361Q474 379 499 390" fill="none" stroke="#a75a63" stroke-width="12" stroke-linecap="round"/>
+<path d="M475 429Q534 462 596 427Q564 485 517 478Q487 467 475 429Z" fill="#74314e" stroke="#57255c" stroke-width="9"/>
+<path d="M488 433Q536 449 582 432" fill="none" stroke="#f6c4b8" stroke-width="7"/>
+<!-- large headphones -->
+<path d="M421 316Q380 174 481 125Q584 70 659 160Q700 212 681 311" fill="none" stroke="#18054d" stroke-width="37" stroke-linecap="round"/>
+<path d="M418 277Q381 277 374 316L371 383Q374 423 410 423L434 410 445 313Q442 281 418 277Z" fill="#211064" stroke="#160449" stroke-width="12"/>
+<path d="M666 275Q703 278 710 317L711 385Q707 424 672 426L650 412 641 314Q644 282 666 275Z" fill="#211064" stroke="#160449" stroke-width="12"/>
+<!-- soft VHS tint and grain -->
+<rect width="1000" height="1000" fill="#bd52ff" opacity=".12"/>
+<rect width="1000" height="1000" filter="url(#grain)" opacity=".22"/>
+<rect x="32" y="32" width="936" height="936" fill="none" stroke="#f3d8ff" stroke-opacity=".25" stroke-width="3"/>
+<text x="62" y="845" font-family="Arial,sans-serif" font-size="25" letter-spacing="10" fill="#f1ddff">IDA DEFAULTS</text>
+<text x="54" y="934" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="108" letter-spacing="3" fill="#fff2ff">DANCIN</text>
+</svg>
