@@ -34,7 +34,7 @@ const APPS: AppItem[] = [
   { name: 'DaFile Explorer', kind: 'explorer', tone: 'blue' },
   { name: 'DaNotes', kind: 'notes', tone: 'slate' },
   { name: 'DaSettings', kind: 'settings', tone: 'slate' },
-  { name: 'DaTrash', kind: 'trash', tone: 'violet' },
+  { name: 'DaTrash', kind: 'trash', tone: 'blue' },
   { name: 'DaMedia', kind: 'media', tone: 'blue' },
   { name: 'DaTV', kind: 'external', url: 'https://www.youtube.com/', tone: 'red' },
   { name: 'DaDrift', kind: 'drift', tone: 'blue' },
