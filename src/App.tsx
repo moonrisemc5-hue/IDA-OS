@@ -1168,25 +1168,55 @@ function DaculatorPanel(){
   const xStep=niceStep(graphView.xmax-graphView.xmin),yStep=niceStep(graphView.ymax-graphView.ymin);
   const runCalculus=()=>{
     try{
-      let s=calcExpression.trim().replace(/^\s*y\s*=\s*/i,'').replace(/−/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,'pi');
+      let s=calcExpression.trim().replace(/^\\s*y\\s*=\\s*/i,'').replace(/−/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,'pi').replace(/\\s+/g,' ');
       if(!s)throw Error('Enter a function first');
-      s=s.replace(/(\d)(x|\()/gi,'$1*$2').replace(/(x|\))(?=\d)/gi,'$1*');
-      const derivative=nerdamer.diff(s,'x').text();
-      const integral=nerdamer.integrate(s,'x').text();
-      if(!derivative||!integral)throw Error('Could not solve this expression');
-      const steps:string[]=[];
-      steps.push('Start with f(x) = '+s);
-      if(/\*\s*(sin|cos|tan|ln|log|exp|e\^)/i.test(s)&&/x\s*\^|x\s*\*/i.test(s)){
-        steps.push('Derivative: use the product rule, (u·v)′ = u′v + uv′, together with the chain rule where needed.');
-        steps.push('Antiderivative: look for integration by parts, ∫u·v′ dx = u·v − ∫u′·v dx, and simplify.');
-      } else if(/sin|cos|tan|ln|log|sqrt|exp|e\^/i.test(s)){
-        steps.push('Apply the standard derivative rules and the chain rule to each function.');
-        steps.push('For the antiderivative, apply known integral rules and substitution patterns where possible.');
-      } else {
-        steps.push('Differentiate term by term using the sum, constant-multiple, and power rules.');
-        steps.push('Integrate term by term using linearity and the reverse power rule where applicable.');
+      // Make common handwritten input unambiguous before the symbolic parser sees it.
+      // In particular, x^2sin(x) must mean x^2 * sin(x), not x^(2sin(x)).
+      s=s.replace(/(\\d)(?=(?:sin|cos|tan|ln|log|exp|sqrt|abs)\\s*\\()/gi,'$1*')
+         .replace(/(\\d)(x|\\()/gi,'$1*$2')
+         .replace(/(x|\\))(?=\\d)/gi,'$1*')
+         .replace(/(x|\\))(?=(?:sin|cos|tan|ln|log|exp|sqrt|abs)\\s*\\()/gi,'$1*');
+      const expression=nerdamer(s).text();
+      const derivative=nerdamer.diff(expression,'x').text();
+      let integral=nerdamer.integrate(expression,'x').text();
+
+      // Nerdamer deliberately leaves some valid integrals unevaluated. For a
+      // polynomial times sin(x)/cos(x), apply repeated integration by parts.
+      const integratePolyTrig=(poly:string,trig:'sin'|'cos',depth=0):string=>{
+        if(depth>16)throw Error('Integration-by-parts depth limit reached');
+        const p=nerdamer(poly).text();
+        const dp=nerdamer.diff(p,'x').text();
+        const derivativeIsZero=/^(?:0|0\\.0+)$/.test(dp);
+        if(derivativeIsZero){
+          return nerdamer(trig==='sin'?'-('+p+')*cos(x)':'('+p+')*sin(x)').text();
+        }
+        const tail=integratePolyTrig(dp,trig==='sin'?'cos':'sin',depth+1);
+        return nerdamer(trig==='sin'?'-('+p+')*cos(x)+('+tail+')':'('+p+')*sin(x)-('+tail+')').text();
+      };
+      if(/integrate\\s*\\(/i.test(integral)){
+        const trigMatch=expression.match(/^(.*)\\*\\s*(sin|cos)\\(x\\)$/i);
+        const reversedMatch=expression.match(/^((?:sin|cos)\\(x\\))\\s*\\*\\s*(.*)$/i);
+        const match=trigMatch||reversedMatch;
+        if(match){
+          const poly=trigMatch?match[1]:match[2];
+          const trig=(trigMatch?match[2]:match[1].slice(0,3)).toLowerCase() as 'sin'|'cos';
+          if(poly&& !/(?:sin|cos|tan|ln|log|exp|sqrt)\\s*\\(/i.test(poly) && !/[a-wyz]/i.test(poly.replace(/x/gi,''))){
+            integral=integratePolyTrig(poly,trig);
+          }
+        }
       }
-      steps.push('The symbolic engine simplifies the result when it can. An unevaluated integral means it could not find a supported closed form.');
+      if(!derivative||!integral)throw Error('Could not solve this expression');
+      const unsupported=/^integrate\\s*\\(/i.test(integral);
+      const steps:string[]=[];
+      steps.push('Parsed function: f(x) = '+expression);
+      steps.push('Derivative: apply the product, chain, power, and standard-function rules as needed.');
+      if(/sin|cos/i.test(expression)&&/x\\s*\\^|x\\s*\\*/i.test(expression)){
+        steps.push('Antiderivative: use integration by parts repeatedly, differentiating the polynomial each time until it becomes zero.');
+      } else {
+        steps.push('Antiderivative: the symbolic engine applies supported integral rules and substitution patterns.');
+      }
+      if(unsupported)steps.push('This integral is not in the engine’s supported symbolic rules yet; the derivative above is still calculated independently.');
+      else steps.push('The antiderivative is an equivalent symbolic expression; add + C for the general indefinite integral.');
       setCalculusResult({derivative,integral,steps});
     }catch(e){setCalculusResult({derivative:'—',integral:'—',steps:[],error:e instanceof Error?e.message:'Could not process function'})}
   };
