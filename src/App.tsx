@@ -1171,8 +1171,8 @@ function DaculatorPanel(){
       let s=calcExpression.trim().replace(/^\s*y\s*=\s*/i,'').replace(/−/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,'pi');
       if(!s)throw Error('Enter a function first');
       s=s.replace(/(\d)(x|\()/gi,'$1*$2').replace(/(x|\))(?=\d)/gi,'$1*');
-      const derivative=nerdamer.diff(s,'x').toString();
-      const integral=nerdamer.integrate(s,'x').toString();
+      const derivative=nerdamer.diff(s,'x').text();
+      const integral=nerdamer.integrate(s,'x').text();
       if(!derivative||!integral)throw Error('Could not solve this expression');
       const steps:string[]=[];
       steps.push('Start with f(x) = '+s);
