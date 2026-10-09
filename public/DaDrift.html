@@ -228,7 +228,7 @@ function feat(g,m){const F=m.p[m.p.length-1][0],L=m.p[0][0],[a,b,hw]=m.c,f=m.f;
  if(m.sh){g.fillStyle='rgba(0,0,0,.45)';for(let x=L+4;x<a-1;x+=3)g.fillRect(x,-6,1.4,12)}}
 const optHtml=o=>`<h4>MAP</h4><div class="chips">${MAPN.map((n,j)=>`<span class="chip${o.map===j?' on':''}" data-a="mp" data-v="${j}">${n}</span>`).join('')}</div>${mpc(o)}<div class="chips"><span class="chip${o.night?' on':''}" data-a="nt">🌙 NIGHT MODE: ${o.night?'ON':'OFF'}</span></div><h4>LAPS</h4><div class="chips">${[1,2,3,5,8].map(l=>`<span class="chip${o.laps===l?' on':''}" data-a="lp" data-v="${l}">${l}</span>`).join('')}</div>`;
 let MU,mt=0,ms=0;const RT=[55,43.65,65.41,49];
-function tn(f,t,d,ty,v,fa){const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.setValueAtTime(f,t);if(fa)o.frequency.exponentialRampToValueAtTime(fa,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(MU);o.start(t);o.stop(t+d+.02)}
+function tn(f,t,d,ty,v,fa){const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.setValueAtTime(f,t);if(fa)o.frequency.exponentialRampToValueAtTime(fa,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(MU);o.onended=()=>{o.disconnect();g.disconnect()};o.start(t);o.stop(t+d+.02)}
 function music(){MU=AC.createGain();MU.gain.value=.7;MU.connect(AC.destination);mt=AC.currentTime+.1;
  setInterval(()=>{while(AC&&mt<AC.currentTime+.5){const r=RT[(ms>>4)&3],q=ms&15;
   if(q%4===0){tn(r,mt,.5,'sine',.3);tn(150,mt,.12,'sine',.35,45)}
