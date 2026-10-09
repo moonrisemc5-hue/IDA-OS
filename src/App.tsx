@@ -1008,6 +1008,81 @@ function DappStore({internetOn,installed,onInstall,onUninstall,onOpen}:{internet
 
 function WebAppPanel({url,offline=false}:{url:string;offline?:boolean}){if(offline)return <div style={{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:10,background:'#11151d',color:'#fff',textAlign:'center'}}><Wifi size={42} opacity={.75}/><strong style={{fontSize:22}}>Waiting for Wi-Fi connection</strong><span style={{opacity:.65}}>Connect to Wi-Fi to use this app.</span></div>;return <iframe src={url} title="IDA web app" className="webapp-frame" />}
 
+type DaFileExplorerProps = {
+  folder:string; setFolder:(folder:string)=>void; files:UserFile[]; folders:UserFolder[];
+  folderApps:Record<string,string[]>; appLabels:Record<string,string>; apps:AppItem[]; desktopApps:string[];
+  onImport:(list:FileList|null,location:'Desktop'|'Pictures'|'Music'|'Videos')=>void;
+  onNewFile:(location?:string)=>void; onNewFolder:(location?:string)=>string; onNewNote:(location?:string)=>string;
+  onMoveFile:(id:string,location:string)=>void; onMoveApp:(id:string,location:string)=>void;
+  onEditFile:(id:string,data:string)=>void; explorerPositions:Record<string,number>; onExplorerMove:(id:string,y:number)=>void;
+  onOpen:(file:UserFile)=>void; onOpenApp:(app:AppItem)=>void;
+  onContext:(x:number,y:number,item:any)=>void; onCopy:(type:'app'|'file'|'folder',id:string)=>void;
+  onCut:(type:'app'|'file'|'folder',id:string)=>void; onPaste:()=>void;
+  onDelete:(type:'app'|'file'|'folder',id:string)=>void; onAddDesktop:(id:string)=>void;
+  openFileId:string|null; setOpenFileId:(id:string|null)=>void;
+}
+function DaFileExplorer({folder,setFolder,files,folders,folderApps,appLabels,apps,desktopApps,onImport,onNewFile,onNewFolder,onNewNote,onMoveFile,onMoveApp,onEditFile,explorerPositions,onExplorerMove,onOpen,onOpenApp,onContext,onCopy,onCut,onPaste,onDelete,onAddDesktop,openFileId,setOpenFileId}:DaFileExplorerProps) {
+  const uploadRef=useRef<HTMLInputElement>(null);
+  const [selected,setSelected]=useState<string|null>(null);
+  const [query,setQuery]=useState('');
+  const [view,setView]=useState<'list'|'grid'>('list');
+  const [dragged,setDragged]=useState<{type:'file'|'folder'|'app';id:string}|null>(null);
+  const [notice,setNotice]=useState('');
+  const roots=[['Home','Home'],['Desktop','Desktop'],['Photos','Pictures'],['Music','Music'],['Videos','Videos']] as const;
+  const currentFolder=folders.find(item=>item.id===folder);
+  const parentFolder=currentFolder?.parent||'Desktop';
+  const isRoot=['Home','Desktop','Pictures','Music','Videos'].includes(folder);
+  const folderFiles=files.filter(file=>file.location===folder);
+  const folderFolders=folders.filter(item=>item.parent===folder);
+  const visibleAppIds=folder==='Desktop'?desktopApps:(folderApps[folder]||[]);
+  const visibleApps=visibleAppIds.map(id=>({id,app:appForId(id)})).filter((item):item is {id:string;app:AppItem}=>!!item.app);
+  const term=query.trim().toLowerCase();
+  const shownFiles=folder==='Home'?files:folderFiles;
+  const matches=(name:string)=>!term||name.toLowerCase().includes(term);
+  const showFile=(file:UserFile)=>matches(file.name);
+  const showFolder=(item:UserFolder)=>matches(item.name);
+  const showApp=(item:{id:string;app:AppItem})=>matches(appLabels[item.id]||item.app.name);
+  const moveTo=(type:'file'|'folder'|'app',id:string,target:string)=>{
+    if(type==='app')onMoveApp(id,target);
+    else onMoveFile(id,target);
+    setDragged(null);
+  };
+  const rowStyle:React.CSSProperties={display:'flex',alignItems:'center',gap:12,minHeight:50,padding:'7px 12px',borderRadius:9,border:'1px solid transparent',color:'#eef1f7',textAlign:'left',background:'transparent',width:'100%',boxSizing:'border-box',cursor:'default'};
+  const iconStyle:React.CSSProperties={width:34,height:34,display:'grid',placeItems:'center',borderRadius:9,background:'rgba(255,255,255,.07)',flexShrink:0};
+  const openFolder=(item:UserFolder)=>setFolder(item.id);
+  const rootDestination=(target:string)=>target==='Home'?'Desktop':target;
+  return <div className="explorer-shell" style={{height:'100%',minHeight:0,display:'flex',flexDirection:'column',color:'#f5f6fb',background:'#11141c',overflow:'hidden'}}>
+    <div className="explorer-toolbar" style={{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',borderBottom:'1px solid rgba(255,255,255,.09)',flexWrap:'wrap'}}>
+      <button type="button" onClick={()=>setFolder(currentFolder?parentFolder:'Home')} disabled={folder==='Home'} title="Back" style={{border:0,borderRadius:8,padding:'8px 10px',background:'rgba(255,255,255,.07)',color:'inherit',cursor:'pointer'}}>←</button>
+      <div style={{minWidth:100,flex:1}}><div style={{fontSize:11,letterSpacing:1.2,opacity:.55}}>IDA FILE EXPLORER</div><strong style={{fontSize:18}}>{currentFolder?.name||folder}</strong></div>
+      <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search this location" aria-label="Search files" style={{width:'min(240px,100%)',padding:'9px 12px',borderRadius:9,border:'1px solid rgba(255,255,255,.12)',background:'rgba(255,255,255,.06)',color:'white',outline:'none'}}/>
+      <button type="button" onClick={()=>uploadRef.current?.click()} style={{border:0,borderRadius:9,padding:'9px 12px',background:'#e9edf7',color:'#141720',fontWeight:700,cursor:'pointer'}}>＋ Add files</button>
+      <input ref={uploadRef} type="file" multiple style={{display:'none'}} onChange={e=>{const target=(folder==='Pictures'||folder==='Music'||folder==='Videos')?folder:'Desktop';onImport(e.currentTarget.files,target);e.currentTarget.value=''}}/>
+      <button type="button" onClick={()=>onNewFolder(folder==='Home'?'Desktop':folder)} title="New folder" style={{border:'1px solid rgba(255,255,255,.12)',borderRadius:9,padding:'9px 11px',background:'rgba(255,255,255,.06)',color:'white',cursor:'pointer'}}>＋ Folder</button>
+      <button type="button" onClick={()=>onNewNote(folder==='Home'?'Desktop':folder)} title="New note" style={{border:'1px solid rgba(255,255,255,.12)',borderRadius:9,padding:'9px 11px',background:'rgba(255,255,255,.06)',color:'white',cursor:'pointer'}}>＋ Note</button>
+    </div>
+    <div style={{display:'flex',flex:1,minHeight:0}}>
+      <aside className="explorer-sidebar" style={{width:155,flexShrink:0,padding:'12px 8px',borderRight:'1px solid rgba(255,255,255,.08)',background:'rgba(255,255,255,.025)'}}>
+        {roots.map(([label,target])=><button key={target} type="button" onClick={()=>setFolder(target)} style={{...rowStyle,minHeight:40,padding:'8px 10px',background:folder===target?'rgba(160,183,230,.16)':'transparent',borderColor:folder===target?'rgba(160,183,230,.22)':'transparent',fontSize:13,marginBottom:3}}><span style={{width:20,textAlign:'center'}}>{target==='Home'?'⌂':target==='Desktop'?'▦':target==='Pictures'?'▧':target==='Music'?'♫':'▹'}</span>{label}</button>)}
+        <div style={{fontSize:10,letterSpacing:1.1,opacity:.45,padding:'18px 10px 7px'}}>FOLDERS</div>
+        {folders.filter(item=>item.parent==='Desktop'||item.parent==='Home').map(item=><button key={item.id} type="button" onClick={()=>openFolder(item)} style={{...rowStyle,minHeight:34,padding:'6px 10px',fontSize:12}}><Folder size={15}/><span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.name}</span></button>)}
+      </aside>
+      <section style={{flex:1,minWidth:0,minHeight:0,overflow:'auto',padding:12}} onDragOver={e=>{if(dragged){e.preventDefault();e.dataTransfer.dropEffect='move'}}} onDrop={e=>{e.preventDefault();if(dragged)moveTo(dragged.type,dragged.id,rootDestination(folder))}}>
+        {folder==='Home'&&<div style={{fontSize:12,opacity:.6,padding:'4px 8px 12px'}}>Quick access · Choose a location on the left or browse recent files below.</div>}
+        {view==='list'&&<div style={{display:'flex',gap:8,padding:'4px 12px 8px',fontSize:10,letterSpacing:1,opacity:.45,textTransform:'uppercase'}}><span style={{flex:1}}>Name</span><span style={{width:90}}>Type</span></div>}
+        <div style={{display:'flex',flexDirection:'column',gap:3}}>
+          {folderFolders.filter(showFolder).map(item=><div key={item.id} draggable onDragStart={e=>{setDragged({type:'folder',id:item.id});e.dataTransfer.setData('text/plain',item.id)}} onDragEnd={()=>setDragged(null)} onDragOver={e=>{if(dragged&&dragged.id!==item.id){e.preventDefault();e.stopPropagation()}}} onDrop={e=>{e.preventDefault();e.stopPropagation();if(dragged&&dragged.id!==item.id)moveTo(dragged.type,dragged.id,item.id)}} onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContext(e.clientX,e.clientY,{folderItem:item})}} style={{...rowStyle,background:selected===item.id?'rgba(145,174,231,.13)':'rgba(255,255,255,.018)',borderColor:selected===item.id?'rgba(145,174,231,.3)':'transparent'}} onClick={()=>setSelected(item.id)} onDoubleClick={()=>openFolder(item)}><span style={iconStyle}><Folder size={20} color="#a8c7ff"/></span><span style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.name}</span><span style={{width:90,fontSize:11,opacity:.48}}>Folder</span></div>)}
+          {visibleApps.filter(showApp).map(({id,app})=><div key={id} draggable onDragStart={e=>{setDragged({type:'app',id});e.dataTransfer.setData('text/plain',id)}} onDragEnd={()=>setDragged(null)} onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContext(e.clientX,e.clientY,{app,appId:id})}} style={{...rowStyle,background:selected===id?'rgba(145,174,231,.13)':'rgba(255,255,255,.018)',borderColor:selected===id?'rgba(145,174,231,.3)':'transparent'}} onClick={()=>setSelected(id)} onDoubleClick={()=>onOpenApp({...app,name:id})}><span style={iconStyle}><IdaAppIcon name={app.name} size={22}/></span><span style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{appLabels[id]||app.name}</span><span style={{width:90,fontSize:11,opacity:.48}}>App</span></div>)}
+          {shownFiles.filter(showFile).map(file=><div key={file.id} draggable onDragStart={e=>{setDragged({type:'file',id:file.id});e.dataTransfer.setData('text/plain',file.id)}} onDragEnd={()=>setDragged(null)} onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContext(e.clientX,e.clientY,{file})}} style={{...rowStyle,background:selected===file.id?'rgba(145,174,231,.13)':openFileId===file.id?'rgba(255,255,255,.04)':'rgba(255,255,255,.018)',borderColor:selected===file.id?'rgba(145,174,231,.3)':'transparent'}} onClick={()=>{setSelected(file.id);setOpenFileId(file.id)}} onDoubleClick={()=>onOpen(file)}><span style={iconStyle}>{file.kind==='note'?<FileText size={20} color="#d8c5ff"/>:file.mime?.startsWith('image/')?<Film size={20} color="#a8c7ff"/>:<FileText size={20} color="#cbd5e1"/>}</span><span style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{file.name}</span><span style={{width:90,fontSize:11,opacity:.48}}>{file.kind==='note'?'Note':file.mime?.startsWith('image/')?'Photo':file.mime?.startsWith('video/')?'Video':'File'}</span></div>)}
+          {folder==='Home'&&shownFiles.length===0&&folderFolders.length===0&&visibleApps.length===0&&<div className="explorer-empty"><Folder size={34}/><strong>Nothing here yet</strong><span>Files and folders you create will appear here.</span></div>}
+          {folder!=='Home'&&folderFolders.length===0&&visibleApps.length===0&&shownFiles.filter(showFile).length===0&&<div className="explorer-empty" style={{marginTop:50}}><Folder size={34}/><strong>This folder is empty</strong><span>Add files or create a folder to get started.</span></div>}
+        </div>
+        <div style={{padding:'16px 8px 4px',fontSize:11,opacity:.45}}>{folderFolders.length} folders · {visibleApps.length} apps · {shownFiles.length} files</div>
+      </section>
+    </div>
+  </div>
+}
+
 function DaMedia({file}:{file?:UserFile}){const [mediaSrc,setMediaSrc]=useState(file?.data||'');useEffect(()=>{let alive=true;let objectUrl:string|undefined;if(!file){setMediaSrc('');return}if(file.blobKey){getVideoBlob(file.blobKey).then(blob=>{if(alive&&blob){objectUrl=URL.createObjectURL(blob);setMediaSrc(objectUrl)}else if(alive)setMediaSrc('')}).catch(()=>{if(alive)setMediaSrc('')})}else setMediaSrc(file.data||'');return()=>{alive=false;if(objectUrl)URL.revokeObjectURL(objectUrl)}},[file?.id,file?.blobKey,file?.data]);if(!file)return <div className="explorer-empty"><Film size={42}/><strong>No media selected</strong><span>Open a photo or video from DaFile Explorer.</span></div>;return <div className="media-shell"><div className="media-toolbar"><div><span className="eyebrow">IDA</span><h2>DaMedia</h2></div><span>{file.name}</span></div><div className="media-stage">{file.mime?.startsWith('image/')?<img src={mediaSrc} alt={file.name}/>:mediaSrc?<video src={mediaSrc} controls autoPlay/>:<div className="explorer-empty"><Film size={32}/><span>Loading video…</span></div>}</div></div>}
 function DaTrash({trash,onRestore,onEmpty,onPermanentDelete}:{trash:Array<{type:'app'|'file'|'folder';id:string;name:string;app?:AppItem;file?:UserFile;folder?:UserFolder;deletedAt:number}>;onRestore:(item:any)=>void;onEmpty:()=>void;onPermanentDelete:(item:any)=>void}){const [menu,setMenu]=useState<{x:number;y:number;item:any}|null>(null);const [confirm,setConfirm]=useState<any>(null);return <div className="trash-shell" onPointerDown={()=>setMenu(null)}><div className="trash-toolbar"><div><span className="eyebrow">IDA</span><h2>DaTrash</h2></div><button onClick={onEmpty} disabled={!trash.length}>Empty Trash</button></div>{trash.length===0?<div className="explorer-empty"><Trash2 size={42}/><strong>Trash is empty</strong><span>Deleted apps, files, and notes will appear here.</span></div>:<div className="explorer-grid">{trash.map(item=><div key={item.type+item.id} className="explorer-card trash-card" onContextMenu={e=>{e.preventDefault();e.stopPropagation();setMenu({x:e.clientX,y:e.clientY,item})}}><span className="explorer-card-icon">{item.type==='app'?<Trash2 size={27}/>:item.file?.kind==='note'?<FileText size={27}/>:<Folder size={27}/>}</span><strong>{item.name}</strong><small>{item.type==='app'?'App':item.file?.kind==='note'?'Note':'File'}</small></div>)}</div>}{menu&&<div className="desktop-context taskbar-context" style={{left:Math.min(menu.x,window.innerWidth-150),top:Math.min(menu.y,window.innerHeight-70),zIndex:100001}} onPointerDown={e=>e.stopPropagation()}><button onClick={()=>{onRestore(menu.item);setMenu(null)}}><Folder size={14}/> Restore</button><button onClick={()=>{setConfirm(menu.item);setMenu(null)}}><X size={14}/> Permanently delete</button></div>}{confirm&&<div className="rename-backdrop" onPointerDown={()=>setConfirm(null)}><div className="rename-dialog" onPointerDown={e=>e.stopPropagation()}><strong>Permanently delete?</strong><p>This will permanently delete “{confirm.name}”. This action cannot be undone.</p><div><button onClick={()=>setConfirm(null)}>Cancel</button><button className="rename-save" onClick={()=>{onPermanentDelete(confirm);setConfirm(null)}}>OK</button></div></div></div>}</div>}
 
