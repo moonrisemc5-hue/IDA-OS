@@ -109,21 +109,23 @@ function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
 }
 
 function LanguageChoiceScreen({ selected, onSelect, onContinue }: { selected:'en'|'cs'|'vi'|'ar-YE'; onSelect:(v:'en'|'cs'|'vi'|'ar-YE')=>void; onContinue:()=>void }) {
-  const choices:[LanguageChoice, string][] = [['en','English'],['cs','Czech'],['vi','Vietnamese'],['ar-YE','Yemeni Arabic']]
-  return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.3),transparent 45%),#080b12'}}>
-    <div style={{width:'min(560px,calc(100vw - 34px))',padding:'34px 36px',borderRadius:18,background:'rgba(18,22,32,.9)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)'}}>
+  const choices:[LanguageChoice, string, string, string][] = [['en','🇬🇧','English','English interface'],['cs','🇨🇿','Czech','Čeština'],['vi','🇻🇳','Vietnamese','Tiếng Việt'],['ar-YE','🇾🇪','Yemeni Arabic','العربية اليمنية']]
+  return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.3),transparent 45%),#080b12',padding:16,boxSizing:'border-box'}}>
+    <style>{'@keyframes idaLanguageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.ida-language-choice{animation:idaLanguageIn .55s cubic-bezier(.2,.8,.2,1) both;transition:transform .2s,border-color .2s,background .2s}.ida-language-choice:hover{transform:translateY(-2px)}@media(prefers-reduced-motion:reduce){.ida-language-choice{animation:none;transition:none}}'}</style>
+    <div style={{width:'min(560px,calc(100vw - 32px))',maxHeight:'94vh',overflowY:'auto',padding:'clamp(22px,4vw,34px)',boxSizing:'border-box',borderRadius:22,background:'rgba(18,22,32,.92)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)',animation:'idaLanguageIn .65s ease both'}}>
       <Hilal small/>
-      <div style={{textAlign:'center',marginTop:22}}>
-        <div style={{fontSize:27,fontWeight:600}}>Choose your language</div>
-        <div style={{marginTop:7,fontSize:13,opacity:.58}}>You can change this later in IDA Settings.</div>
+      <div style={{textAlign:'center',marginTop:20}}>
+        <div style={{fontSize:27,fontWeight:600,letterSpacing:'-.03em'}}>Choose your language</div>
+        <div style={{marginTop:7,fontSize:13,lineHeight:1.6,opacity:.62}}>Pick the flag and language you’re most comfortable with. You can change this later in IDA Settings.</div>
       </div>
-      <div style={{display:'grid',gap:10,marginTop:25}}>
-        {choices.map(([id,label])=><button key={id} onClick={()=>onSelect(id)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 15px',borderRadius:12,border:selected===id?'1px solid rgba(255,255,255,.5)':'1px solid rgba(255,255,255,.1)',background:selected===id?'rgba(255,255,255,.1)':'rgba(255,255,255,.035)',color:'#fff',cursor:'pointer',textAlign:'left'}}>
-          <span style={{fontSize:15}}>{label}</span>
-          <span style={{width:20,height:20,borderRadius:6,border:'1px solid rgba(255,255,255,.3)',background:selected===id?'#fff':'transparent',display:'grid',placeItems:'center',color:'#111',fontSize:13}}>{selected===id?'✓':''}</span>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,marginTop:24}}>
+        {choices.map(([id,flag,label,native],i)=><button className="ida-language-choice" key={id} onClick={()=>onSelect(id)} style={{animationDelay:(i*70)+'ms',minWidth:0,display:'flex',alignItems:'center',gap:12,padding:'15px 13px',borderRadius:14,border:selected===id?'1px solid rgba(210,225,255,.8)':'1px solid rgba(255,255,255,.1)',background:selected===id?'linear-gradient(135deg,rgba(135,164,218,.2),rgba(255,255,255,.06))':'rgba(255,255,255,.035)',color:'#fff',cursor:'pointer',textAlign:'left',boxShadow:selected===id?'0 0 0 2px rgba(180,205,255,.08)':'none'}}>
+          <span style={{fontSize:29,lineHeight:1,filter:'drop-shadow(0 3px 5px #0005)'}}>{flag}</span>
+          <span style={{display:'grid',gap:4,flex:1,minWidth:0}}><span style={{fontSize:14,fontWeight:650}}>{label}</span><span dir={id==='ar-YE'?'rtl':undefined} style={{fontSize:11,opacity:.58,overflowWrap:'anywhere'}}>{native}</span></span>
+          <span style={{flexShrink:0,width:20,height:20,borderRadius:'50%',border:selected===id?'0':'1px solid rgba(255,255,255,.3)',background:selected===id?'#dfe9ff':'transparent',display:'grid',placeItems:'center',color:'#111',fontSize:12,fontWeight:800}}>{selected===id?'✓':''}</span>
         </button>)}
       </div>
-      <button onClick={onContinue} style={{...buttonStyle,marginTop:22}}>Continue</button>
+      <button onClick={onContinue} style={{...buttonStyle,marginTop:22}}>Continue <span style={{marginLeft:7}}>→</span></button>
     </div>
   </div>
 }
@@ -187,10 +189,18 @@ function AccountSetup({ selectedApps, onCreated, onSkip }: { selectedApps:string
   }
   return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.28),transparent 45%),#080b12'}}>
     <div style={{width:'min(410px,calc(100vw - 34px))',padding:'34px 36px 28px',borderRadius:18,background:'rgba(18,22,32,.94)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)'}}>
-      <div style={{textAlign:'center',marginBottom:25}}><Hilal small/><div style={{fontSize:26,fontWeight:600,marginTop:18}}>Make your IDA account</div><div style={{fontSize:12,opacity:.55,marginTop:6}}>This is your personal IDA desktop.</div></div>
-      <label style={{fontSize:11,opacity:.55}}>NAME</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" style={inputStyle}/>
-            <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>PASSWORD</label><input value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" type="password" autoComplete="new-password" style={inputStyle}/>
-      <label style={{display:'block',fontSize:11,opacity:.55,marginTop:14}}>CONFIRM PASSWORD</label><input value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Enter it again" type="password" autoComplete="new-password" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
+      <style>{'@keyframes idaAccountIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.ida-account-field{transition:border-color .2s,background .2s}.ida-account-field:focus{border-color:rgba(205,222,255,.65)!important;background:rgba(255,255,255,.09)!important}@media(prefers-reduced-motion:reduce){.ida-account-field{transition:none}}'}</style>
+      <div style={{textAlign:'center',marginBottom:25,animation:'idaAccountIn .55s ease both'}}><Hilal small/><div style={{fontSize:26,fontWeight:600,marginTop:18,letterSpacing:'-.03em'}}>Create your IDA account</div><div style={{fontSize:12,lineHeight:1.6,opacity:.62,marginTop:7}}>Choose a display name and a password to keep your own desktop and settings together.</div></div>
+      <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:8,fontSize:12,fontWeight:700,letterSpacing:'.04em',color:'#d9e3f5'}}><span style={{width:24,height:24,borderRadius:8,display:'grid',placeItems:'center',background:'#ffffff12'}}>1</span> YOUR DISPLAY NAME</div>
+      <input className="ida-account-field" value={name} onChange={e=>setName(e.target.value)} placeholder="What should IDA call you?" autoComplete="nickname" style={inputStyle}/>
+      <div style={{fontSize:11,opacity:.48,marginTop:6}}>This name appears on your IDA welcome and lock screens.</div>
+      <div style={{display:'flex',alignItems:'center',gap:9,margin:'18px 0 8px',fontSize:12,fontWeight:700,letterSpacing:'.04em',color:'#d9e3f5'}}><span style={{width:24,height:24,borderRadius:8,display:'grid',placeItems:'center',background:'#ffffff12'}}>2</span> CREATE A PASSWORD</div>
+      <input className="ida-account-field" value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" type="password" autoComplete="new-password" style={inputStyle}/>
+      <div style={{display:'flex',gap:4,marginTop:8}}>{[0,1,2,3].map(n=><span key={n} style={{height:4,flex:1,borderRadius:9,background:password.length===0?'#ffffff18':password.length<8?(n===0?'#e6a1a1':'#ffffff18'):password.length<12?(n<2?'#e7d4a0':'#ffffff18'):'#b7d9bd',transition:'background .2s'}}/>)}</div>
+      <div style={{fontSize:11,opacity:.5,marginTop:6}}>{password.length===0?'Use 8 or more characters.':password.length<8?'Keep going — use at least 8 characters.':password.length<12?'Looks good. A longer password is even better.':'Nice — that’s a stronger length.'}</div>
+      <div style={{display:'flex',alignItems:'center',gap:9,margin:'18px 0 8px',fontSize:12,fontWeight:700,letterSpacing:'.04em',color:'#d9e3f5'}}><span style={{width:24,height:24,borderRadius:8,display:'grid',placeItems:'center',background:'#ffffff12'}}>3</span> CONFIRM YOUR PASSWORD</div>
+      <input className="ida-account-field" value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Type the same password again" type="password" autoComplete="new-password" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')void submit()}}/>
+      {confirm.length>0&&<div style={{fontSize:11,marginTop:6,color:confirm===password?'#b7d9bd':'#e6a1a1'}}>{confirm===password?'Passwords match ✓':'These passwords don’t match yet.'}</div>}
       <button disabled={busy||!name||!password||!confirm} onClick={()=>void submit()} style={{...buttonStyle,opacity:(busy||!name||!password||!confirm) ? .5 : 1}}>{busy?'Creating your IDA…':'Create account'}</button>
       {message&&<div style={{marginTop:13,padding:12,borderRadius:10,background:'rgba(255,255,255,.055)',fontSize:12,lineHeight:1.5,opacity:.82}}>{message}</div>}
       <button onClick={onSkip} style={switchStyle}>Skip for now</button>
@@ -359,6 +369,18 @@ export function CloudGate() {
 
   useEffect(()=>{
     let mounted=true
+    // Start downloading every built-in wallpaper while the welcome/setup screens are visible.
+    // This warms the browser cache so the desktop is ready sooner after sign-in.
+    const wallpaperUrls=[
+      FIRSTBOOT_WALLPAPER,
+      'https://images.pexels.com/photos/18928472/pexels-photo-18928472.jpeg?cs=srgb&dl=pexels-bylukemiller-18928472.jpg&fm=jpg',
+      'https://images.pexels.com/photos/28737270/pexels-photo-28737270.jpeg?cs=srgb&dl=pexels-simon-steiner-1108932161-28737270.jpg&fm=jpg',
+      'https://images.pexels.com/photos/12490458/pexels-photo-12490458.jpeg?cs=srgb&dl=pexels-andrey-yudkin-63325015-12490458.jpg&fm=jpg',
+      'https://images.pexels.com/photos/8776172/pexels-photo-8776172.jpeg?cs=srgb&dl=pexels-alexmaksin55-8776172.jpg&fm=jpg',
+      'https://images.pexels.com/photos/7348417/pexels-photo-7348417.jpeg?auto=compress&cs=tinysrgb&w=2400'
+    ]
+    try { const custom=localStorage.getItem('daapps-custom-wallpaper'); if(custom&&custom.startsWith('data:image/'))wallpaperUrls.push(custom) } catch {}
+    const preloadImages=wallpaperUrls.map(src=>{const image=new Image();image.decoding='async';image.src=src;return image})
     const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v3')==='1'
     setFirstBoot(!hadFirstBoot)
     const stored=readIdaSession()
@@ -376,7 +398,7 @@ export function CloudGate() {
         window.setTimeout(()=>mounted&&setBootStage('hi'),5000)
       }
     }
-    return()=>{mounted=false;removeStorageSync();if(saveTimer.current!==null)window.clearTimeout(saveTimer.current)}
+    return()=>{mounted=false;preloadImages.forEach(image=>{image.onload=null;image.onerror=null});removeStorageSync();if(saveTimer.current!==null)window.clearTimeout(saveTimer.current)}
   },[])
 
   useEffect(()=>{
