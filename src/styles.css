@@ -199,3 +199,24 @@
 
 /* Keep IDA crisp on high-DPI displays without scaling the whole desktop. */
 svg{shape-rendering:geometricPrecision;text-rendering:geometricPrecision}img,video,canvas{image-rendering:auto}button,input,select,textarea{-webkit-font-smoothing:auto;text-rendering:optimizeLegibility}
+
+/* IDA sleep: four-second preparation, then a full-screen bouncing hilal. */
+.sleep-transition-screen{background:radial-gradient(ellipse at 50% 42%,#12182b 0%,#060811 48%,#020307 100%);z-index:2147483647;animation:sleep-screen-in .55s ease-out both}
+.sleep-preparing{display:flex;flex-direction:column;align-items:center;gap:14px;animation:sleep-prepare-in .6s cubic-bezier(.2,.8,.2,1) both}
+.sleep-logo-pulse{width:84px;height:84px;display:grid;place-items:center;border-radius:26px;background:linear-gradient(145deg,#ffffff12,#ffffff03);border:1px solid #ffffff17;box-shadow:0 15px 60px #738bff17;animation:sleep-logo-breathe 1.8s ease-in-out infinite}
+.sleep-logo-pulse .hilal-crescent{font-size:54px;color:#fff;filter:drop-shadow(0 0 16px #b7c6ff55)}
+.sleep-transition-screen .shutdown-message{font-size:19px;letter-spacing:-.025em}
+.sleep-transition-screen .shutdown-sub{font-size:12px;color:#a2abc0}
+.sleep-preparing-dots{display:flex;gap:7px;margin-top:4px}
+.sleep-preparing-dots i{width:5px;height:5px;border-radius:50%;background:#dce5ff;opacity:.3;animation:sleep-dot 1s ease-in-out infinite}
+.sleep-preparing-dots i:nth-child(2){animation-delay:.15s}.sleep-preparing-dots i:nth-child(3){animation-delay:.3s}
+.sleep-bounce-hint{position:absolute;top:24px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.05em;color:#a5afc9;animation:sleep-hint-in .7s ease-out both}
+.sleep-bouncing-logo{width:74px;height:74px;display:grid;place-items:center;border-radius:22px;background:linear-gradient(145deg,#ffffff18,#ffffff04);border:1px solid #ffffff25;box-shadow:0 10px 35px #6d83ff30;will-change:left,top;pointer-events:none;animation:sleep-bounce-glow 1.4s ease-in-out infinite alternate}
+.sleep-bouncing-logo .hilal-crescent{font-size:49px;color:#fff;filter:drop-shadow(0 0 12px #d9e4ff65)}
+@keyframes sleep-screen-in{from{opacity:0}to{opacity:1}}
+@keyframes sleep-prepare-in{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes sleep-logo-breathe{0%,100%{transform:translateY(0) scale(1);box-shadow:0 15px 60px #738bff17}50%{transform:translateY(-5px) scale(1.035);box-shadow:0 20px 70px #738bff35}}
+@keyframes sleep-dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
+@keyframes sleep-hint-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sleep-bounce-glow{from{filter:brightness(.9);box-shadow:0 10px 30px #6d83ff20}to{filter:brightness(1.18);box-shadow:0 12px 42px #6d83ff50}}
+@media(prefers-reduced-motion:reduce){.sleep-preparing,.sleep-logo-pulse,.sleep-preparing-dots i,.sleep-bouncing-logo{animation:none!important}}
