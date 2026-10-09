@@ -109,7 +109,7 @@ function BootScreen({ stage }: { stage:'loading'|'hi'|'working'|'install' }) {
 }
 
 function LanguageChoiceScreen({ selected, onSelect, onContinue }: { selected:'en'|'cs'|'vi'|'ar-YE'; onSelect:(v:'en'|'cs'|'vi'|'ar-YE')=>void; onContinue:()=>void }) {
-  const choices:[LanguageChoice, string, string, string][] = [['en','🇬🇧','English','English interface'],['cs','🇨🇿','Czech','Čeština'],['vi','🇻🇳','Vietnamese','Tiếng Việt'],['ar-YE','🇾🇪','Yemeni Arabic','العربية اليمنية']]
+  const choices:[LanguageChoice, string, string][] = [['en','English','English interface'],['cs','Czech','Čeština'],['vi','Vietnamese','Tiếng Việt'],['ar-YE','Yemeni Arabic','العربية اليمنية']]
   return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.3),transparent 45%),#080b12',padding:16,boxSizing:'border-box'}}>
     <style>{'@keyframes idaLanguageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.ida-language-choice{animation:idaLanguageIn .55s cubic-bezier(.2,.8,.2,1) both;transition:transform .2s,border-color .2s,background .2s}.ida-language-choice:hover{transform:translateY(-2px)}@media(prefers-reduced-motion:reduce){.ida-language-choice{animation:none;transition:none}}'}</style>
     <div style={{width:'min(560px,calc(100vw - 32px))',maxHeight:'94vh',overflowY:'auto',padding:'clamp(22px,4vw,34px)',boxSizing:'border-box',borderRadius:22,background:'rgba(18,22,32,.92)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)',animation:'idaLanguageIn .65s ease both'}}>
@@ -119,8 +119,8 @@ function LanguageChoiceScreen({ selected, onSelect, onContinue }: { selected:'en
         <div style={{marginTop:7,fontSize:13,lineHeight:1.6,opacity:.62}}>Pick the flag and language you’re most comfortable with. You can change this later in IDA Settings.</div>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,marginTop:24}}>
-        {choices.map(([id,flag,label,native],i)=><button className="ida-language-choice" key={id} onClick={()=>onSelect(id)} style={{animationDelay:(i*70)+'ms',minWidth:0,display:'flex',alignItems:'center',gap:12,padding:'15px 13px',borderRadius:14,border:selected===id?'1px solid rgba(210,225,255,.8)':'1px solid rgba(255,255,255,.1)',background:selected===id?'linear-gradient(135deg,rgba(135,164,218,.2),rgba(255,255,255,.06))':'rgba(255,255,255,.035)',color:'#fff',cursor:'pointer',textAlign:'left',boxShadow:selected===id?'0 0 0 2px rgba(180,205,255,.08)':'none'}}>
-          <span style={{fontSize:29,lineHeight:1,filter:'drop-shadow(0 3px 5px #0005)'}}>{flag}</span>
+        {choices.map(([id,label,native],i)=><button className="ida-language-choice" key={id} onClick={()=>onSelect(id)} style={{animationDelay:(i*70)+'ms',minWidth:0,display:'flex',alignItems:'center',gap:12,padding:'15px 13px',borderRadius:14,border:selected===id?'1px solid rgba(210,225,255,.8)':'1px solid rgba(255,255,255,.1)',background:selected===id?'linear-gradient(135deg,rgba(135,164,218,.2),rgba(255,255,255,.06))':'rgba(255,255,255,.035)',color:'#fff',cursor:'pointer',textAlign:'left',boxShadow:selected===id?'0 0 0 2px rgba(180,205,255,.08)':'none'}}>
+          <SetupFlag code={id}/>
           <span style={{display:'grid',gap:4,flex:1,minWidth:0}}><span style={{fontSize:14,fontWeight:650}}>{label}</span><span dir={id==='ar-YE'?'rtl':undefined} style={{fontSize:11,opacity:.58,overflowWrap:'anywhere'}}>{native}</span></span>
           <span style={{flexShrink:0,width:20,height:20,borderRadius:'50%',border:selected===id?'0':'1px solid rgba(255,255,255,.3)',background:selected===id?'#dfe9ff':'transparent',display:'grid',placeItems:'center',color:'#111',fontSize:12,fontWeight:800}}>{selected===id?'✓':''}</span>
         </button>)}
@@ -145,28 +145,38 @@ function FullscreenGuide({step,onNext,onBack,onContinue}:{step:number;onNext:()=
       <div style={{display:'flex',justifyContent:'space-between',gap:10,marginTop:22}}><button onClick={onBack} style={{...buttonStyle,width:'auto',padding:'0 18px',background:'transparent',border:'1px solid #ffffff25',color:'#fff',visibility:step===0?'hidden':'visible'}}>Back</button>{keyboard?<button onClick={onNext} style={{...buttonStyle,flex:1}}>Next step <span style={{marginLeft:7}}>→</span></button>:<button onClick={onContinue} style={{...buttonStyle,flex:1}}>Got it — choose my apps <span style={{marginLeft:7}}>→</span></button>}</div>
     </div></div>
 }
+function SetupFlag({ code }: { code:'en'|'cs'|'vi'|'ar-YE' }) {
+  const common={position:'absolute' as const,inset:0,overflow:'hidden' as const,borderRadius:5}
+  return <span aria-label={{en:'United Kingdom flag',cs:'Czech flag',vi:'Vietnam flag','ar-YE':'Yemen flag'}[code]} role="img" style={{position:'relative',display:'inline-block',width:34,height:24,flexShrink:0,borderRadius:6,overflow:'hidden',boxShadow:'0 2px 7px #0005',border:'1px solid #ffffff35',background:'#fff'}}>
+    {code==='en'&&<span style={{...common,background:'#21468b'}}><span style={{position:'absolute',width:'140%',height:7,background:'#fff',left:'-20%',top:8,transform:'rotate(35deg)'}}/><span style={{position:'absolute',width:'140%',height:7,background:'#fff',left:'-20%',top:8,transform:'rotate(-35deg)'}}/><span style={{position:'absolute',inset:'0 12px',background:'#fff'}}/><span style={{position:'absolute',inset:'7px 0',background:'#fff'}}/><span style={{position:'absolute',width:5,height:'100%',left:14,background:'#c8102e'}}/><span style={{position:'absolute',height:5,width:'100%',top:9,background:'#c8102e'}}/></span>}
+    {code==='cs'&&<span style={{...common,background:'linear-gradient(to bottom,#fff 0 50%,#d7141a 50% 100%)'}}><span style={{position:'absolute',left:0,top:0,width:0,height:0,borderTop:'12px solid transparent',borderBottom:'12px solid transparent',borderLeft:'17px solid #11457e'}}/></span>}
+    {code==='vi'&&<span style={{...common,background:'#da251d'}}><svg viewBox="0 0 100 70" width="100%" height="100%" style={{position:'absolute',inset:0}}><polygon points="50,12 56,34 79,34 60,47 67,66 50,54 33,66 40,47 21,34 44,34" fill="#ffde00"/></svg></span>}
+    {code==='ar-YE'&&<span style={{...common,background:'linear-gradient(to bottom,#ce1126 0 33.33%,#fff 33.33% 66.66%,#000 66.66% 100%)'}}/>}
+  </span>
+}
+function SetupAppLogo({ id }: { id:string }) {
+  const styles:Record<string,{bg:string;fg:string;symbol:string}>={DaMusic:{bg:'linear-gradient(145deg,#a78bfa,#6d28d9)',fg:'#fff',symbol:'♫'},DaEconomy:{bg:'linear-gradient(145deg,#facc15,#d97706)',fg:'#372400',symbol:'$'},DaCourt:{bg:'linear-gradient(145deg,#fb7185,#be123c)',fg:'#fff',symbol:'⚖'}}
+  const v=styles[id]||styles.DaMusic
+  return <span aria-hidden="true" style={{width:48,height:48,flexShrink:0,display:'grid',placeItems:'center',borderRadius:14,background:v.bg,color:v.fg,fontSize:id==='DaCourt'?25:29,fontWeight:800,boxShadow:'0 5px 16px #0004,inset 0 1px #ffffff55',border:'1px solid #ffffff35',textShadow:'0 1px 4px #0002'}}>{v.symbol}</span>
+}
 function AppChoiceScreen({ selected, setSelected, onContinue }: { selected:string[]; setSelected:(v:string[])=>void; onContinue:()=>void }) {
-  const choices=[['DaMusic','Music'],['DaEconomy','DaEconomy'],['DaCourt','DaCourt']]
+  const choices=[['DaMusic','Music','Your playlists and music, right on the desktop.'],['DaEconomy','DaEconomy','Your DaBoys bank, balance, and economy.'],['DaCourt','DaCourt','Trials, cases, and the courtroom.']]
   const toggle=(name:string)=>setSelected(selected.includes(name)?selected.filter(x=>x!==name):[...selected,name])
-  return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.3),transparent 45%),#080b12'}}>
-    <div style={{width:'min(560px,calc(100vw - 34px))',padding:'34px 36px',borderRadius:18,background:'rgba(18,22,32,.9)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)'}}>
-      <Hilal small/>
-      <div style={{textAlign:'center',marginTop:22}}>
-        <div style={{fontSize:27,fontWeight:600}}>Choose your IDA apps</div>
-        <div style={{marginTop:7,fontSize:13,opacity:.58}}>Would you like these apps ready on your desktop?</div>
+  return <div style={{...bootStyle,background:'radial-gradient(circle at 50% 35%,rgba(55,65,88,.3),transparent 45%),#080b12',padding:16,boxSizing:'border-box'}}>
+    <style>{'@keyframes idaChoiceIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes idaLogoFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(-2deg)}}.ida-app-choice{animation:idaChoiceIn .48s cubic-bezier(.2,.8,.2,1) both;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s}.ida-app-choice:hover{transform:translateY(-2px);box-shadow:0 10px 28px #0003}.ida-app-choice[aria-pressed=true]{box-shadow:0 0 0 2px #b9d0ff15,0 8px 22px #0002}.ida-app-choice:hover .ida-choice-logo{animation:idaLogoFloat .8s ease-in-out infinite}@media(prefers-reduced-motion:reduce){.ida-app-choice,.ida-choice-logo{animation:none!important;transition:none!important}}'}</style>
+    <div style={{width:'min(620px,calc(100vw - 32px))',maxHeight:'94vh',overflowY:'auto',padding:'clamp(22px,4vw,34px)',boxSizing:'border-box',borderRadius:22,background:'rgba(18,22,32,.93)',border:'1px solid rgba(255,255,255,.1)',boxShadow:'0 28px 90px rgba(0,0,0,.5)',backdropFilter:'blur(20px)',animation:'idaChoiceIn .6s ease both'}}>
+      <div style={{display:'flex',justifyContent:'center'}}><Hilal small/></div>
+      <div style={{textAlign:'center',marginTop:20}}><div style={{fontSize:'clamp(24px,4vw,29px)',fontWeight:650,letterSpacing:'-.035em'}}>Make IDA yours</div><div style={{margin:'8px auto 0',fontSize:13,lineHeight:1.65,opacity:.65,maxWidth:410}}>Choose the apps you want ready on your desktop. Tap a card to select or deselect it.</div></div>
+      <div style={{display:'grid',gap:10,marginTop:24}}>
+        {choices.map(([id,label,description],i)=>{const active=selected.includes(id);return <button className="ida-app-choice" aria-pressed={active} key={id} onClick={()=>toggle(id)} style={{animationDelay:(i*85)+'ms',width:'100%',boxSizing:'border-box',display:'flex',alignItems:'center',gap:14,padding:'14px 15px',borderRadius:15,border:active?'1px solid rgba(190,211,255,.8)':'1px solid rgba(255,255,255,.11)',background:active?'linear-gradient(105deg,rgba(135,164,218,.18),rgba(255,255,255,.055))':'rgba(255,255,255,.035)',color:'#fff',cursor:'pointer',textAlign:'left'}}>
+          <span className="ida-choice-logo"><SetupAppLogo id={id}/></span><span style={{display:'grid',gap:5,flex:1,minWidth:0}}><span style={{fontSize:15,fontWeight:650}}>{label}</span><span style={{fontSize:12,lineHeight:1.45,opacity:.58}}>{description}</span></span><span style={{width:23,height:23,flexShrink:0,borderRadius:8,border:active?'1px solid #dce7ff':'1px solid #ffffff40',background:active?'#dce7ff':'#ffffff06',display:'grid',placeItems:'center',color:'#111',fontSize:14,fontWeight:900,transition:'all .2s'}}>{active?'✓':''}</span>
+        </button>})}
       </div>
-      <div style={{display:'grid',gap:10,marginTop:25}}>
-        {choices.map(([id,label])=><button key={id} onClick={()=>toggle(id)} style={{display:'flex',alignItems:'center',gap:13,padding:'14px 15px',borderRadius:12,border:selected.includes(id)?'1px solid rgba(255,255,255,.5)':'1px solid rgba(255,255,255,.1)',background:selected.includes(id)?'rgba(255,255,255,.1)':'rgba(255,255,255,.035)',color:'#fff',cursor:'pointer',textAlign:'left'}}>
-          <span style={{width:20,height:20,borderRadius:6,border:'1px solid rgba(255,255,255,.3)',background:selected.includes(id)?'#fff':'transparent',display:'grid',placeItems:'center',color:'#111',fontSize:13}}>{selected.includes(id)?'✓':''}</span>
-          <span style={{fontSize:15}}>{label}</span>
-        </button>)}
-      </div>
-      <button onClick={onContinue} style={{...buttonStyle,marginTop:22}}>Continue</button>
-      <div style={{textAlign:'center',marginTop:12,fontSize:11,opacity:.38}}>You can change this later in IDA.</div>
+      <button onClick={onContinue} style={{...buttonStyle,marginTop:22,display:'flex',alignItems:'center',justifyContent:'center',gap:9}}>{selected.length ? 'Continue with '+selected.length+' '+(selected.length===1?'app':'apps') : 'Continue without extra apps'} <span>→</span></button>
+      <div style={{textAlign:'center',marginTop:12,fontSize:11,opacity:.42}}>You can change your apps later in IDA.</div>
     </div>
   </div>
 }
-
 function AccountSetup({ selectedApps, onCreated, onSkip }: { selectedApps:string[]; onCreated:(session:IdaSession,displayName:string,apps:string[])=>void; onSkip:()=>void }) {
   const [name,setName]=useState('')
   const [password,setPassword]=useState('')
