@@ -120,3 +120,9 @@
 .music-hero .damusic-visualizer span{max-width:none;min-width:1px;flex:1 1 0;box-shadow:0 0 5px currentColor;border-radius:999px 999px 2px 2px}
 @media(max-width:1000px){.music-hero{gap:18px;padding:24px 22px 18px}.music-hero .music-art{width:128px;height:128px;flex-basis:128px}.music-hero>div:nth-child(2){flex:0 1 260px;min-width:150px}.music-hero .damusic-visualizer{height:58px}}
 @media(max-width:620px){.music-hero{flex-wrap:wrap;gap:14px;padding:22px 18px 16px;min-height:0}.music-hero .music-art{width:110px;height:110px;flex-basis:110px}.music-hero>div:nth-child(2){flex:1 1 140px;min-width:120px}.music-hero h2{font-size:25px}.music-hero .damusic-visualizer{flex:1 0 100%;width:100%;min-width:0;height:48px;margin:0}.music-panel-content>.music-progress-panel{width:calc(100% - 36px)!important;margin:0 18px 14px!important;padding:10px 12px 12px!important}.music-panel-content>.music-progress-panel .play-button{width:54px;height:54px}}
+
+/* DaMusic spectrum: shorter overall so peaks stay medium and never dominate the cover. */
+.music-hero .damusic-visualizer{height:46px!important;max-height:46px!important}
+.music-hero .damusic-visualizer span{max-height:44px}
+@media(max-width:1000px){.music-hero .damusic-visualizer{height:42px!important;max-height:42px!important}}
+@media(max-width:620px){.music-hero .damusic-visualizer{height:38px!important;max-height:38px!important}}
