@@ -1065,7 +1065,7 @@ function MusicPanel({ volume }: { volume: number }) {
       audioSourceRef.current=source;
     }catch(error){console.warn('DaMusic visualizer could not attach to audio:',error)}
     return()=>{try{audioSourceRef.current?.disconnect();analyserRef.current?.disconnect();void audioContextRef.current?.close()}catch{};audioSourceRef.current=null;analyserRef.current=null;audioContextRef.current=null};
-  },[]);
+  },[view]);
   useEffect(()=>{
     let frame=0;
     const analyser=analyserRef.current;
@@ -1101,7 +1101,7 @@ function MusicPanel({ volume }: { volume: number }) {
     };
     frame=window.requestAnimationFrame(draw);
     return()=>window.cancelAnimationFrame(frame);
-  },[playing,track]);
+  },[playing,track,view]);
   useEffect(()=>{if(audioRef.current&&currentTime>0){const a=audioRef.current;const restore=()=>{if(Math.abs(a.currentTime-currentTime)>1)a.currentTime=Math.min(currentTime,a.duration||currentTime)};if(a.readyState>=1)restore();else a.addEventListener('loadedmetadata',restore,{once:true});return()=>a.removeEventListener('loadedmetadata',restore)}},[]);
   useEffect(()=>()=>{if(toastTimer.current)clearTimeout(toastTimer.current)},[]);
   const showTrackToast=(index:number)=>{const t=TRACKS[index];if(!t)return;const detail={title:t.title,artist:'IDA Default',image:t.image};setToast(detail);window.dispatchEvent(new CustomEvent('ida-now-playing',{detail}));if(toastTimer.current)clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToast(null),4200)};
