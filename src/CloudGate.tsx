@@ -352,7 +352,7 @@ export function CloudGate() {
     const localChangesPending=localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId
     // Start observing local edits before the network round-trip so a fast desktop
     // can still save changes without the cloud response overwriting them.
-    installStorageSync()
+    if(options.background)installStorageSync()
     let resetWindowLayout=false
     try { resetWindowLayout=sessionStorage.getItem('ida-reset-window-layout-once')==='1' } catch {}
     const {data,error:loadError}=await supabase.rpc('ida_load_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken})
