@@ -48,3 +48,14 @@
 .dx-zoom button:hover{background:#e5e5e5}
 .dx-zoom input{width:92px;accent-color:#217346;cursor:pointer}
 @media(max-width:760px){.dx-zoom input{width:55px}.dx-ribbon{min-height:65px}.dx-ribbon-group{padding-right:5px}}
+
+
+/* FortuneSheet-backed DaExcelent workspace */
+.dx-engine-shell{height:100%;min-height:0;position:relative;background:#fff}
+.dx-engine-workspace{flex:1;min-height:0;min-width:0;overflow:hidden;position:relative;background:#fff}
+.dx-engine-workspace>div{height:100%;min-height:0;width:100%}
+.dx-engine-workspace .fortune-sheet-container,.dx-engine-workspace .fortune-sheet-workbook,.dx-engine-workspace .luckysheet{height:100%;min-height:0}
+.dx-engine-shell .dx-open-panel{top:54px;right:14px;z-index:100}
+.dx-engine-shell .dx-open-panel>div button{width:auto}
+.dx-engine-shell .dx-actions button{white-space:nowrap}
+@media(max-width:760px){.dx-engine-shell .dx-titlebar{flex-wrap:wrap}.dx-engine-workspace{min-height:300px}}
