@@ -372,7 +372,9 @@ export function CloudGate() {
         stateToApply=repaired
         await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:repaired})
       }
-      applyLocalState(stateToApply)
+      // During fast resume the desktop is already mounted from local storage; do not
+      // replace its backing storage underneath the live React state.
+      if(!options.background)applyLocalState(stateToApply)
     } else if(Object.keys(localBeforeCloud.keys).length || localChangesPending || localChangesArrivedDuringLoad){
       // Preserve newer local edits instead of replacing them with an older cloud snapshot.
       const stateToSave=localChangesArrivedDuringLoad?readLocalState():localBeforeCloud
