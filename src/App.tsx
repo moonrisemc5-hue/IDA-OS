@@ -1,7 +1,7 @@
 import DaRawPanel from './DaRawPanel'
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ChevronDown, ChevronUp, ChevronRight, Download, Gauge, CarFront, Settings as Gear, Music2, Film, Trash2, Moon,
+  ChevronDown, ChevronUp, ChevronRight, Download, Gauge, CarFront, Settings as Gear, Music2, Film, Trash2, Moon, Plus,
   Minus, Pause, Play, Scale, Search, Settings2, SlidersHorizontal, Maximize2, ArrowUpDown,
   SunMedium, Volume2, VolumeX, Wifi, BatteryFull, Power, Folder, Sparkles, X, FileText, Clipboard, Scissors, Tv, SkipBack, SkipForward, ListMusic, Calculator, Sigma
 } from 'lucide-react'
