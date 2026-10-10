@@ -20,10 +20,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p public/bad-time
-          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --directory-prefix=/tmp/ida-bad-time https://sans-simulator.github.io/c2-sans-fight/
+          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --directory-prefix=/tmp/ida-bad-time https://sans-simulator.github.io/c2-sans-fight/ || wget_status=$?
+          if [[ "${wget_status:-0}" -gt 8 ]]; then exit "$wget_status"; fi
+          git clone --depth 1 https://github.com/sans-simulator/c2-sans-fight.git /tmp/ida-bad-time-source
           GAME_DIR="$(find /tmp/ida-bad-time -type f -name 'index.html' -printf '%h\\n' | head -n 1)"
           test -n "$GAME_DIR"
           cp -a "$GAME_DIR"/. public/bad-time/
+          if [[ -d /tmp/ida-bad-time-source/images ]]; then cp -a /tmp/ida-bad-time-source/images public/bad-time/; fi
+          if [[ -f /tmp/ida-bad-time-source/offlineClient.js ]]; then cp /tmp/ida-bad-time-source/offlineClient.js public/bad-time/; fi
           python3 - <<'PY'
           from pathlib import Path
           p = Path("public/bad-time/index.html")
