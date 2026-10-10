@@ -951,7 +951,7 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     if (e.buttons !== 1) return
     if (!dragging.current && (Math.abs(e.clientX-startPoint.current.x)>8 || Math.abs(e.clientY-startPoint.current.y)>8)) {
       dragging.current = true
-      onEdit()
+      // Do not switch desktop edit mode while dragging: that mode changes tile layout and caused a visible jump.
       tileRef.current?.setPointerCapture(e.pointerId)
       if (tileRef.current) {
         tileRef.current.style.cursor = 'grabbing'
