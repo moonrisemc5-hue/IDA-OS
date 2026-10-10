@@ -176,6 +176,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     const syncDesktop = () => setDesktop(mq.matches)
     syncDesktop(); mq.addEventListener?.('change', syncDesktop)
     const tick = window.setInterval(() => setClock(new Date()), 1000)
+    // Paint the desktop first; restore persisted settings and window state on the next frame.
+    const restoreFrame = window.requestAnimationFrame(() => {
     try {
       const savedPositions = localStorage.getItem('daapps-positions')
       const savedLanguage = localStorage.getItem('ida-language') as 'en'|'cs'|'vi'|'ar-YE'|null
@@ -239,7 +241,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     } finally {
       setWindowsHydrated(true)
     }
-    return () => { mq.removeEventListener?.('change', syncDesktop); window.clearInterval(tick) }
+    })
+    return () => { window.cancelAnimationFrame(restoreFrame); mq.removeEventListener?.('change', syncDesktop); window.clearInterval(tick) }
   }, [])
 
   useEffect(() => {
