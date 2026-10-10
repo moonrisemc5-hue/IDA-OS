@@ -774,7 +774,6 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   }
 
 
-  if (!mounted) return <div className="daapps-root" aria-hidden="true" />
   if (shutdown) return <ShutdownScreen />
   if (sleeping) return <SleepScreen onWake={()=>window.location.reload()} />
   if (restarting) return <RestartScreen progress={restartProgress} status={restartStatus} />
