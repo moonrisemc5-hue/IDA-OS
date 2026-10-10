@@ -116,37 +116,38 @@
 	<!-- Keep the Construct 2 fight from monopolizing the browser's main thread. -->
 	<script>
 	(function(){
+	  // Throttle the game's own animation loop without setTimeout callback queues.
+	  // Construct 2 schedules the next frame from inside each callback, so each
+	  // request below remains a single cancellable loop and runs at most ~30 FPS.
 	  var nativeRaf = window.requestAnimationFrame.bind(window);
 	  var nativeCancel = window.cancelAnimationFrame.bind(window);
-	  var lastFrame = 0;
-	  var pending = new Map();
 	  var nextId = 1;
-	  var frameInterval = 1000 / 30;
+	  var pending = new Map();
+	  var lastFrame = 0;
+	  var interval = 1000 / 30;
 	  window.requestAnimationFrame = function(callback) {
 	    var id = nextId++;
-	    var nativeId = nativeRaf(function(timestamp) {
-	      var wait = frameInterval - (timestamp - lastFrame);
-	      if (lastFrame && wait > 1) {
-	        var timer = window.setTimeout(function() {
-	          pending.delete(id);
-	          lastFrame = performance.now();
-	          callback(lastFrame);
-	        }, wait);
-	        pending.set(id, { timer: timer, nativeId: null });
-	      } else {
+	    var task = { nativeId: 0, cancelled: false };
+	    pending.set(id, task);
+	    function tick(timestamp) {
+	      if (task.cancelled) return;
+	      var elapsed = timestamp - lastFrame;
+	      if (!lastFrame || elapsed >= interval - 0.5) {
 	        pending.delete(id);
 	        lastFrame = timestamp;
 	        callback(timestamp);
+	      } else {
+	        task.nativeId = nativeRaf(tick);
 	      }
-	    });
-	    pending.set(id, { timer: null, nativeId: nativeId });
+	    }
+	    task.nativeId = nativeRaf(tick);
 	    return id;
 	  };
 	  window.cancelAnimationFrame = function(id) {
 	    var task = pending.get(id);
 	    if (!task) return;
-	    if (task.nativeId !== null) nativeCancel(task.nativeId);
-	    if (task.timer !== null) window.clearTimeout(task.timer);
+	    task.cancelled = true;
+	    if (task.nativeId) nativeCancel(task.nativeId);
 	    pending.delete(id);
 	  };
 	})();
