@@ -160,6 +160,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [sleeping, setSleeping] = useState(false)
   const [shutdown, setShutdown] = useState(false)
   const [restarting, setRestarting] = useState(false)
+  const [restartProgress, setRestartProgress] = useState(0)
+  const [restartStatus, setRestartStatus] = useState('Saving your desktop...')
   const [language, setLanguage] = useState<'en'|'cs'|'vi'|'ar-YE'>('en')
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const [languagePrompt, setLanguagePrompt] = useState<'en'|'cs'|'vi'|'ar-YE'|null>(null)
@@ -685,10 +687,51 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     setSearchOpen(false)
     setContextMenu(null)
     setRestarting(true)
-    window.setTimeout(() => {
-      setRestarting(false)
-      onRestartToLock?.()
-    }, 10000)
+    setRestartProgress(0)
+    setRestartStatus('Saving your desktop...')
+    const started = Date.now()
+    let completed = 0
+    let finished = false
+    const tasks = [
+      ...Object.values(WALLPAPERS).map((src) => () => new Promise<void>((resolve) => {
+        const image = new Image()
+        image.onload = () => resolve()
+        image.onerror = () => resolve()
+        image.src = src
+        if (image.complete) resolve()
+      })),
+      ...TRACKS.map((track) => () => new Promise<void>((resolve) => {
+        const audio = new Audio()
+        audio.preload = 'metadata'
+        audio.onloadedmetadata = () => { audio.removeAttribute('src'); audio.load(); resolve() }
+        audio.onerror = () => resolve()
+        audio.src = track.src
+        audio.load()
+      })),
+    ]
+    const statusFor = (count:number) => count < Object.keys(WALLPAPERS).length
+      ? 'Loading wallpapers...'
+      : count < Object.keys(WALLPAPERS).length + TRACKS.length
+        ? 'Checking music library...'
+        : 'Finishing desktop startup...'
+    setRestartStatus('Loading wallpapers...')
+    const preload = Promise.all(tasks.map(async (task) => {
+      try { await task() } catch {}
+      completed += 1
+      setRestartProgress(Math.round(completed / tasks.length * 90))
+      setRestartStatus(statusFor(completed))
+    }))
+    const minimumWait = new Promise<void>((resolve) => window.setTimeout(resolve, Math.max(0, 10000 - (Date.now() - started))))
+    Promise.all([preload, minimumWait]).then(() => {
+      if (finished) return
+      finished = true
+      setRestartProgress(100)
+      setRestartStatus('Ready. Opening your desktop...')
+      window.setTimeout(() => {
+        setRestarting(false)
+        onRestartToLock?.()
+      }, 450)
+    })
   }
 
   const uploadWallpaper = (file: File) => {
@@ -707,7 +750,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   if (!mounted) return <div className="daapps-root" aria-hidden="true" />
   if (shutdown) return <ShutdownScreen />
   if (sleeping) return <SleepScreen onWake={()=>window.location.reload()} />
-  if (restarting) return <RestartScreen />
+  if (restarting) return <RestartScreen progress={restartProgress} status={restartStatus} />
 
   return (
     <main
@@ -1272,7 +1315,7 @@ function ExternalAppPanel({url,name}:{url:string;name:string}){return <iframe cl
 function ShutdownScreen(){return <div className="shutdown-screen"><div className="shutdown-logo">IDA</div><div className="shutdown-spinner"/><div className="shutdown-message">Shutting down IDA</div><div className="shutdown-sub">Closing IDA...</div></div>}
 function SleepScreen({onWake}:{onWake:()=>void}){const [bouncing,setBouncing]=useState(false);const [point,setPoint]=useState({x:40,y:100});const pointRef=useRef({x:40,y:100});const velocity=useRef({x:2.7,y:2.1});const logo=useRef<HTMLDivElement>(null);useEffect(()=>{const timer=window.setTimeout(()=>setBouncing(true),4000);return()=>window.clearTimeout(timer)},[]);useEffect(()=>{if(!bouncing)return;let raf=0;let last=0;const tick=(now:number)=>{if(now-last>15){last=now;const el=logo.current;const w=window.innerWidth,h=window.innerHeight,box=el?.getBoundingClientRect();const bw=box?.width||74,bh=box?.height||74;let x=pointRef.current.x+velocity.current.x,y=pointRef.current.y+velocity.current.y;if(x<=0||x+bw>=w)velocity.current.x*=-1;if(y<=0||y+bh>=h)velocity.current.y*=-1;x=Math.max(0,Math.min(w-bw,x));y=Math.max(0,Math.min(h-bh,y));pointRef.current={x,y};setPoint({x,y})}raf=window.requestAnimationFrame(tick)};raf=window.requestAnimationFrame(tick);return()=>window.cancelAnimationFrame(raf)},[bouncing]);return <div className="shutdown-screen sleep-transition-screen" role="button" tabIndex={0} aria-label="Wake IDA and open the lock screen" onClick={onWake} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onWake()}}} style={{cursor:'pointer',overflow:'hidden',userSelect:'none'}}>{!bouncing?<div className="sleep-preparing"><div className="sleep-logo-pulse"><HilalLogo/></div><div className="shutdown-message">Preparing IDA to sleep</div><div className="shutdown-sub">This may take a moment</div><div className="sleep-preparing-dots"><i/><i/><i/></div></div>:<><div className="sleep-bounce-hint">IDA is sleeping · Click anywhere to wake</div><div ref={logo} className="sleep-bouncing-logo" style={{position:'absolute',left:point.x,top:point.y}}><HilalLogo/></div></>}</div>}
 function HilalLogo({small=false}:{small?:boolean}){return <span className={'hilal-logo '+(small?'hilal-small':'')} aria-hidden="true"><span className="hilal-crescent">☾</span></span>}
-function RestartScreen(){return <div className="restart-screen"><div className="restart-logo"><HilalLogo/></div><div className="restart-spinner"><span/></div><div className="restart-message">Restarting IDA</div><div className="restart-sub">Don't turn off the web</div><div className="restart-progress"><span/></div><div className="restart-status">Almost there...</div></div>}
+function RestartScreen({progress=0,status='Almost there...'}:{progress?:number;status?:string}){return <div className="restart-screen"><div className="restart-logo"><HilalLogo/></div><div className="restart-spinner"><span/></div><div className="restart-message">Restarting IDA</div><div className="restart-sub">Don't turn off the web</div><div className="restart-progress"><span style={{width:Math.max(0,Math.min(100,progress))+'%',transition:'width 240ms ease'}}/></div><div className="restart-status">{status} {progress>0&&<span>({progress}%)</span>}</div></div>}
 function PowerMenu({onShutdown,onSleep,onRestart,onCancel}:{onShutdown:()=>void;onSleep:()=>void;onRestart:()=>void;onCancel:()=>void}){return <section className="power-menu" onPointerDown={e=>e.stopPropagation()}><div className="power-title"><Power size={18}/><strong>Power</strong></div><button onClick={onShutdown}><Power size={18}/><span><strong>Shut down</strong><small>Close IDA</small></span></button><button onClick={onSleep}><span className="sleep-icon">◐</span><span><strong>Sleep</strong><small>Keep IDA open and resume later</small></span></button><button onClick={onRestart}><span className="restart-icon">↻</span><span><strong>Restart IDA</strong><small>Restart the IDA desktop</small></span></button><button className="power-cancel" onClick={onCancel}>Cancel</button></section>}
 
 function WindowFrame({app,state,active,onFocus,onPatch,onMinimize,onClose,onMaximize,onContextMenu,children}:{app:AppItem;state:any;active:boolean;onFocus:()=>void;onPatch:(p:any)=>void;onMinimize:()=>void;onClose:()=>void;onMaximize:()=>void;onContextMenu?:(x:number,y:number)=>void;children:React.ReactNode}) {
