@@ -345,10 +345,14 @@ export function CloudGate() {
     originalMethods.current=null
   }
 
-  const loadUser=async(nextSession:IdaSession)=>{
-    setReady(false);setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
+  const loadUser=async(nextSession:IdaSession, options:{background?:boolean}={})=>{
+    if(!options.background)setReady(false)
+    setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
     const localBeforeCloud=readLocalState()
     const localChangesPending=localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId
+    // Start observing local edits before the network round-trip so a fast desktop
+    // can still save changes without the cloud response overwriting them.
+    installStorageSync()
     let resetWindowLayout=false
     try { resetWindowLayout=sessionStorage.getItem('ida-reset-window-layout-once')==='1' } catch {}
     const {data,error:loadError}=await supabase.rpc('ida_load_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken})
@@ -358,7 +362,8 @@ export function CloudGate() {
       }
       setError('Cloud sync is temporarily unavailable. Your IDA sign-in and local desktop are being kept.');installStorageSync();setReady(true);return
     }
-    if(data&&looksLikeIdaState(data)&&!localChangesPending){
+    const localChangesArrivedDuringLoad=localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId
+    if(data&&looksLikeIdaState(data)&&!localChangesPending&&!localChangesArrivedDuringLoad){
       let stateToApply=data
       if(resetWindowLayout){
         const repaired:CloudState={...data,keys:{...data.keys}}
@@ -368,9 +373,10 @@ export function CloudGate() {
         await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:repaired})
       }
       applyLocalState(stateToApply)
-    } else if(Object.keys(localBeforeCloud.keys).length || localChangesPending){
+    } else if(Object.keys(localBeforeCloud.keys).length || localChangesPending || localChangesArrivedDuringLoad){
       // Preserve newer local edits instead of replacing them with an older cloud snapshot.
-      const {error:saveError}=await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
+      const stateToSave=localChangesArrivedDuringLoad?readLocalState():localBeforeCloud
+      const {error:saveError}=await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:stateToSave})
       if(saveError)setError(saveError.message)
       else if(localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId) localStorage.removeItem(CLOUD_DIRTY_KEY)
     }
@@ -420,8 +426,13 @@ export function CloudGate() {
     if(stored){
       setSession(stored)
       const powerLock=localStorage.getItem('ida-power-lock-v1')==='1'
-      setDesktopOpen(!powerLock && localStorage.getItem('ida-desktop-session-open-v1')==='1')
-      void loadUser(stored)
+      const resumeDesktop=!powerLock && localStorage.getItem('ida-desktop-session-open-v1')==='1'
+      setDesktopOpen(resumeDesktop)
+      // If IDA was already open, render its saved local desktop immediately and
+      // synchronize the account snapshot in the background instead of showing a
+      // blank/boot screen while waiting for the cloud round-trip.
+      if(resumeDesktop)setReady(true)
+      void loadUser(stored,{background:resumeDesktop})
     } else {
       setReady(true)
       if(localStorage.getItem(GUEST_LOCK_KEY)==='1'){setSession({accountId:'',sessionToken:'',displayName:'IDA User'});setDesktopOpen(false)}
