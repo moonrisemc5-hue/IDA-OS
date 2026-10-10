@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Workbook } from '@fortune-sheet/react'
+import { FortuneExcelHelper, importToolBarItem, exportToolBarItem } from '@corbe30/fortune-excel'
 import '@fortune-sheet/react/dist/index.css'
 import { Check, FilePlus, FolderOpen, Save } from 'lucide-react'
 import './daexcelent.css'
@@ -94,10 +95,11 @@ export default function DaExcelentPanel({ initialFile, availableFiles = [], onSa
     } catch { return freshBook() }
   })
   const [engineKey, setEngineKey] = useState(0)
+  const [engineData, setEngineData] = useState<EngineSheet[]>(() => bookToEngine(book))
+  const sheetRef = useRef<any>(null)
   const [saved, setSaved] = useState(true)
   const [showOpen, setShowOpen] = useState(false)
   const [toast, setToast] = useState('')
-  const engineData = useMemo(() => bookToEngine(book), [engineKey])
   const persist = (next: Book) => {
     setBook(next)
     setSaved(false)
@@ -109,6 +111,7 @@ export default function DaExcelentPanel({ initialFile, availableFiles = [], onSa
     try {
       const next = decodeBook(initialFile.data)
       setBook(next)
+      setEngineData(bookToEngine(next))
       setEngineKey(k => k + 1)
       setToast('Workbook opened')
     } catch { setToast('Could not open this workbook') }
@@ -129,6 +132,7 @@ export default function DaExcelentPanel({ initialFile, availableFiles = [], onSa
     if (!window.confirm('Create a new workbook? Your current workbook remains autosaved on this device.')) return
     const next = freshBook()
     setBook(next)
+    setEngineData(bookToEngine(next))
     setEngineKey(k => k + 1)
     setToast('New workbook created')
   }
@@ -154,6 +158,7 @@ export default function DaExcelentPanel({ initialFile, availableFiles = [], onSa
     try {
       const next = decodeBook(file.data)
       setBook(next)
+      setEngineData(bookToEngine(next))
       setEngineKey(k => k + 1)
       setShowOpen(false)
       setToast('Workbook opened')
@@ -167,7 +172,8 @@ export default function DaExcelentPanel({ initialFile, availableFiles = [], onSa
       <div className="dx-actions"><button onClick={newBook}><FilePlus size={15}/>New</button><button onClick={() => setShowOpen(v => !v)}><FolderOpen size={15}/>Open</button><button className="dx-primary" onClick={exportBook}><Save size={15}/>Save to DaFiles</button></div>
     </header>
     <div className="dx-engine-workspace" key={engineKey}>
-      <Workbook data={engineData as any} lang="en" showToolbar={true} showFormulaBar={true} showSheetTabs={true} row={100} column={26} defaultFontSize={11} cellContextMenu={['copy','paste','|','insert-row','insert-column','delete-row','delete-column','delete-cell','hide-row','hide-column','clear','sort','filter','chart','image','link','data','cell-format']} onChange={(data: any) => { if (Array.isArray(data)) persist(engineToBook(data as EngineSheet[], book.active)) }} />
+      <FortuneExcelHelper setKey={setEngineKey} setSheets={setEngineData} sheetRef={sheetRef} config={{ import: { xlsx: true, csv: true }, export: { xlsx: true, csv: true } }} />
+      <Workbook ref={sheetRef} data={engineData as any} lang="en" showToolbar={true} showFormulaBar={true} showSheetTabs={true} row={100} column={26} defaultFontSize={11} cellContextMenu={['copy','paste','|','insert-row','insert-column','delete-row','delete-column','delete-cell','hide-row','hide-column','clear','sort','filter','chart','image','link','data','cell-format']} customToolbarItems={[importToolBarItem(), exportToolBarItem()]} onChange={(data: any) => { if (Array.isArray(data)) { setEngineData(data); persist(engineToBook(data as EngineSheet[], book.active)) } }} />
     </div>
     {showOpen && <div className="dx-open-panel"><div><b>Open a workbook from DaFiles</b><button onClick={() => setShowOpen(false)}>×</button></div>{availableFiles.filter(f => /\.daexcelent$/i.test(f.name)).map(f => <button key={f.id} onClick={() => openFile(f)}><FolderOpen size={16}/>{f.name}</button>)}{!availableFiles.some(f => /\.daexcelent$/i.test(f.name)) && <p>No DaExcelent workbooks saved in DaFiles yet.</p>}</div>}
     {toast && <div className="dx-toast"><Check size={15}/>{toast}</div>}
