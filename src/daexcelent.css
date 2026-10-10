@@ -59,3 +59,21 @@
 .dx-engine-shell .dx-open-panel>div button{width:auto}
 .dx-engine-shell .dx-actions button{white-space:nowrap}
 @media(max-width:760px){.dx-engine-shell .dx-titlebar{flex-wrap:wrap}.dx-engine-workspace{min-height:300px}}
+
+
+/* Refined Excel-like FortuneSheet chrome */
+.dx-engine-workspace{font-family:"Aptos",Calibri,"Segoe UI",Arial,sans-serif;color:#242424}
+.dx-engine-workspace .fortune-toolbar{min-height:72px;box-sizing:border-box;padding:7px 12px;background:#f8f9fa;border-bottom:1px solid #d1d5db;gap:2px;overflow-x:auto;scrollbar-width:thin}
+.dx-engine-workspace .fortune-toolbar-button,.dx-engine-workspace .fortune-toolbar-combo{border-radius:3px;margin:2px;padding:4px}
+.dx-engine-workspace .fortune-toolbar-button:hover,.dx-engine-workspace .fortune-toolbar-combo:hover{background:#e7eee9;outline:1px solid #c7d9ce}
+.dx-engine-workspace .fortune-toolbar-button:active,.dx-engine-workspace .fortune-toolbar-combo:active{background:#d3e7da}
+.dx-engine-workspace .fortune-toolbar-divider{height:34px;background:#d4d8d5;margin:0 5px}
+.dx-engine-workspace .fortune-sheet-container{border:0;border-radius:0;box-shadow:none}
+.dx-engine-workspace .fortune-sheet-container input,.dx-engine-workspace .fortune-sheet-container textarea{font-family:inherit}
+.dx-engine-workspace .fortune-sheet-container ::selection{background:#cfe5ff}
+.dx-engine-workspace .fortune-sheet-container .fortune-sheet-tab{border-radius:0}
+.dx-engine-workspace .fortune-sheet-container .fortune-sheet-tab-active{border-bottom:2px solid #217346}
+.dx-engine-shell .dx-document-title{font-weight:500}
+.dx-engine-shell .dx-saved{color:#217346}
+.dx-engine-shell .dx-saving{color:#8a5a00}
+@media(max-width:760px){.dx-engine-workspace .fortune-toolbar{min-height:56px;padding:5px 6px}}
