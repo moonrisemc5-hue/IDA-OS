@@ -40,7 +40,14 @@ function readLocalState(): CloudState {
     const key = localStorage.key(i)
     if (!key || !isSyncKey(key)) continue
     const value = localStorage.getItem(key)
-    if (value !== null) keys[key] = value
+    if (value === null) continue
+    // Keep large binary assets local. Sending base64 images (custom wallpapers,
+    // paint canvases, imported photos) inside every account snapshot can make the
+    // JSONB upsert exceed Supabase's statement timeout. The original values remain
+    // in this browser's localStorage; only lightweight settings/state are cloud-synced.
+    if (value.startsWith('data:image/') || value.startsWith('data:video/')) continue
+    if (value.length > 250_000) continue
+    keys[key] = value
   }
   return { version: 1, keys }
 }
