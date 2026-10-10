@@ -44,6 +44,8 @@ export default function DaExcelentPanel({initialFile,availableFiles=[],onSaveToF
  const newBook=()=>{if(!window.confirm('Create a new workbook? Your current workbook remains autosaved on this device.'))return;setBook(freshBook());setActive(0);setSelected('A1');setToast('New workbook created')}
  const addSheet=()=>{setBook(b=>({...b,active:b.sheets.length,sheets:[...b.sheets,{name:'Sheet'+(b.sheets.length+1),cells:{}}]}));setActive(book.sheets.length);setSelected('A1')}
  const renameSheet=()=>{const name=window.prompt('Name this sheet',sheet.name);if(name?.trim())setBook(b=>({...b,sheets:b.sheets.map((s,i)=>i===active?{...s,name:name.trim().slice(0,31)}:s)}))}
+ const addRow=()=>{setRows(n=>Math.min(300,n+1));setToast('Row added')}
+ const addCol=()=>{setCols(n=>Math.min(50,n+1));setToast('Column added')}
  const exportBook=()=>{const name=window.prompt('Workbook name','Workbook');if(name===null)return;const safe=name.trim().replace(/[\\/:*?"<>|]/g,'').slice(0,80)||'Workbook';const json=JSON.stringify({...book,active},null,2);const data='data:application/vnd.ida.daexcelent+json;base64,'+btoa(unescape(encodeURIComponent(json)));if(onSaveToFiles){onSaveToFiles(safe+'.daexcelent','application/vnd.ida.daexcelent+json',data);setToast('Saved to DaFiles')}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));a.download=safe+'.daexcelent';a.click();URL.revokeObjectURL(a.href)}}
  const format=(fmt:Cell['fmt'])=>patchSelected({fmt})
  const insertOperator=(op:string)=>{const base=selectedCell.v||'';const next=base.startsWith('=')?base+op:'='+base+op;setEdit(next);setFormulaBar(next);setEditing(true)}
