@@ -1,181 +1,92 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Workbook } from '@fortune-sheet/react'
-import { FortuneExcelHelper, importToolBarItem, exportToolBarItem } from '@corbe30/fortune-excel'
+import * as XLSX from 'xlsx'
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, WrapText, Plus, Trash2, Save, FolderOpen, FilePlus, Download, Upload, Search, Sigma, Grid3X3, Palette, Type, Table2, Undo2, Redo2, Check, ChevronDown, Calculator, Rows3, Columns3, Snowflake, Eye, FileSpreadsheet, X } from 'lucide-react'
 import '@fortune-sheet/react/dist/index.css'
-import { Check, FilePlus, FolderOpen, Save } from 'lucide-react'
 import './daexcelent.css'
 
-type Cell = { v: string; bold?: boolean; italic?: boolean; underline?: boolean; color?: string; bg?: string; align?: 'left' | 'center' | 'right'; fmt?: 'general' | 'number' | 'currency' | 'percent'; wrap?: boolean; border?: boolean; font?: string }
+type Cell = { v: string; bold?: boolean; italic?: boolean; underline?: boolean; color?: string; bg?: string; align?: 'left'|'center'|'right'; fmt?: 'general'|'number'|'currency'|'percent'|'date'; wrap?: boolean; border?: boolean; font?: string }
 type Sheet = { name: string; cells: Record<string, Cell> }
 type Book = { version: 1; active: number; sheets: Sheet[] }
 type SavedFile = { id: string; name: string; mime?: string; data?: string; location?: string }
-type EngineCell = { r: number; c: number; v: Record<string, any> }
-type EngineSheet = { name: string; celldata: EngineCell[]; [key: string]: any }
-
-const colName = (n: number) => { let s = ''; while (n >= 0) { s = String.fromCharCode(n % 26 + 65) + s; n = Math.floor(n / 26) - 1 } return s }
-const parseRef = (ref: string) => { const m = ref.toUpperCase().match(/^([A-Z]+)([1-9]\d*)$/); if (!m) return null; let c = 0; for (const ch of m[1]) c = c * 26 + ch.charCodeAt(0) - 64; return { r: Number(m[2]) - 1, c: c - 1 } }
-const freshBook = (): Book => ({ version: 1, active: 0, sheets: [{ name: 'Sheet1', cells: {} }] })
-
-function bookToEngine(book: Book): EngineSheet[] {
-  const sheets = book.sheets.length ? book.sheets : freshBook().sheets
-  return sheets.map(sheet => {
-    const celldata: EngineCell[] = []
-    for (const [address, cell] of Object.entries(sheet.cells || {})) {
-      const p = parseRef(address)
-      if (!p) continue
-      const formula = cell.v.startsWith('=') ? cell.v.slice(1) : undefined
-      const numeric = cell.v !== '' && !formula && Number.isFinite(Number(cell.v))
-      const v: Record<string, any> = {
-        v: formula ? null : (numeric ? Number(cell.v) : cell.v),
-        m: formula ? undefined : cell.v,
-        ct: { fa: cell.fmt === 'currency' ? '$#,##0.00' : cell.fmt === 'percent' ? '0.00%' : cell.fmt === 'number' ? '#,##0.########' : 'General', t: numeric || formula ? 'n' : 'g' },
-      }
-      if (formula) v.f = formula
-      if (cell.bold) v.bl = 1
-      if (cell.italic) v.it = 1
-      if (cell.underline) v.un = 1
-      if (cell.color) v.fc = cell.color
-      if (cell.bg) v.bg = cell.bg
-      if (cell.align) v.ht = cell.align === 'left' ? 1 : cell.align === 'center' ? 0 : 2
-      if (cell.wrap) v.tb = 2
-      if (cell.border) v.bd = { left: { style: 1, color: '#808080' }, right: { style: 1, color: '#808080' }, top: { style: 1, color: '#808080' }, bottom: { style: 1, color: '#808080' } }
-      if (cell.font) v.ff = cell.font
-      celldata.push({ r: p.r, c: p.c, v })
-    }
-    return { name: sheet.name, celldata, config: {} }
-  })
+type ECell = { r:number; c:number; v:any }
+type ESheet = { name?:string; celldata?:ECell[]; data?:any[][]; [key:string]:any }
+const freshBook = ():Book => ({version:1,active:0,sheets:[{name:'Sheet1',cells:{}}]})
+const colName = (n:number) => { let s=''; while(n>=0){s=String.fromCharCode(n%26+65)+s;n=Math.floor(n/26)-1} return s }
+const parseRef = (s:string) => { const m=s.trim().toUpperCase().match(/^([A-Z]+)([1-9]\d*)$/); if(!m)return null; let c=0; for(const ch of m[1])c=c*26+ch.charCodeAt(0)-64; return {r:Number(m[2])-1,c:c-1} }
+const parseRange = (s:string) => { const parts=s.replace(/\$/g,'').split(':'); const a=parseRef(parts[0]); const b=parseRef(parts[1]||parts[0]); if(!a||!b)return null; return {r1:Math.min(a.r,b.r),r2:Math.max(a.r,b.r),c1:Math.min(a.c,b.c),c2:Math.max(a.c,b.c)} }
+const asText = (v:any) => v===null||v===undefined?'':String(v)
+function bookToEngine(book:Book):ESheet[] {
+ return (book.sheets?.length?book.sheets:freshBook().sheets).map((sheet,index)=>({name:sheet.name||'Sheet'+(index+1),order:index,status:index===book.active?1:0,row:100,column:26,defaultRowHeight:22,defaultColWidth:92,celldata:Object.entries(sheet.cells||{}).flatMap(([address,cell])=>{const p=parseRef(address);if(!p)return[];const formula=cell.v.startsWith('=');const numeric=!formula&&cell.v.trim()!==''&&Number.isFinite(Number(cell.v));const v:any={v:formula?null:(numeric?Number(cell.v):cell.v),m:formula?'':cell.v,ct:{fa:cell.fmt==='currency'?'$#,##0.00':cell.fmt==='percent'?'0.00%':cell.fmt==='number'?'#,##0.00':cell.fmt==='date'?'yyyy-mm-dd':'General',t:formula||numeric?'n':'g'}};if(formula)v.f=cell.v.slice(1);if(cell.bold)v.bl=1;if(cell.italic)v.it=1;if(cell.underline)v.un=1;if(cell.color)v.fc=cell.color;if(cell.bg)v.bg=cell.bg;if(cell.align)v.ht=cell.align==='left'?1:cell.align==='center'?0:2;if(cell.wrap)v.tb=2;if(cell.font)v.ff=cell.font;if(cell.border)v.bd={left:{style:1,color:'#808080'},right:{style:1,color:'#808080'},top:{style:1,color:'#808080'},bottom:{style:1,color:'#808080'}};return[{r:p.r,c:p.c,v}]})}))
+}
+function engineToBook(data:ESheet[],active:number):Book {
+ const sheets:Sheet[]=(data||[]).map((sheet,index)=>{const cells:Record<string,Cell>={};const put=(r:number,c:number,v:any)=>{if(!v)return;const address=colName(c)+String(r+1);const formula=typeof v.f==='string'&&v.f?'='+v.f.replace(/^=/,''):undefined;const raw=v.v??v.m??'';const cell:Cell={v:formula??asText(raw)};if(v.bl)cell.bold=true;if(v.it)cell.italic=true;if(v.un||v.cl)cell.underline=true;if(v.fc)cell.color=String(v.fc);if(v.bg)cell.bg=String(v.bg);if(v.ht===1)cell.align='left';if(v.ht===0)cell.align='center';if(v.ht===2)cell.align='right';if(v.tb)cell.wrap=true;if(v.bd)cell.border=true;if(v.ff)cell.font=String(v.ff);const fmt=String(v.ct?.fa||'').toLowerCase();if(fmt.includes('%'))cell.fmt='percent';else if(fmt.includes('$')||fmt.includes('€')||fmt.includes('£'))cell.fmt='currency';else if(fmt.includes('yy')||fmt.includes('dd'))cell.fmt='date';else if(fmt.includes('#')||fmt.includes('0.'))cell.fmt='number';if(cell.v!==''||cell.bold||cell.italic||cell.underline||cell.bg||cell.color||cell.border||cell.font||cell.fmt)cells[address]=cell}
+  if(Array.isArray(sheet.celldata))for(const e of sheet.celldata)if(e)put(e.r,e.c,e.v)
+  if(Array.isArray(sheet.data))for(let r=0;r<sheet.data.length;r++){const row=sheet.data[r];if(Array.isArray(row))for(let c=0;c<row.length;c++){const v=row[c];if(v&&typeof v==='object'&&('v'in v||'f'in v||'m'in v))put(r,c,v);else if(v!==null&&v!==undefined&&v!=='')put(r,c,{v,m:String(v)})}}
+  return {name:String(sheet.name||'Sheet'+(index+1)),cells}})
+ return {version:1,active:Math.max(0,Math.min(active,Math.max(0,sheets.length-1))),sheets:sheets.length?sheets:freshBook().sheets}
+}
+function decodeBook(data:string):Book { const raw=data.includes(',')?data.slice(data.indexOf(',')+1):data;const parsed=JSON.parse(decodeURIComponent(escape(atob(raw))));if(parsed?.version===1&&Array.isArray(parsed.sheets)&&parsed.sheets.length)return parsed;throw new Error('Not a DaExcelent workbook') }
+function bookFromXlsx(wb:XLSX.WorkBook):Book {
+ const sheets:Sheet[]=wb.SheetNames.map(name=>{const ws=wb.Sheets[name];const cells:Record<string,Cell>={};if(ws?.['!ref']){const range=XLSX.utils.decode_range(ws['!ref']);for(let r=range.s.r;r<=range.e.r;r++)for(let c=range.s.c;c<=range.e.c;c++){const address=XLSX.utils.encode_cell({r,c});const x:any=ws[address];if(!x)continue;const cell:Cell={v:x.f?'='+x.f:asText(x.v)};if(x.z){const z=String(x.z);if(z.includes('%'))cell.fmt='percent';else if(z.includes('$')||z.includes('€'))cell.fmt='currency';else if(z.toLowerCase().includes('yy')||z.toLowerCase().includes('dd'))cell.fmt='date';else if(/[0#]\.[0#]/.test(z))cell.fmt='number'}if(x.s?.font?.bold)cell.bold=true;if(x.s?.font?.italic)cell.italic=true;if(x.s?.font?.underline)cell.underline=true;if(x.s?.font?.color?.rgb)cell.color='#'+String(x.s.font.color.rgb).slice(-6);if(x.s?.fill?.fgColor?.rgb)cell.bg='#'+String(x.s.fill.fgColor.rgb).slice(-6);if(x.s?.alignment?.horizontal)cell.align=x.s.alignment.horizontal==='center'?'center':x.s.alignment.horizontal==='right'?'right':'left';if(cell.v!==''||cell.fmt||cell.bold||cell.italic||cell.bg||cell.color)cells[address]=cell}}return{name,cells}})
+ return {version:1,active:0,sheets:sheets.length?sheets:freshBook().sheets}
+}
+function bookToXlsx(book:Book):XLSX.WorkBook {
+ const wb=XLSX.utils.book_new()
+ for(const sheet of (book.sheets.length?book.sheets:freshBook().sheets)){const ws:any={};let maxR=0,maxC=0;for(const [address,cell] of Object.entries(sheet.cells||{})){const p=parseRef(address);if(!p)continue;const formula=cell.v.startsWith('=');const raw=formula?cell.v.slice(1):cell.v;const numeric=!formula&&raw.trim()!==''&&Number.isFinite(Number(raw));const x:any=formula?{t:'n',f:raw}:numeric?{t:'n',v:Number(raw)}:{t:'s',v:raw};if(cell.fmt==='currency')x.z='$#,##0.00';else if(cell.fmt==='percent')x.z='0.00%';else if(cell.fmt==='number')x.z='#,##0.00';else if(cell.fmt==='date')x.z='yyyy-mm-dd';ws[address]=x;maxR=Math.max(maxR,p.r);maxC=Math.max(maxC,p.c)}ws['!ref']='A1:'+colName(maxC)+String(maxR+1);XLSX.utils.book_append_sheet(wb,ws,sheet.name.slice(0,31)||'Sheet')}
+ return wb
 }
 
-function engineToBook(data: EngineSheet[], active: number): Book {
-  const sheets: Sheet[] = (data || []).map((sheet, index) => {
-    const cells: Record<string, Cell> = {}
-    const entries: EngineCell[] = Array.isArray(sheet.celldata) ? sheet.celldata : []
-    for (const entry of entries) {
-      if (!entry || !entry.v) continue
-      const address = colName(entry.c) + (entry.r + 1)
-      const v = entry.v
-      const formula = typeof v.f === 'string' && v.f ? '=' + v.f.replace(/^=/, '') : undefined
-      const raw = v.v ?? v.m ?? ''
-      const cell: Cell = { v: formula ?? (raw === null || raw === undefined ? '' : String(raw)) }
-      if (v.bl) cell.bold = true
-      if (v.it) cell.italic = true
-      if (v.un) cell.underline = true
-      if (v.fc) cell.color = String(v.fc)
-      if (v.bg) cell.bg = String(v.bg)
-      if (v.ht === 1) cell.align = 'left'
-      else if (v.ht === 0) cell.align = 'center'
-      else if (v.ht === 2) cell.align = 'right'
-      if (v.tb) cell.wrap = true
-      if (v.bd) cell.border = true
-      if (v.ff) cell.font = String(v.ff)
-      const fmt = String(v.ct?.fa || '').toLowerCase()
-      if (fmt.includes('%')) cell.fmt = 'percent'
-      else if (fmt.includes('$') || fmt.includes('€') || fmt.includes('£')) cell.fmt = 'currency'
-      else if (fmt.includes('#') || fmt.includes('0.')) cell.fmt = 'number'
-      if (cell.v !== '' || cell.bold || cell.italic || cell.underline || cell.bg || cell.color || cell.border || cell.font || cell.fmt) cells[address] = cell
-    }
-    return { name: String(sheet.name || 'Sheet' + (index + 1)), cells }
-  })
-  return { version: 1, active: Math.max(0, Math.min(active, Math.max(0, sheets.length - 1))), sheets: sheets.length ? sheets : freshBook().sheets }
-}
-
-function decodeBook(data: string): Book {
-  const raw = data.includes(',') ? data.slice(data.indexOf(',') + 1) : data
-  const text = decodeURIComponent(escape(atob(raw)))
-  const parsed = JSON.parse(text)
-  if (parsed?.version === 1 && Array.isArray(parsed.sheets) && parsed.sheets.length) return parsed
-  throw new Error('Not a DaExcelent workbook')
-}
-
-export default function DaExcelentPanel({ initialFile, availableFiles = [], onSaveToFiles }: { initialFile?: SavedFile; availableFiles?: SavedFile[]; onSaveToFiles?: (name: string, mime: string, data: string) => void }) {
-  const [book, setBook] = useState<Book>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('ida-daexcelent-autosave-v1') || 'null')
-      return saved?.version === 1 && Array.isArray(saved.sheets) && saved.sheets.length ? saved : freshBook()
-    } catch { return freshBook() }
-  })
-  const [engineKey, setEngineKey] = useState(0)
-  const [engineData, setEngineData] = useState<EngineSheet[]>(() => bookToEngine(book))
-  const sheetRef = useRef<any>(null)
-  const [saved, setSaved] = useState(true)
-  const [showOpen, setShowOpen] = useState(false)
-  const [toast, setToast] = useState('')
-  const persist = (next: Book) => {
-    setBook(next)
-    setSaved(false)
-    try { localStorage.setItem('ida-daexcelent-autosave-v1', JSON.stringify(next)); setSaved(true) } catch { setSaved(false) }
-  }
-
-  useEffect(() => {
-    if (!initialFile?.id || !initialFile.data) return
-    try {
-      const next = decodeBook(initialFile.data)
-      setBook(next)
-      setEngineData(bookToEngine(next))
-      setEngineKey(k => k + 1)
-      setToast('Workbook opened')
-    } catch { setToast('Could not open this workbook') }
-  }, [initialFile?.id])
-
-  useEffect(() => {
-    if (!toast) return
-    const timer = window.setTimeout(() => setToast(''), 2400)
-    return () => window.clearTimeout(timer)
-  }, [toast])
-
-  useEffect(() => {
-    try { localStorage.setItem('ida-daexcelent-autosave-v1', JSON.stringify(book)); setSaved(true) }
-    catch { setSaved(false) }
-  }, [book])
-
-  const newBook = () => {
-    if (!window.confirm('Create a new workbook? Your current workbook remains autosaved on this device.')) return
-    const next = freshBook()
-    setBook(next)
-    setEngineData(bookToEngine(next))
-    setEngineKey(k => k + 1)
-    setToast('New workbook created')
-  }
-  const exportBook = () => {
-    const answer = window.prompt('Workbook name', 'Workbook')
-    if (answer === null) return
-    const safe = answer.trim().replace(/[\\/:*?"<>|]/g, '').slice(0, 80) || 'Workbook'
-    const json = JSON.stringify(book, null, 2)
-    const data = 'data:application/vnd.ida.daexcelent+json;base64,' + btoa(unescape(encodeURIComponent(json)))
-    if (onSaveToFiles) {
-      onSaveToFiles(safe + '.daexcelent', 'application/vnd.ida.daexcelent+json', data)
-      setToast('Saved to DaFiles')
-    } else {
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
-      a.download = safe + '.daexcelent'
-      a.click()
-      URL.revokeObjectURL(a.href)
-    }
-  }
-  const openFile = (file: SavedFile) => {
-    if (!file.data) { setToast('This file has no workbook data'); return }
-    try {
-      const next = decodeBook(file.data)
-      setBook(next)
-      setEngineData(bookToEngine(next))
-      setEngineKey(k => k + 1)
-      setShowOpen(false)
-      setToast('Workbook opened')
-    } catch { setToast('Could not open workbook') }
-  }
-
-  return <div className="daexcelent dx-engine-shell">
-    <header className="dx-titlebar">
-      <div className="dx-brand"><span className="dx-logo"><svg viewBox="0 0 40 40" aria-label="DaExcelent spreadsheet logo"><path d="M7 3h19l7 7v27H7z" fill="#fff"/><path d="M26 3v8h7" fill="#b7e4c7"/><path d="M3 11h18v23H3z" fill="#107c41"/><path d="M7 16h10M7 21h10M7 26h10M7 31h10M12 16v15M17 16v15" stroke="#fff" strokeWidth="1.5"/><path d="M22 15h7M22 21h7M22 27h7" stroke="#107c41" strokeWidth="2"/></svg></span><div><b>DaExcelent</b><small>Spreadsheet studio</small></div></div>
-      <div className="dx-document-title">Workbook <span className={saved ? 'dx-saved' : 'dx-saving'}><Check size={12}/>{saved ? 'Saved on this device' : 'Saving…'}</span></div>
-      <div className="dx-actions"><button onClick={newBook}><FilePlus size={15}/>New</button><button onClick={() => setShowOpen(v => !v)}><FolderOpen size={15}/>Open</button><button className="dx-primary" onClick={exportBook}><Save size={15}/>Save to DaFiles</button></div>
-    </header>
-    <div className="dx-engine-workspace" key={engineKey}>
-      <FortuneExcelHelper setKey={setEngineKey} setSheets={setEngineData} sheetRef={sheetRef} config={{ import: { xlsx: true, csv: true }, export: { xlsx: true, csv: true } }} />
-      <Workbook ref={sheetRef} data={engineData as any} lang="en" showToolbar={true} showFormulaBar={true} showSheetTabs={true} row={100} column={26} defaultFontSize={11} cellContextMenu={['copy','paste','|','insert-row','insert-column','delete-row','delete-column','delete-cell','hide-row','hide-column','clear','sort','filter','chart','image','link','data','cell-format']} customToolbarItems={[importToolBarItem(), exportToolBarItem()]} onChange={(data: any) => { if (Array.isArray(data)) persist(engineToBook(data as EngineSheet[], book.active)) }} />
-    </div>
-    {showOpen && <div className="dx-open-panel"><div><b>Open a workbook from DaFiles</b><button onClick={() => setShowOpen(false)}>×</button></div>{availableFiles.filter(f => /\.daexcelent$/i.test(f.name)).map(f => <button key={f.id} onClick={() => openFile(f)}><FolderOpen size={16}/>{f.name}</button>)}{!availableFiles.some(f => /\.daexcelent$/i.test(f.name)) && <p>No DaExcelent workbooks saved in DaFiles yet.</p>}</div>}
-    {toast && <div className="dx-toast"><Check size={15}/>{toast}</div>}
-  </div>
+const ribbonTabs=['Home','Insert','Page Layout','Formulas','Data','Review','View','Help']
+export default function DaExcelentPanel({initialFile,availableFiles=[],onSaveToFiles}:{initialFile?:SavedFile;availableFiles?:SavedFile[];onSaveToFiles?:(name:string,mime:string,data:string)=>void}) {
+ const [book,setBook]=useState<Book>(()=>{try{const x=JSON.parse(localStorage.getItem('ida-daexcelent-autosave-v1')||'null');return x?.version===1&&Array.isArray(x.sheets)&&x.sheets.length?x:freshBook()}catch{return freshBook()}})
+ const [engineData,setEngineData]=useState<ESheet[]>(()=>bookToEngine(book))
+ const [engineKey,setEngineKey]=useState(0)
+ const sheetRef=useRef<any>(null);const rootRef=useRef<HTMLDivElement>(null);const importRef=useRef<HTMLInputElement>(null)
+ const [tab,setTab]=useState('Home');const [saved,setSaved]=useState(true);const [showOpen,setShowOpen]=useState(false);const [toast,setToast]=useState('');const [selected,setSelected]=useState('A1');const [formulaText,setFormulaText]=useState('');const [nameText,setNameText]=useState('A1');const [fontSize,setFontSize]=useState('11');const [fontName,setFontName]=useState('Aptos');const [numberFormat,setNumberFormat]=useState('General');const [searchText,setSearchText]=useState('');const [zoom,setZoom]=useState(100)
+ const persist=useCallback((next:Book)=>{setBook(next);setSaved(true);try{localStorage.setItem('ida-daexcelent-autosave-v1',JSON.stringify(next))}catch{setSaved(false)}},[])
+ useEffect(()=>{try{localStorage.setItem('ida-daexcelent-autosave-v1',JSON.stringify(book));setSaved(true)}catch{setSaved(false)}},[book])
+ useEffect(()=>{if(!initialFile?.id||!initialFile.data)return;try{const next=decodeBook(initialFile.data);setBook(next);setEngineData(bookToEngine(next));setEngineKey(k=>k+1);setToast('Workbook opened')}catch{setToast('Could not open this workbook')}},[initialFile?.id])
+ useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),2200);return()=>window.clearTimeout(t)},[toast])
+ const syncSelection=useCallback(()=>{try{const coords=sheetRef.current?.getSelectionCoordinates?.();const first=Array.isArray(coords)&&coords.length?String(coords[0]):'A1';const addr=first.split(':')[0].replace(/\$/g,'');const p=parseRef(addr);if(!p)return;setSelected(addr);setNameText(first);const f=sheetRef.current?.getCellValue?.(p.r,p.c,{type:'f'});const v=sheetRef.current?.getCellValue?.(p.r,p.c);setFormulaText(typeof f==='string'&&f?('='+f.replace(/^=/,'')):asText(v));}catch{}},[])
+ const getRanges=useCallback(()=>{try{const coords=sheetRef.current?.getSelectionCoordinates?.();const list=Array.isArray(coords)&&coords.length?coords:[selected];return list.map((x:any)=>parseRange(String(x))).filter(Boolean) as NonNullable<ReturnType<typeof parseRange>>[]}catch{return [parseRange(selected)!].filter(Boolean) as NonNullable<ReturnType<typeof parseRange>>[]}},[selected])
+ const eachSelected=(fn:(r:number,c:number)=>void)=>{const ranges=getRanges();for(const q of ranges){let count=0;for(let r=q.r1;r<=q.r2&&count<3000;r++)for(let c=q.c1;c<=q.c2&&count<3000;c++,count++)fn(r,c)}}
+ const setFormat=(attr:string,value:any)=>{eachSelected((r,c)=>sheetRef.current?.setCellFormat?.(r,c,attr,value))}
+ const commitFormula=()=>{const p=parseRef(selected);if(!p)return;sheetRef.current?.setCellValue?.(p.r,p.c,formulaText);setToast('Cell updated');window.setTimeout(syncSelection,30)}
+ const jumpToCell=()=>{const p=parseRef(nameText.split(':')[0]);if(!p){setToast('Enter a cell reference such as B12');return}sheetRef.current?.setSelection?.({row:[p.r],column:[p.c]});setSelected(colName(p.c)+String(p.r+1));window.setTimeout(syncSelection,30)}
+ const resetWorkbook=(next:Book,message:string)=>{setBook(next);persist(next);setEngineData(bookToEngine(next));setEngineKey(k=>k+1);setSelected('A1');setNameText('A1');setFormulaText('');setToast(message)}
+ const newBook=()=>{if(!window.confirm('Create a new blank workbook? Your current workbook stays autosaved on this device.'))return;resetWorkbook(freshBook(),'New workbook created')}
+ const saveDaFile=()=>{const name=window.prompt('Name this workbook','Workbook');if(name===null)return;const safe=name.trim().replace(/[\\/:*?"<>|]/g,'').slice(0,80)||'Workbook';const data='data:application/vnd.ida.daexcelent+json;base64,'+btoa(unescape(encodeURIComponent(JSON.stringify(book))));if(onSaveToFiles){onSaveToFiles(safe+'.daexcelent','application/vnd.ida.daexcelent+json',data);setToast('Saved to DaFiles')}else{const blob=new Blob([JSON.stringify(book,null,2)],{type:'application/json'});downloadBlob(blob,safe+'.daexcelent')}}
+ const downloadBlob=(blob:Blob,name:string)=>{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}
+ const exportXlsx=()=>{try{XLSX.writeFile(bookToXlsx(book),'DaExcelent.xlsx');setToast('Excel workbook exported')}catch{setToast('Excel export failed')}}
+ const exportCsv=()=>{try{const ws=bookToXlsx(book).Sheets[book.sheets[book.active]?.name||book.sheets[0]?.name];if(!ws){setToast('No active sheet');return}const csv=XLSX.utils.sheet_to_csv(ws);downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),(book.sheets[book.active]?.name||'Sheet1')+'.csv');setToast('CSV exported')}catch{setToast('CSV export failed')}}
+ const importFile=async(file?:File)=>{if(!file)return;try{const buffer=await file.arrayBuffer();const wb=XLSX.read(buffer,{type:'array',cellFormula:true,cellStyles:true});const next=bookFromXlsx(wb);resetWorkbook(next,'Imported '+file.name)}catch{setToast('Could not read that spreadsheet file')}if(importRef.current)importRef.current.value=''}
+ const openFile=(file:SavedFile)=>{if(!file.data){setToast('This file has no workbook data');return}try{resetWorkbook(decodeBook(file.data),'Workbook opened');setShowOpen(false)}catch{setToast('Could not open workbook')}}
+ const addSheet=()=>{const name='Sheet'+(book.sheets.length+1);const next={...book,sheets:[...book.sheets,{name,cells:{}}],active:book.sheets.length};resetWorkbook(next,'Worksheet added')}
+ const insertAxis=(axis:'row'|'column',del=false)=>{const p=parseRef(selected);if(!p)return;const sheets=book.sheets.map((s,i)=>{if(i!==book.active)return s;const cells:Record<string,Cell>={};for(const [a,v] of Object.entries(s.cells)){const q=parseRef(a);if(!q)continue;const n=axis==='row'?q.r:q.c;const target=axis==='row'?p.r:p.c;if(del&&n===target)continue;const moved=del&&n>target?n-1:!del&&n>=target?n+1:n;cells[axis==='row'?colName(q.c)+String(moved+1):colName(moved)+String(q.r+1)]=v}return {...s,cells}});resetWorkbook({...book,sheets},del?'Deleted '+axis:'Inserted '+axis)}
+ const addAutoSum=()=>{const p=parseRef(selected);if(!p)return;const q=getRanges()[0];const formula=q&&q.r2>=q.r1? '=SUM('+colName(q.c1)+String(q.r1+1)+':'+colName(q.c2)+String(q.r2+1)+')':'=SUM('+colName(p.c)+String(Math.max(1,p.r-4))+':'+colName(p.c)+String(p.r)+')';sheetRef.current?.setCellValue?.(p.r,p.c,formula);setFormulaText(formula);setToast('SUM formula inserted')}
+ const findNext=()=>{const needle=searchText.toLowerCase();if(!needle)return;for(let i=0;i<book.sheets.length;i++){const s=book.sheets[i];for(const [address,cell] of Object.entries(s.cells)){if(cell.v.toLowerCase().includes(needle)){if(i!==book.active){const next={...book,active:i};setBook(next);setEngineData(bookToEngine(next));setEngineKey(k=>k+1)}sheetRef.current?.setSelection?.(parseRange(address)&&{row:[parseRef(address)!.r],column:[parseRef(address)!.c]});setSelected(address);setNameText(address);setFormulaText(cell.v);setToast('Found '+address);return}}}setToast('No matches found')}
+ const handleEngineChange=(data:any)=>{if(!Array.isArray(data))return;const next=engineToBook(data as ESheet[],book.active);persist(next)}
+ const ribbonButton=(label:string,Icon:any,action:()=>void,active=false)=><button type="button" title={label} className={active?'dx-ribbon-btn active':'dx-ribbon-btn'} onClick={action}><Icon size={16}/><span>{label}</span></button>
+ const ribbonSelect=(label:string,value:string,options:string[],change:(v:string)=>void)=><label className="dx-ribbon-select"><small>{label}</small><select value={value} onChange={e=>change(e.target.value)}>{options.map(x=><option key={x}>{x}</option>)}</select></label>
+ const ribbon=()=>{if(tab==='Home')return <><div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonSelect('Font',fontName,['Aptos','Arial','Calibri','Cambria','Courier New','Georgia','Times New Roman','Verdana'],v=>{setFontName(v);setFormat('ff',v)})}{ribbonSelect('Size',fontSize,['8','9','10','11','12','14','16','18','20','24','28','36','48','72'],v=>{setFontSize(v);setFormat('fs',Number(v))})}</div><div className="dx-ribbon-row">{ribbonButton('Bold',Bold,()=>setFormat('bl',1))}{ribbonButton('Italic',Italic,()=>setFormat('it',1))}{ribbonButton('Underline',Underline,()=>setFormat('un',1))}<label className="dx-color-tool" title="Font color"><Type size={15}/><input type="color" defaultValue="#222222" onChange={e=>setFormat('fc',e.target.value)}/></label><label className="dx-color-tool" title="Cell fill"><Palette size={15}/><input type="color" defaultValue="#fff2cc" onChange={e=>setFormat('bg',e.target.value)}/></label></div></div><div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('Align left',AlignLeft,()=>setFormat('ht',1))}{ribbonButton('Center',AlignCenter,()=>setFormat('ht',0))}{ribbonButton('Align right',AlignRight,()=>setFormat('ht',2))}{ribbonButton('Wrap text',WrapText,()=>setFormat('tb',2))}</div><div className="dx-ribbon-row">{ribbonSelect('Number format',numberFormat,['General','Number','Currency','Percent','Date','Text'],v=>{setNumberFormat(v);const fmt=v==='Currency'?'$#,##0.00':v==='Percent'?'0.00%':v==='Number'?'#,##0.00':v==='Date'?'yyyy-mm-dd':v==='Text'?'@':'General';setFormat('ct',{fa:fmt,t:v==='Text'?'s':v==='General'?'g':'n'})})}{ribbonButton('Borders',Grid3X3,()=>setFormat('bd',{left:{style:1,color:'#808080'},right:{style:1,color:'#808080'},top:{style:1,color:'#808080'},bottom:{style:1,color:'#808080'}}))}</div></div><div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('AutoSum',Sigma,addAutoSum)}{ribbonButton('Clear',Trash2,()=>eachSelected((r,c)=>sheetRef.current?.clearCell?.(r,c)))}</div><div className="dx-ribbon-caption">Number & editing</div></div></>
+ if(tab==='Insert')return <><div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('New sheet',Plus,addSheet)}{ribbonButton('Insert row',Rows3,()=>insertAxis('row'))}{ribbonButton('Insert column',Columns3,()=>insertAxis('column'))}</div><div className="dx-ribbon-caption">Tables & cells</div></div><div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('SUM',Sigma,addAutoSum)}{ribbonButton('Cell grid',Grid3X3,()=>setFormat('bd',{left:{style:1,color:'#808080'},right:{style:1,color:'#808080'},top:{style:1,color:'#808080'},bottom:{style:1,color:'#808080'}}))}</div><div className="dx-ribbon-caption">Functions</div></div></>
+ if(tab==='Page Layout')return <div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('Freeze top row',Snowflake,()=>{try{sheetRef.current?.freeze?.({row:0,column:-1});setToast('Freeze command applied')}catch{setToast('Freeze is not available in this engine build')}})}{ribbonButton('Gridlines',Eye,()=>setToast('Gridlines are shown by default'))}</div><div className="dx-ribbon-caption">Page setup</div></div>
+ if(tab==='Formulas')return <div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('AutoSum',Sigma,addAutoSum)}{ribbonButton('Insert formula',Calculator,()=>{setFormulaText('=SUM()');setToast('Edit the formula in the formula bar')})}{ribbonButton('Formula help',FileSpreadsheet,()=>setToast('Try SUM, AVERAGE, COUNT, IF, MIN, MAX and cell ranges'))}</div><div className="dx-ribbon-caption">Function library</div></div>
+ if(tab==='Data')return <div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('Find next',Search,findNext)}{ribbonButton('Delete row',Trash2,()=>insertAxis('row',true))}{ribbonButton('Delete column',Trash2,()=>insertAxis('column',true))}</div><div className="dx-ribbon-caption">Data tools</div></div>
+ if(tab==='View')return <div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('Zoom out',Eye,()=>setZoom(z=>Math.max(60,z-10)))}<strong className="dx-zoom-value">{zoom}%</strong>{ribbonButton('Zoom in',Eye,()=>setZoom(z=>Math.min(160,z+10)))}</div><div className="dx-ribbon-caption">View</div></div>
+ if(tab==='Review')return <div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('Check workbook',Check,()=>setToast('Workbook autosaves on this device'))}{ribbonButton('Delete selected row',Trash2,()=>insertAxis('row',true))}</div><div className="dx-ribbon-caption">Review</div></div>
+ return <div className="dx-ribbon-group"><div className="dx-ribbon-row">{ribbonButton('Keyboard tips',Check,()=>setToast('Enter edits a cell • Ctrl+C/V copies and pastes • Ctrl+Z undo'))}{ribbonButton('Save a copy',Download,saveDaFile)}</div><div className="dx-ribbon-caption">Help & workbook</div></div>
+ }
+ const sheetNames=book.sheets.map(s=>s.name)
+ return <div className="daexcelent dx-engine-shell dx-excel-rebuild" ref={rootRef} onMouseUp={()=>window.requestAnimationFrame(syncSelection)} onKeyUp={()=>window.requestAnimationFrame(syncSelection)}>
+  <header className="dx-titlebar"><div className="dx-brand"><span className="dx-logo"><svg viewBox="0 0 40 40" aria-label="DaExcelent logo"><path d="M7 3h26v34H7z" fill="#fff"/><path d="M3 10h19v24H3z" fill="#107c41"/><path d="M7 15h11M7 20h11M7 25h11M7 30h11M12 15v15M17 15v15" stroke="#fff" strokeWidth="1.5"/></svg></span><div><b>DaExcelent</b><small>Spreadsheet</small></div></div><input className="dx-workbook-name" aria-label="Workbook name" defaultValue="Workbook" onBlur={e=>{const n=e.target.value.trim();if(n)e.target.dataset.savedName=n}}/><span className={saved?'dx-saved':'dx-saving'}><Check size={12}/>{saved?'Saved':'Saving'}</span><div className="dx-actions"><button onClick={newBook}><FilePlus size={15}/>New</button><button onClick={()=>setShowOpen(v=>!v)}><FolderOpen size={15}/>Open</button><button onClick={()=>importRef.current?.click()}><Upload size={15}/>Import</button><button onClick={exportXlsx}><Download size={15}/>Export .xlsx</button><button className="dx-primary" onClick={saveDaFile}><Save size={15}/>Save to DaFiles</button><input ref={importRef} hidden type="file" accept=".xlsx,.xls,.csv,.ods" onChange={e=>void importFile(e.target.files?.[0])}/></div></header>
+  <nav className="dx-excel-tabs" aria-label="Spreadsheet ribbon tabs">{ribbonTabs.map(t=><button type="button" key={t} className={tab===t?'active':''} onClick={()=>setTab(t)}>{t}</button>)}<span className="dx-ribbon-spacer"/><label className="dx-search"><Search size={14}/><input value={searchText} onChange={e=>setSearchText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')findNext()}} placeholder="Find in sheet"/></label></nav>
+  <section className="dx-ribbon">{ribbon()}</section>
+  <div className="dx-formula"><input className="dx-name" aria-label="Cell reference" value={nameText} onChange={e=>setNameText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')jumpToCell()}}/><span className="dx-fx">fx</span><input aria-label="Formula bar" value={formulaText} onChange={e=>setFormulaText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();commitFormula()}if(e.key==='Escape')syncSelection()}} onBlur={commitFormula}/><button type="button" title="Commit formula" onClick={commitFormula}><Check size={15}/></button></div>
+  <div className="dx-engine-workspace" key={engineKey} onMouseUp={()=>window.requestAnimationFrame(syncSelection)} onKeyUp={()=>window.requestAnimationFrame(syncSelection)}><Workbook ref={sheetRef} data={engineData as any} lang="en" showToolbar={false} showFormulaBar={false} showSheetTabs={true} row={100} column={26} defaultFontSize={11} cellContextMenu={['copy','paste','|','insert-row','insert-column','delete-row','delete-column','delete-cell','hide-row','hide-column','clear','sort','filter','chart','image','link','data','cell-format']} onChange={handleEngineChange}/></div>
+  <footer className="dx-status"><div className="dx-status-left"><span>Ready</span><span>{selected}</span><span>{book.sheets[book.active]?.name||'Sheet1'}</span></div><div className="dx-status-right"><button onClick={exportCsv}>Export CSV</button><button onClick={()=>setZoom(z=>Math.max(60,z-10))}>−</button><input aria-label="Zoom" type="range" min="60" max="160" step="10" value={zoom} onChange={e=>setZoom(Number(e.target.value))}/><button onClick={()=>setZoom(z=>Math.min(160,z+10))}>+</button><span>{zoom}%</span></div></footer>
+  {showOpen&&<div className="dx-open-panel"><div><b>Open from DaFiles</b><button onClick={()=>setShowOpen(false)}><X size={15}/></button></div>{availableFiles.filter(f=>/\.daexcelent$/i.test(f.name)||f.mime==='application/vnd.ida.daexcelent+json').map(f=><button key={f.id} onClick={()=>openFile(f)}><FolderOpen size={16}/>{f.name}</button>)}{!availableFiles.some(f=>/\.daexcelent$/i.test(f.name)||f.mime==='application/vnd.ida.daexcelent+json')&&<p>No DaExcelent workbooks saved in DaFiles yet.</p>}</div>}
+  {toast&&<div className="dx-toast"><Check size={15}/>{toast}</div>}
+ </div>
 }
