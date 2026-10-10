@@ -220,3 +220,13 @@ svg{shape-rendering:geometricPrecision;text-rendering:geometricPrecision}img,vid
 @keyframes sleep-hint-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes sleep-bounce-glow{from{filter:brightness(.9);box-shadow:0 10px 30px #6d83ff20}to{filter:brightness(1.18);box-shadow:0 12px 42px #6d83ff50}}
 @media(prefers-reduced-motion:reduce){.sleep-preparing,.sleep-logo-pulse,.sleep-preparing-dots i,.sleep-bouncing-logo{animation:none!important}}
+
+/* IDA Explorer refinements: preserve the original dark, atmospheric IDA surface. */
+.explorer-sidebar{background:#111620!important;color:#d7dce4}
+.explorer-sidebar>button{min-height:44px!important;font-size:14px!important;gap:12px!important;color:#d7dce4!important}
+.explorer-sidebar>button svg{width:21px;height:21px;stroke-width:2.2}
+.explorer-sidebar>button.active,.explorer-sidebar>button[style*="background: rgb"]{background:#ffffff12!important}
+.explorer-main{background:#0d1118;color:#e8edf5}
+.explorer-main .explorer-card-icon{width:46px;height:46px;flex-basis:46px}
+.explorer-main .explorer-card-icon svg{width:25px;height:25px}
+.explorer-toolbar{background:#111620!important;border-color:hsl(var(--line))!important}
