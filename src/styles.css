@@ -230,3 +230,6 @@ svg{shape-rendering:geometricPrecision;text-rendering:geometricPrecision}img,vid
 .explorer-main .explorer-card-icon{width:46px;height:46px;flex-basis:46px}
 .explorer-main .explorer-card-icon svg{width:25px;height:25px}
 .explorer-toolbar{background:#111620!important;border-color:hsl(var(--line))!important}
+
+/* Keep live game/website frames out of IDA's expensive backdrop-blur compositing path. */
+.app-window:has(iframe),.app-window:has(canvas){backdrop-filter:none;-webkit-backdrop-filter:none}
