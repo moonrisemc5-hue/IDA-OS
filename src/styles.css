@@ -233,3 +233,5 @@ svg{shape-rendering:geometricPrecision;text-rendering:geometricPrecision}img,vid
 
 /* Keep live game/website frames out of IDA's expensive backdrop-blur compositing path. */
 .app-window:has(iframe),.app-window:has(canvas){backdrop-filter:none;-webkit-backdrop-filter:none}
+/* When a live iframe game is running, avoid compositing the full-screen wallpaper fade at the same time. Keep wallpaper transitions for normal desktop use. */
+.daapps-root:has(.app-window iframe) .wallpaper-current,.daapps-root:has(.app-window iframe) .wallpaper-previous{animation:none!important;will-change:auto}
