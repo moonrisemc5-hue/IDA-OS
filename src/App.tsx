@@ -1001,7 +1001,7 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     <button
       ref={tileRef}
       className={`app-tile ${selected ? 'app-tile-selected' : ''}`}
-      style={{ left: `${(dragging.current ? position : (dragPos||position)).x}%`, top: `${(dragging.current ? position : (dragPos||position)).y}%`, ['--scale' as string]: scale }}
+      style={{ left: `${(dragPos||position).x}%`, top: `${(dragPos||position).y}%`, ['--scale' as string]: scale }}
       onPointerDown={pointerDown}
       onPointerMove={pointerMove}
       onPointerUp={pointerUp}
