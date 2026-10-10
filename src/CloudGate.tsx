@@ -402,8 +402,9 @@ export function CloudGate() {
 
   useEffect(()=>{
     let mounted=true
-    // Start downloading every built-in wallpaper while the welcome/setup screens are visible.
-    // This warms the browser cache so the desktop is ready sooner after sign-in.
+    // Only preload wallpapers during first-time setup. Re-downloading six large images
+    // on every refresh competes with IDA's startup work and wastes bandwidth.
+    const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v3')==='1'
     const wallpaperUrls=[
       FIRSTBOOT_WALLPAPER,
       'https://images.pexels.com/photos/18928472/pexels-photo-18928472.jpeg?cs=srgb&dl=pexels-bylukemiller-18928472.jpg&fm=jpg',
@@ -413,8 +414,7 @@ export function CloudGate() {
       'https://images.pexels.com/photos/7348417/pexels-photo-7348417.jpeg?auto=compress&cs=tinysrgb&w=2400'
     ]
     try { const custom=localStorage.getItem('daapps-custom-wallpaper'); if(custom&&custom.startsWith('data:image/'))wallpaperUrls.push(custom) } catch {}
-    const preloadImages=wallpaperUrls.map(src=>{const image=new Image();image.decoding='async';image.src=src;return image})
-    const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v3')==='1'
+    const preloadImages=hadFirstBoot?[]:wallpaperUrls.map(src=>{const image=new Image();image.decoding='async';image.src=src;return image})
     setFirstBoot(!hadFirstBoot)
     const stored=readIdaSession()
     if(stored){
