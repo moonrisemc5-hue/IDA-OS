@@ -414,31 +414,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     if (permanentlyDeletedApps.size) saveTaskbar(taskbarApps.filter(name=>!permanentlyDeletedApps.has(name)))
     saveTrash(trash.filter(item=>item.type==='app' && (item.id==='DaSettings'||item.id==='DaTrash')))
   }
-  const canPlaceDesktopTile = (type:'app'|'file'|'folder', id:string, pos:Position) => {
-    const area = document.querySelector('.home-screen')?.getBoundingClientRect()
-    if (!area) return true
-    const size = 92 * iconScale
-    const gap = 5
-    const x = pos.x / 100 * area.width
-    const y = pos.y / 100 * area.height
-    const overlaps = (other:Position) => {
-      const ox = other.x / 100 * area.width
-      const oy = other.y / 100 * area.height
-      return x < ox + size - gap && x + size - gap > ox && y < oy + size - gap && y + size - gap > oy
-    }
-    for (const appName of desktopApps) if (type!=='app' || appBaseId(appName)!==appBaseId(id)) if (overlaps(positions[appName] || positions[appBaseId(appName)] || DEFAULT_POSITIONS[appBaseId(appName)])) return false
-    for (const folder of folders.filter(f=>f.parent==='Desktop')) if (!(type==='folder' && folder.id===id)) {
-      const index = folders.filter(f=>f.parent==='Desktop').findIndex(f=>f.id===folder.id)
-      const other = filePositions[folder.id] || {x:5+(index%5)*15,y:34+Math.floor(index/5)*14}
-      if (overlaps(other)) return false
-    }
-    for (const file of files.filter(f=>f.location==='Desktop')) if (!(type==='file' && file.id===id)) {
-      const index = files.filter(f=>f.location==='Desktop').findIndex(f=>f.id===file.id)
-      const other = filePositions[file.id] || {x:5+(index%5)*15,y:34+Math.floor(index/5)*14}
-      if (overlaps(other)) return false
-    }
-    return true
-  }
+  const canPlaceDesktopTile = (_type:'app'|'file'|'folder', _id:string, _pos:Position) => true
   const moveDesktopItem = (type:'app'|'file'|'folder', id:string, pos:Position) => {
     // All desktop items follow the same drag rule: move freely while held,
     // then settle into the nearest available grid slot when released.
