@@ -904,7 +904,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
       {desktop && renaming && <RenameDialog value={renaming.name} onChange={name=>setRenaming({...renaming,name})} onCancel={()=>setRenaming(null)} onSave={()=>renameItem(renaming.type,renaming.id,renaming.name)}/>} 
 
     
-      {badTimeWarning && <div role="dialog" aria-modal="true" aria-labelledby="bad-time-warning-title" style={{position:'fixed',inset:0,zIndex:999999,display:'grid',placeItems:'center',padding:20,background:'rgba(0,0,0,.68)',backdropFilter:'blur(7px)'}}>
+      {badTimeWarning && <div role="dialog" aria-modal="true" aria-labelledby="bad-time-warning-title" style={{position:'fixed',inset:0,zIndex:999999,display:'grid',placeItems:'center',padding:20,background:'rgba(0,0,0,.78)'}}>
         <section style={{width:'min(440px,100%)',padding:26,borderRadius:18,background:'linear-gradient(145deg,#171923,#0d0f16)',border:'1px solid #484b59',boxShadow:'0 24px 90px #0009',color:'#f8fafc',fontFamily:'inherit'}}>
           <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:18}}><img src="/IDA-OS/Sans-Blaster.png" alt="" style={{width:66,height:66,objectFit:'contain',imageRendering:'pixelated',borderRadius:12,background:'#050505'}}/><div><div style={{fontSize:11,letterSpacing:2,color:'#f87171',fontWeight:800}}>WARNING</div><h2 id="bad-time-warning-title" style={{fontSize:24,margin:'4px 0 0'}}>Bad-Time</h2></div></div>
           <p style={{fontSize:16,lineHeight:1.55,color:'#e5e7eb',margin:'0 0 22px'}}>This game will rage-bait you. Are you sure you want to continue?</p>
