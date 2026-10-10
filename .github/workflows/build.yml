@@ -15,4 +15,72 @@ jobs:
           node-version: 22
           package-manager-cache: false
       - run: npm install
+      - name: Mirror Bad-Time game locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/bad-time
+          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --directory-prefix=/tmp/ida-bad-time https://sans-simulator.github.io/c2-sans-fight/
+          GAME_DIR="$(find /tmp/ida-bad-time -type f -name 'index.html' -printf '%h\\n' | head -n 1)"
+          test -n "$GAME_DIR"
+          cp -a "$GAME_DIR"/. public/bad-time/
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("public/bad-time/index.html")
+          html = p.read_text(encoding="utf-8", errors="replace")
+          patch = r"""
+          <style>
+            #ida-game-volume{position:fixed;z-index:2147483647;right:12px;top:12px;display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #ffffff33;border-radius:12px;background:#10131ddd;color:white;font:12px system-ui,sans-serif;box-shadow:0 4px 18px #0006}
+            #ida-game-volume input{width:100px;accent-color:#7c9cff}
+            #ida-game-volume button{border:0;background:transparent;color:white;cursor:pointer;font:inherit}
+          </style>
+          <div id="ida-game-volume"><button id="ida-game-mute" type="button" aria-label="Mute game">🔊</button><span>Volume</span><input id="ida-game-slider" type="range" min="0" max="100" value="70" aria-label="Game volume"><span id="ida-game-percent">70%</span></div>
+          <script>
+          (() => {
+            try { Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: () => Math.min(1, Number(window.__idaDpr || 1)) }); } catch (_) {}
+            let level = 0.7, masterNodes = new WeakMap();
+            const NativeAudioContext = window.AudioContext || window.webkitAudioContext;
+            if (NativeAudioContext && window.AudioNode) {
+              const nativeConnect = AudioNode.prototype.connect;
+              AudioNode.prototype.connect = function(destination, ...args) {
+                try {
+                  const ctx = this.context;
+                  if (ctx && destination === ctx.destination && this !== masterNodes.get(ctx)) {
+                    let master = masterNodes.get(ctx);
+                    if (!master) {
+                      master = ctx.createGain();
+                      master.gain.value = level;
+                      masterNodes.set(ctx, master);
+                      nativeConnect.call(master, ctx.destination);
+                    }
+                    return nativeConnect.call(this, master, ...args);
+                  }
+                } catch (_) {}
+                return nativeConnect.call(this, destination, ...args);
+              };
+            }
+            const slider = document.getElementById('ida-game-slider');
+            const pct = document.getElementById('ida-game-percent');
+            const mute = document.getElementById('ida-game-mute');
+            const apply = () => {
+              level = Number(slider.value) / 100;
+              pct.textContent = slider.value + '%';
+              mute.textContent = level === 0 ? '🔇' : '🔊';
+              // Update every audio context's shared master gain as it becomes available.
+              document.querySelectorAll('audio,video').forEach(el => { try { el.volume = level; } catch (_) {} });
+              window.__idaGameVolume = level;
+            };
+            slider.addEventListener('input', apply);
+            mute.addEventListener('click', () => { slider.value = Number(slider.value) === 0 ? 70 : 0; apply(); });
+            apply();
+          })();
+          </script>
+          """
+          if "</body>" in html.lower():
+              import re
+              html = re.sub(r"</body>", patch + "\\n</body>", html, count=1, flags=re.I)
+          else:
+              html += patch
+          p.write_text(html, encoding="utf-8")
+          PY
       - run: npm run build
