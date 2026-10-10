@@ -426,7 +426,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
       const oy = other.y / 100 * area.height
       return x < ox + size - gap && x + size - gap > ox && y < oy + size - gap && y + size - gap > oy
     }
-    for (const appName of desktopApps) if (type!=='app' || appName!==id) if (overlaps(positions[appName] || DEFAULT_POSITIONS[appName])) return false
+    for (const appName of desktopApps) if (type!=='app' || appBaseId(appName)!==appBaseId(id)) if (overlaps(positions[appName] || positions[appBaseId(appName)] || DEFAULT_POSITIONS[appBaseId(appName)])) return false
     for (const folder of folders.filter(f=>f.parent==='Desktop')) if (!(type==='folder' && folder.id===id)) {
       const index = folders.filter(f=>f.parent==='Desktop').findIndex(f=>f.id===folder.id)
       const other = filePositions[folder.id] || {x:5+(index%5)*15,y:34+Math.floor(index/5)*14}
@@ -964,7 +964,7 @@ function AppTile({ app, displayName, shortcutId, position, editMode, onEdit, onO
     }
     if (!dragging.current || !tileRef.current) return
     const tile = tileRef.current
-    const parent = tile.parentElement?.getBoundingClientRect()
+    const parent = (document.querySelector('.home-screen') as HTMLElement|null)?.getBoundingClientRect()
     if (!parent) return
     const maxX = Math.max(0, parent.width - tile.offsetWidth)
     const maxY = Math.max(0, parent.height - tile.offsetHeight)
