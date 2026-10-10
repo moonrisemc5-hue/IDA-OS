@@ -13,7 +13,7 @@ type EngineSheet = { name: string; celldata: EngineCell[]; [key: string]: any }
 
 const colName = (n: number) => { let s = ''; while (n >= 0) { s = String.fromCharCode(n % 26 + 65) + s; n = Math.floor(n / 26) - 1 } return s }
 const parseRef = (ref: string) => { const m = ref.toUpperCase().match(/^([A-Z]+)([1-9]\d*)$/); if (!m) return null; let c = 0; for (const ch of m[1]) c = c * 26 + ch.charCodeAt(0) - 64; return { r: Number(m[2]) - 1, c: c - 1 } }
-const freshBook = (): Book => ({ version: 1, active: 0, sheets: [{ name: 'Sheet1', cells: { A1: { v: 'Welcome to DaExcelent', bold: true, bg: '#dbeafe', color: '#1d4ed8' }, A2: { v: 'A real spreadsheet engine is ready to use' }, A4: { v: 'Try a formula in B4', italic: true }, B4: { v: '=SUM(B1:B3)' } }] })
+const freshBook = (): Book => ({ version: 1, active: 0, sheets: [{ name: 'Sheet1', cells: { A1: { v: 'Welcome to DaExcelent', bold: true, bg: '#dbeafe', color: '#1d4ed8' }, A2: { v: 'A real spreadsheet engine is ready to use' }, A4: { v: 'Try a formula in B4', italic: true }, B4: { v: '=SUM(B1:B3)' } } }] })
 
 function bookToEngine(book: Book): EngineSheet[] {
   const sheets = book.sheets.length ? book.sheets : freshBook().sheets
