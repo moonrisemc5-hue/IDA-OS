@@ -40,14 +40,14 @@
 			-ms-touch-action: none;
 		}
     
-        #ida-sans-mute{position:fixed;right:14px;top:42px;z-index:2147483647;width:42px;height:42px;display:grid;place-items:center;padding:4px;border:2px solid #fff;border-radius:0;background:#080808;color:#fff;cursor:pointer;touch-action:manipulation;image-rendering:pixelated;box-shadow:3px 3px 0 #555}
+        #ida-sans-mute{position:fixed;right:38px;top:50%;transform:translateY(-50%);z-index:2147483647;width:42px;height:42px;display:grid;place-items:center;padding:4px;border:2px solid #fff;border-radius:0;background:#080808;color:#fff;cursor:pointer;touch-action:manipulation;image-rendering:pixelated;box-shadow:3px 3px 0 #555}
         #ida-sans-mute:hover{background:#242424}#ida-sans-mute svg{width:26px;height:26px;display:block;image-rendering:pixelated;shape-rendering:crispEdges}#ida-sans-mute:focus-visible{outline:2px dashed #fff;outline-offset:3px}
     </style>
 	
 
 </head> 
  
-<body> 
+<body> <button id="ida-sans-mute" type="button" aria-label="Mute Sans game audio" title="Mute Sans game audio"></button>\r\n\t
 	<div id="fb-root"></div>
 	
 	<script>
@@ -119,7 +119,7 @@
   var button;
   function paint(){ if(!button)return; button.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true" shape-rendering="crispEdges"><path fill="#fff" d="M1 6h3l4-3v10l-4-3H1z"/>'+(muted?'<path fill="#fff" d="M10 4l1.5-1.5L13 4l1.5-1.5L16 4l-1.5 1.5L16 7l-1.5 1.5L13 7l-1.5 1.5L10 7l1.5-1.5z"/><path fill="#fff" d="M9 11l1.4-1.4 4 4L13 15z"/>':'<path fill="#fff" d="M10 5h2v2h2v2h-2v2h-2V9H8V7h2z"/>')+'</svg>'; button.setAttribute('aria-label',muted?'Unmute Sans game audio':'Mute Sans game audio'); button.setAttribute('aria-pressed',String(muted)); button.title=muted?'Unmute Sans game audio':'Mute Sans game audio'; }
   function toggle(){ muted=!muted; masters.forEach(function(m){try{m.gain.setTargetAtTime(muted?0:1,m.context.currentTime,.015)}catch(e){m.gain.value=muted?0:1}}); paint(); }
-  window.addEventListener('DOMContentLoaded',function(){button=document.createElement('button');button.id='ida-sans-mute';button.type='button';button.addEventListener('click',toggle);document.body.appendChild(button);paint();});
+  function initMuteButton(){button=document.getElementById('ida-sans-mute');if(!button)return;button.addEventListener('click',toggle);paint();} if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',initMuteButton,{once:true});else initMuteButton();
 })();
 </script>
 
