@@ -228,7 +228,11 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
         setWindows(normalizedWindows)
         if (savedActiveWindow && normalizedWindows?.[savedActiveWindow]) setActiveWindow(savedActiveWindow)
       }
-    } catch {} finally {
+    } catch (error) {
+      console.error('IDA could not restore saved window layout; resetting only window layout:', error)
+      try { localStorage.removeItem('ida-open-windows-v1'); localStorage.removeItem('ida-active-window-v1'); localStorage.removeItem('ida-clear-open-windows-on-start-v1') } catch {}
+      setWindows({}); setActiveWindow(null)
+    } finally {
       setWindowsHydrated(true)
     }
     return () => { mq.removeEventListener?.('change', syncDesktop); window.clearInterval(tick) }
