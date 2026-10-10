@@ -30,3 +30,8 @@
 @keyframes daraw-photo-picker-in{from{opacity:0;transform:translateY(12px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes daraw-photo-tile-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:760px){.daraw-photo-picker{max-height:94%}.daraw-photo-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px;padding:10px}.daraw-photo-grid img{height:75px}.daraw-photo-picker>header{padding:12px}.daraw-photo-actions{padding:10px}}
+
+.daraw-canvas-frame.daraw-transparent-background{background-color:#fff;background-image:repeating-conic-gradient(#dfe3eb 0% 25%,#fff 0% 50%);background-size:24px 24px}
+.daraw-canvas-frame.daraw-transparent-background canvas:first-child{background:transparent!important}
+.daraw-canvas-frame.daraw-white-background canvas:first-child{background:#fff}
+.daraw-actions button.active{background:#e8e1ff;border-color:#a996fa;color:#653ed0}
