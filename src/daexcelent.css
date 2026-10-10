@@ -1,79 +1,68 @@
-.daexcelent{height:100%;min-height:0;display:flex;flex-direction:column;background:#f7f9fc;color:#1f2937;font:13px/1.4 "Segoe UI",system-ui,sans-serif;position:relative;overflow:hidden;animation:dx-enter .24s ease-out}
-@keyframes dx-enter{from{opacity:0;transform:translateY(7px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
-.daexcelent button{font:inherit;cursor:pointer}.daexcelent button:active{transform:scale(.97)}.dx-titlebar{display:flex;align-items:center;gap:18px;padding:11px 15px;background:linear-gradient(110deg,#fff,#f1f8f4);border-bottom:1px solid #dce5e0;min-height:64px;box-sizing:border-box}.dx-brand{display:flex;align-items:center;gap:10px;min-width:190px}.dx-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#16834a,#20b56c);display:grid;place-items:center;color:white;box-shadow:0 4px 12px #16834a33}.dx-brand b{display:block;font-size:16px;letter-spacing:-.3px}.dx-brand small{display:block;color:#718096;font-size:11px}.dx-document-title{flex:1;color:#637166;font-size:12px;display:flex;align-items:center;gap:12px}.dx-saved,.dx-saving{display:inline-flex;align-items:center;gap:4px;color:#198754;font-size:11px}.dx-saving{color:#b7791f}.dx-actions{display:flex;gap:6px}.dx-actions button,.dx-ribbon button,.dx-ribbon select,.dx-rename-sheet{border:1px solid #dce4e1;background:#fff;border-radius:7px;padding:7px 9px;display:inline-flex;align-items:center;gap:6px;color:#334155;transition:background .15s,border-color .15s,transform .15s}.dx-actions button:hover,.dx-ribbon button:hover,.dx-rename-sheet:hover{background:#eaf7ef;border-color:#a8d8ba}.dx-actions .dx-primary{background:#16834a;border-color:#16834a;color:white}.dx-actions .dx-primary:hover{background:#11683b}.dx-ribbon{display:flex;gap:12px;align-items:stretch;padding:9px 12px;background:#fff;border-bottom:1px solid #dfe7e3;overflow-x:auto}.dx-ribbon-group{display:flex;align-items:center;gap:4px;padding-right:12px;border-right:1px solid #e5ebe7;white-space:nowrap}.dx-ribbon-group:last-child{border:0}.dx-ribbon-group strong{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#849188;margin-right:5px}.dx-ribbon button{padding:6px}.dx-ribbon button.active{background:#d8f3e2;color:#126b3b;border-color:#8dd3a7}.dx-ribbon select{font-size:12px;padding:6px}.dx-color{display:flex;align-items:center;gap:4px;border:1px solid #dce4e1;border-radius:6px;padding:4px 6px;color:#475569;cursor:pointer}.dx-color input{width:20px;height:20px;padding:0;border:0;background:none;cursor:pointer}.dx-formula{display:flex;align-items:center;gap:9px;padding:8px 12px;background:#f5f8f6;border-bottom:1px solid #dce5e0}.dx-name{min-width:65px;padding:7px 9px;background:#fff;border:1px solid #cbd5d1;border-radius:5px;text-align:center;font-weight:700;color:#1c7544}.dx-fx{color:#1c7544;display:grid;place-items:center}.dx-formula input{flex:1;min-width:0;padding:8px 10px;border:1px solid #d3ddd7;border-radius:6px;background:white;outline:none}.dx-formula input:focus{border-color:#29965b;box-shadow:0 0 0 3px #29965b1a}.dx-grid-wrap{flex:1;min-height:0;overflow:auto;background:#fff}.dx-grid{min-width:max-content;min-height:100%;outline:none}.dx-grid table{border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:12px}.dx-grid th,.dx-grid td{height:26px;min-width:94px;max-width:240px;box-sizing:border-box;padding:3px 7px;border-right:1px solid #e6ebe8;border-bottom:1px solid #e6ebe8;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.dx-grid thead th{position:sticky;top:0;z-index:3;background:#f0f5f2;color:#526259;font-weight:650;text-align:center;min-width:94px;height:29px}.dx-grid th:first-child{position:sticky;left:0;z-index:2;background:#f0f5f2;min-width:43px;width:43px;text-align:center;color:#6b7b72;font-weight:500}.dx-grid .dx-corner{z-index:4;left:0;top:0}.dx-grid td{cursor:cell;color:#202124}.dx-grid td:hover{background-color:#f1fbf4}.dx-grid td.selected{outline:2px solid #16834a;outline-offset:-2px;position:relative;z-index:1;background-color:#effbf3}.dx-grid td.selected:not(:has(+ .selected)){box-shadow:inset -1px -1px #16834a}.dx-grid td{user-select:none}.dx-grid td input{user-select:text}.dx-grid td input{width:100%;min-width:60px;box-sizing:border-box;border:0;outline:0;background:transparent;font:inherit;color:inherit;padding:0}.dx-open-panel{position:absolute;right:15px;top:62px;width:min(340px,90%);z-index:30;background:#fff;border:1px solid #dce5e0;border-radius:12px;padding:12px;box-shadow:0 15px 45px #12251c26;animation:dx-enter .18s ease-out}.dx-open-panel>div{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.dx-open-panel button{display:flex;align-items:center;gap:9px;width:100%;padding:9px;border:0;border-radius:7px;background:#f3f8f5;text-align:left;color:#1f5134;margin:3px 0}.dx-open-panel>div button{width:auto;background:transparent}.dx-open-panel p{color:#718096;font-size:12px}.dx-status{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 10px;background:#f6f9f7;border-top:1px solid #dce5e0;min-height:38px;box-sizing:border-box}.dx-sheets{display:flex;align-items:center;gap:4px;overflow:auto}.dx-sheets button{border:0;background:transparent;color:#6b7b72;padding:6px 10px;border-radius:6px;white-space:nowrap}.dx-sheets button.active{background:#fff;color:#176c3c;border-bottom:2px solid #16834a;font-weight:700}.dx-sheets .dx-add-sheet{border:1px solid #dce5e0;background:#fff;padding:5px;display:grid;place-items:center}.dx-status-right{display:flex;gap:14px;color:#6b7b72;font-size:11px;white-space:nowrap}.dx-toast{position:absolute;right:18px;bottom:55px;display:flex;align-items:center;gap:8px;background:#123e28;color:white;padding:11px 15px;border-radius:9px;box-shadow:0 8px 28px #0002;animation:dx-enter .2s ease-out}@media(max-width:760px){.dx-titlebar{flex-wrap:wrap;gap:8px}.dx-brand{min-width:0}.dx-document-title{min-width:90px}.dx-actions button{font-size:11px;padding:6px}.dx-actions button svg{display:none}.dx-ribbon{gap:8px}.dx-status-right span:first-child{display:none}.dx-rename-sheet{display:none}}@media(prefers-reduced-motion:reduce){.daexcelent,.dx-open-panel,.dx-toast{animation:none}.daexcelent button{transition:none}}
-.dx-logo svg{display:block;width:100%;height:100%;overflow:visible}
-.dx-grid th{position:relative;user-select:none}
-.dx-col-resize{position:absolute;top:0;right:-2px;width:6px;height:100%;cursor:col-resize;z-index:3}
-.dx-col-resize:hover{background:#16834a;opacity:.65}
-.dx-row-resize{position:absolute;left:0;bottom:-2px;width:100%;height:6px;cursor:row-resize;z-index:3}
-.dx-row-resize:hover{background:#16834a;opacity:.65}
-.dx-grid th:first-child{min-width:42px}
-
-.dx-chart-panel{position:absolute;right:16px;bottom:52px;z-index:25;width:min(540px,88%);background:#fff;border:1px solid #cbd5d1;border-radius:10px;box-shadow:0 12px 35px #0f172a26;padding:12px;animation:dx-enter .18s ease-out}.dx-chart-panel>div:first-child{display:flex;align-items:center;justify-content:space-between;color:#217346}.dx-chart-panel button{border:0;background:#eef5f0;border-radius:5px;padding:3px 8px}.dx-chart-bars{height:190px;display:flex;align-items:flex-end;gap:7px;padding:14px 6px 0;overflow:hidden}.dx-chart-bars>div{flex:1;min-width:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}.dx-chart-bars span{width:min(30px,90%);background:linear-gradient(#21a366,#107c41);border-radius:4px 4px 0 0;min-height:3px}.dx-chart-bars small{font-size:10px;color:#526259;max-width:55px;overflow:hidden;text-overflow:ellipsis}
-
-/* Excel-style formula reference outline */
-.dx-grid td.dx-formula-reference{position:relative;outline:2px dashed #4472c4!important;outline-offset:-2px;background:#dce9ff!important;z-index:1;animation:dx-ref-pulse 1.2s ease-in-out infinite alternate}.dx-grid td.dx-formula-reference::after{content:'';position:absolute;inset:-2px;border:1px dashed #4472c4;pointer-events:none}@keyframes dx-ref-pulse{from{outline-color:#4472c4}to{outline-color:#6c9bea}}
-
-
-/* Excel-like ribbon density, controls and zoom */
-.dx-titlebar{background:#fff;border-bottom:0;min-height:48px;padding:6px 12px;gap:14px}
-.dx-brand{min-width:160px}.dx-logo{border-radius:3px;box-shadow:none;width:30px;height:30px}
-.dx-brand b{font-size:15px}.dx-brand small{display:none}
-.dx-document-title{font-size:13px;color:#303030}
-.dx-actions{gap:3px}.dx-actions button,.dx-ribbon button,.dx-ribbon select,.dx-rename-sheet{border-radius:3px;border-color:transparent;padding:5px 7px;color:#242424;background:transparent}
-.dx-actions button:hover,.dx-ribbon button:hover,.dx-rename-sheet:hover{background:#f0f0f0;border-color:#dedede}
-.dx-actions .dx-primary{background:#217346;color:#fff;border-color:#217346}.dx-actions .dx-primary:hover{background:#185c37}
-.dx-ribbon{gap:8px;padding:7px 8px;background:#f8f9fa;border-bottom:1px solid #d6d6d6;min-height:75px}
-.dx-ribbon-group{gap:3px;padding:2px 8px 2px 2px;border-color:#d7d7d7;flex-wrap:wrap;align-content:center}
-.dx-ribbon-group strong{flex-basis:100%;font-size:10px;text-transform:none;letter-spacing:0;color:#666;text-align:center;margin:3px 0 0;order:9}
-.dx-ribbon-group button{min-height:27px;border-radius:2px;border:1px solid transparent;padding:5px 6px}
-.dx-ribbon-group button.active{background:#d9eadf;color:#185c37;border-color:#87b99b}
-.dx-ribbon-group select{border:1px solid #bfbfbf;background:#fff;min-width:70px}
-.dx-formula{padding:5px 8px;gap:7px;background:#fff;border-bottom:1px solid #d0d0d0}
-.dx-name{min-width:78px;padding:5px 8px;border-radius:2px;border-color:#c6c6c6;color:#333;font-weight:500}
-.dx-fx{color:#333}
-.dx-formula input{padding:6px 8px;border-radius:2px;border-color:#c6c6c6;color:#222}
-.dx-formula input:focus{border-color:#217346;box-shadow:inset 0 0 0 1px #217346}
-.dx-grid th,.dx-grid td{font-size:13px;height:26px;min-width:84px;padding:3px 5px;border-color:#dedede}
-.dx-grid thead th,.dx-grid th:first-child{background:#f3f3f3;color:#333;font-weight:500}
-.dx-grid td.selected{outline:2px solid #217346;outline-offset:-2px;background-color:#fff}
-.dx-grid td:hover{background-color:#f5f9f6}
-.dx-grid td.dx-formula-reference{background:#e8f0fc!important;outline:2px dashed #4472c4!important}
-.dx-status{background:#f3f3f3;border-color:#d1d1d1;min-height:34px;padding:3px 8px}
-.dx-sheets button{border-radius:0;padding:6px 12px;color:#555}
-.dx-sheets button.active{background:#fff;color:#217346;border-bottom:2px solid #217346}
-.dx-status-right{align-items:center;gap:10px}
-.dx-zoom{display:flex;align-items:center;gap:4px;padding-left:8px;border-left:1px solid #d2d2d2;color:#555}
-.dx-zoom button{display:inline-flex;align-items:center;justify-content:center;gap:3px;background:transparent;border:0;border-radius:2px;padding:3px 4px;color:#444;min-width:24px}
-.dx-zoom button:hover{background:#e5e5e5}
-.dx-zoom input{width:92px;accent-color:#217346;cursor:pointer}
-@media(max-width:760px){.dx-zoom input{width:55px}.dx-ribbon{min-height:65px}.dx-ribbon-group{padding-right:5px}}
-
-
-/* FortuneSheet-backed DaExcelent workspace */
-.dx-engine-shell{height:100%;min-height:0;position:relative;background:#fff}
-.dx-engine-workspace{flex:1;min-height:0;min-width:0;overflow:hidden;position:relative;background:#fff}
-.dx-engine-workspace>div{height:100%;min-height:0;width:100%}
-.dx-engine-workspace .fortune-sheet-container,.dx-engine-workspace .fortune-sheet-workbook,.dx-engine-workspace .luckysheet{height:100%;min-height:0}
-.dx-engine-shell .dx-open-panel{top:54px;right:14px;z-index:100}
-.dx-engine-shell .dx-open-panel>div button{width:auto}
-.dx-engine-shell .dx-actions button{white-space:nowrap}
-@media(max-width:760px){.dx-engine-shell .dx-titlebar{flex-wrap:wrap}.dx-engine-workspace{min-height:300px}}
-
-
-/* Refined Excel-like FortuneSheet chrome */
-.dx-engine-workspace{font-family:"Aptos",Calibri,"Segoe UI",Arial,sans-serif;color:#242424}
-.dx-engine-workspace .fortune-toolbar{min-height:72px;box-sizing:border-box;padding:7px 12px;background:#f8f9fa;border-bottom:1px solid #d1d5db;gap:2px;overflow-x:auto;scrollbar-width:thin}
-.dx-engine-workspace .fortune-toolbar-button,.dx-engine-workspace .fortune-toolbar-combo{border-radius:3px;margin:2px;padding:4px}
-.dx-engine-workspace .fortune-toolbar-button:hover,.dx-engine-workspace .fortune-toolbar-combo:hover{background:#e7eee9;outline:1px solid #c7d9ce}
-.dx-engine-workspace .fortune-toolbar-button:active,.dx-engine-workspace .fortune-toolbar-combo:active{background:#d3e7da}
-.dx-engine-workspace .fortune-toolbar-divider{height:34px;background:#d4d8d5;margin:0 5px}
-.dx-engine-workspace .fortune-sheet-container{border:0;border-radius:0;box-shadow:none}
-.dx-engine-workspace .fortune-sheet-container input,.dx-engine-workspace .fortune-sheet-container textarea{font-family:inherit}
-.dx-engine-workspace .fortune-sheet-container ::selection{background:#cfe5ff}
-.dx-engine-workspace .fortune-sheet-container .fortune-sheet-tab{border-radius:0}
-.dx-engine-workspace .fortune-sheet-container .fortune-sheet-tab-active{border-bottom:2px solid #217346}
-.dx-engine-shell .dx-document-title{font-weight:500}
-.dx-engine-shell .dx-saved{color:#217346}
-.dx-engine-shell .dx-saving{color:#8a5a00}
-@media(max-width:760px){.dx-engine-workspace .fortune-toolbar{min-height:56px;padding:5px 6px}}
+/* DaExcelent rebuild: stable, Excel-inspired workspace. No enter/scale animation on the spreadsheet root. */
+.daexcelent.dx-excel-rebuild{height:100%;width:100%;min-height:0;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden;background:#fff;color:#242424;font:13px/1.35 "Aptos","Segoe UI",Calibri,Arial,sans-serif;animation:none!important;transform:none!important}
+.dx-excel-rebuild *{box-sizing:border-box}
+.dx-excel-rebuild button{font:inherit;cursor:pointer;transition:background-color .12s,border-color .12s;color:inherit}
+.dx-excel-rebuild button:active{transform:none}
+.dx-excel-rebuild .dx-titlebar{flex:0 0 auto;min-height:47px;padding:5px 12px;display:flex;align-items:center;gap:12px;background:#fff;border-bottom:1px solid #d6d6d6}
+.dx-excel-rebuild .dx-brand{display:flex;align-items:center;gap:8px;min-width:130px}
+.dx-excel-rebuild .dx-logo{width:28px;height:28px;display:grid;place-items:center;background:transparent;box-shadow:none;border-radius:2px;flex-shrink:0}
+.dx-excel-rebuild .dx-logo svg{width:28px;height:28px}
+.dx-excel-rebuild .dx-brand b{display:block;font-size:15px;font-weight:650;white-space:nowrap;color:#242424}
+.dx-excel-rebuild .dx-brand small{display:block;font-size:10px;color:#666}
+.dx-excel-rebuild .dx-workbook-name{min-width:75px;width:120px;max-width:180px;border:1px solid transparent;border-radius:3px;padding:5px 7px;font:inherit;color:#333;background:#fff}
+.dx-excel-rebuild .dx-workbook-name:hover,.dx-excel-rebuild .dx-workbook-name:focus{border-color:#c7c7c7;outline:none}
+.dx-excel-rebuild .dx-saved,.dx-excel-rebuild .dx-saving{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#217346;font-size:11px}
+.dx-excel-rebuild .dx-saving{color:#8a5a00}
+.dx-excel-rebuild .dx-actions{display:flex;align-items:center;gap:2px;margin-left:auto;min-width:0}
+.dx-excel-rebuild .dx-actions button{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border:1px solid transparent;border-radius:3px;background:#fff;padding:6px 8px;font-size:12px}
+.dx-excel-rebuild .dx-actions button:hover{background:#f2f2f2;border-color:#ddd}
+.dx-excel-rebuild .dx-actions .dx-primary{background:#217346;color:#fff;border-color:#217346}
+.dx-excel-rebuild .dx-actions .dx-primary:hover{background:#185c37}
+.dx-excel-rebuild .dx-excel-tabs{flex:0 0 34px;display:flex;align-items:stretch;gap:2px;padding:0 12px;background:#fff;border-bottom:1px solid #d5d5d5;min-width:0;overflow-x:auto}
+.dx-excel-rebuild .dx-excel-tabs>button{position:relative;border:0;background:transparent;padding:0 12px;font-size:12px;white-space:nowrap}
+.dx-excel-rebuild .dx-excel-tabs>button:hover{background:#f5f5f5}
+.dx-excel-rebuild .dx-excel-tabs>button.active{color:#217346;font-weight:650}
+.dx-excel-rebuild .dx-excel-tabs>button.active:after{content:"";position:absolute;bottom:0;left:8px;right:8px;height:3px;background:#217346;border-radius:2px 2px 0 0}
+.dx-excel-rebuild .dx-ribbon-spacer{flex:1;min-width:12px}
+.dx-excel-rebuild .dx-search{align-self:center;display:flex;align-items:center;gap:5px;min-width:130px;max-width:220px;padding:4px 8px;border:1px solid #d2d2d2;border-radius:3px;color:#666}
+.dx-excel-rebuild .dx-search input{min-width:0;width:100%;border:0;outline:0;font:inherit}
+.dx-excel-rebuild .dx-ribbon{flex:0 0 auto;display:flex;align-items:stretch;gap:0;min-height:82px;max-height:106px;padding:6px 9px;background:#f8f9fa;border-bottom:1px solid #d2d2d2;overflow-x:auto;overflow-y:hidden}
+.dx-excel-rebuild .dx-ribbon-group{display:flex;flex-direction:column;justify-content:space-between;gap:4px;padding:2px 10px 4px;border-right:1px solid #d5d5d5;flex:0 0 auto}
+.dx-excel-rebuild .dx-ribbon-group:last-child{border-right:0}
+.dx-excel-rebuild .dx-ribbon-row{display:flex;align-items:center;gap:3px;min-height:29px}
+.dx-excel-rebuild .dx-ribbon-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:28px;border:1px solid transparent;border-radius:3px;background:transparent;padding:5px 7px;white-space:nowrap;font-size:11px}
+.dx-excel-rebuild .dx-ribbon-btn span{display:inline}
+.dx-excel-rebuild .dx-ribbon-btn:hover{background:#e8eee9;border-color:#d2ded5}
+.dx-excel-rebuild .dx-ribbon-btn.active{background:#d6e8dc;border-color:#8bb79a;color:#185c37}
+.dx-excel-rebuild .dx-ribbon-caption{font-size:10px;color:#666;text-align:center;white-space:nowrap}
+.dx-excel-rebuild .dx-ribbon-select{display:flex;flex-direction:column;gap:2px;min-width:80px}
+.dx-excel-rebuild .dx-ribbon-select small{font-size:9px;color:#666}
+.dx-excel-rebuild .dx-ribbon-select select{width:100%;height:25px;border:1px solid #bcbcbc;border-radius:2px;background:#fff;padding:2px 5px;font:11px "Segoe UI",Arial,sans-serif}
+.dx-excel-rebuild .dx-color-tool{display:inline-flex;align-items:center;gap:3px;border:1px solid transparent;padding:4px;border-radius:3px;cursor:pointer}
+.dx-excel-rebuild .dx-color-tool:hover{background:#e8eee9;border-color:#d2ded5}
+.dx-excel-rebuild .dx-color-tool input{width:17px;height:17px;border:0;padding:0;background:transparent;cursor:pointer}
+.dx-excel-rebuild .dx-zoom-value{font-size:11px;min-width:38px;text-align:center;font-weight:500}
+.dx-excel-rebuild .dx-formula{flex:0 0 38px;display:flex;align-items:center;gap:7px;padding:4px 10px;background:#fff;border-bottom:1px solid #d0d0d0}
+.dx-excel-rebuild .dx-name{width:110px;flex:0 0 110px;border:1px solid #c6c6c6;border-radius:2px;padding:5px 7px;background:#fff;font:12px "Segoe UI",Arial,sans-serif;color:#333}
+.dx-excel-rebuild .dx-fx{font-family:Georgia,serif;font-style:italic;font-weight:700;font-size:15px;color:#444;padding:0 4px}
+.dx-excel-rebuild .dx-formula input[aria-label="Formula bar"]{flex:1;min-width:0;height:27px;border:1px solid #c6c6c6;border-radius:2px;padding:5px 8px;background:#fff;font:12px "Segoe UI",Arial,sans-serif;outline:0}
+.dx-excel-rebuild .dx-formula input:focus{border-color:#217346;box-shadow:inset 0 0 0 1px #217346}
+.dx-excel-rebuild .dx-formula>button{display:grid;place-items:center;width:27px;height:27px;border:1px solid transparent;border-radius:2px;background:#f5f5f5;color:#217346}
+.dx-excel-rebuild .dx-engine-workspace{flex:1 1 auto;min-height:80px;min-width:0;width:100%;overflow:hidden;position:relative;background:#fff;animation:none!important;transform:none!important}
+.dx-excel-rebuild .dx-engine-workspace>div{height:100%;min-height:0;width:100%}
+.dx-excel-rebuild .dx-engine-workspace .fortune-sheet-container,.dx-excel-rebuild .dx-engine-workspace .fortune-sheet-workbook,.dx-excel-rebuild .dx-engine-workspace .luckysheet{height:100%;min-height:0;border:0;border-radius:0;box-shadow:none}
+.dx-excel-rebuild .dx-engine-workspace .fortune-sheet-container{font-family:"Aptos","Segoe UI",Calibri,Arial,sans-serif}
+.dx-excel-rebuild .dx-engine-workspace .fortune-sheet-container input,.dx-excel-rebuild .dx-engine-workspace .fortune-sheet-container textarea{font-family:inherit}
+.dx-excel-rebuild .dx-status{flex:0 0 30px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 10px;background:#f3f3f3;border-top:1px solid #d0d0d0;color:#555;font-size:11px}
+.dx-excel-rebuild .dx-status-left,.dx-excel-rebuild .dx-status-right{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.dx-excel-rebuild .dx-status-right button{border:0;background:transparent;padding:3px 5px;border-radius:2px}
+.dx-excel-rebuild .dx-status-right button:hover{background:#e4e4e4}
+.dx-excel-rebuild .dx-status-right input{width:100px;accent-color:#217346}
+.dx-excel-rebuild .dx-open-panel{position:absolute;top:48px;right:12px;width:min(330px,90%);z-index:100;background:#fff;border:1px solid #d0d0d0;border-radius:4px;padding:12px;box-shadow:0 8px 28px #0002}
+.dx-excel-rebuild .dx-open-panel>div{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dx-excel-rebuild .dx-open-panel button{display:flex;align-items:center;gap:8px;width:100%;padding:8px;border:0;background:#f6f8f6;text-align:left;margin:2px 0}
+.dx-excel-rebuild .dx-open-panel>div button{width:auto;background:transparent}
+.dx-excel-rebuild .dx-open-panel p{color:#666;font-size:12px}
+.dx-excel-rebuild .dx-toast{position:absolute;right:15px;bottom:40px;z-index:150;display:flex;align-items:center;gap:7px;padding:9px 12px;background:#185c37;color:#fff;border-radius:4px;box-shadow:0 6px 18px #0002;animation:none!important}
+@media(max-width:900px){.dx-excel-rebuild .dx-titlebar{flex-wrap:wrap;gap:5px}.dx-excel-rebuild .dx-actions{flex-wrap:wrap}.dx-excel-rebuild .dx-actions button{padding:5px}.dx-excel-rebuild .dx-actions button svg{display:none}.dx-excel-rebuild .dx-workbook-name{width:90px}.dx-excel-rebuild .dx-ribbon{min-height:75px}.dx-excel-rebuild .dx-ribbon-btn span{display:none}.dx-excel-rebuild .dx-search{min-width:90px}}
+@media(prefers-reduced-motion:reduce){.dx-excel-rebuild *{animation:none!important;transition:none!important}}
