@@ -158,6 +158,8 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const [windows, setWindows] = useState<Record<string, any>>({})
   const [activeWindow, setActiveWindow] = useState<string|null>(null)
   const [windowsHydrated, setWindowsHydrated] = useState(false)
+  const [badTimeWarning, setBadTimeWarning] = useState<{desktopInstance:boolean}|null>(null)
+  const [dontAskBadTime, setDontAskBadTime] = useState(false)
   const [iconScale, setIconScale] = useState(1.1)
   const [clock, setClock] = useState(new Date())
   const [powerMenu, setPowerMenu] = useState(false)
@@ -578,7 +580,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     setContextMenu(null); setStartOpen(false); setSearchOpen(false)
     if (app.kind==='store') { const k=requestedId==='DAPP'?'DAPP':'desktop:'+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:prev[k]?{...prev[k],minimized:false,z:maxZ+1}:{kind:'store',appName:'DAPP',minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,980),height:Math.min(window.innerHeight-90,680),z:maxZ+1,taskbarInstance:false}}}); setActiveWindow(k); return }
     if (app.kind==='trash' && requestedId==='DaTrash') { setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,DaTrash:prev.DaTrash?{...prev.DaTrash,minimized:false,z:maxZ+1}:{kind:'trash',appName:'DaTrash',minimized:false,maximized:false,x:60,y:45,width:Math.min(window.innerWidth-40,900),height:Math.min(window.innerHeight-90,620),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow('DaTrash'); return }
-    if (app.kind==='sans') { const k=(desktopInstance?'desktop:':'taskbar:')+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'sans',appName:requestedId,minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,720),z:maxZ+1,taskbarInstance:!desktopInstance,appInstanceId:requestedId}}});setActiveWindow(k);return }
+    if (app.kind==='sans') { try { if(localStorage.getItem('ida-bad-time-dont-ask')!=='1') { setDontAskBadTime(false); setBadTimeWarning({desktopInstance}); return } } catch { setDontAskBadTime(false); setBadTimeWarning({desktopInstance}); return } const k=(desktopInstance?'desktop:':'taskbar:')+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'sans',appName:requestedId,minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,720),z:maxZ+1,taskbarInstance:!desktopInstance,appInstanceId:requestedId}}});setActiveWindow(k);return }
     if (app.kind==='scope') { const k=(desktopInstance?'desktop:':'taskbar:')+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'scope',appName:'DaScope',minimized:false,maximized:false,x:45,y:35,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance}}});setActiveWindow(k);return }
     const k = desktopInstance ? `desktop:${requestedId}:${Date.now()}` : requestedId
     setWindows(prev => { const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0)); const existing=prev[k]; return {...prev,[k]:existing?{...existing,minimized:false,z:maxZ+1}:{kind:app.kind,appName:app.name,minimized:false,maximized:false,x:20 + Object.keys(prev).length*18,y:18 + Object.keys(prev).length*18,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,700),z:maxZ+1,taskbarInstance:!desktopInstance,appInstanceId:requestedId}} })
@@ -901,7 +903,19 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
       {desktop && languagePrompt && <LanguageRestartDialog language={languagePrompt} onCancel={()=>setLanguagePrompt(null)} onRestart={applyLanguageAndRestart}/>} 
       {desktop && renaming && <RenameDialog value={renaming.name} onChange={name=>setRenaming({...renaming,name})} onCancel={()=>setRenaming(null)} onSave={()=>renameItem(renaming.type,renaming.id,renaming.name)}/>} 
 
-    </main>
+    
+      {badTimeWarning && <div role="dialog" aria-modal="true" aria-labelledby="bad-time-warning-title" style={{position:'fixed',inset:0,zIndex:999999,display:'grid',placeItems:'center',padding:20,background:'rgba(0,0,0,.68)',backdropFilter:'blur(7px)'}}>
+        <section style={{width:'min(440px,100%)',padding:26,borderRadius:18,background:'linear-gradient(145deg,#171923,#0d0f16)',border:'1px solid #484b59',boxShadow:'0 24px 90px #0009',color:'#f8fafc',fontFamily:'inherit'}}>
+          <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:18}}><img src="/IDA-OS/Sans-Blaster.png" alt="" style={{width:66,height:66,objectFit:'contain',imageRendering:'pixelated',borderRadius:12,background:'#050505'}}/><div><div style={{fontSize:11,letterSpacing:2,color:'#f87171',fontWeight:800}}>WARNING</div><h2 id="bad-time-warning-title" style={{fontSize:24,margin:'4px 0 0'}}>Bad-Time</h2></div></div>
+          <p style={{fontSize:16,lineHeight:1.55,color:'#e5e7eb',margin:'0 0 22px'}}>This game will rage-bait you. Are you sure you want to continue?</p>
+          <label style={{display:'flex',alignItems:'center',gap:9,fontSize:13,color:'#cbd5e1',marginBottom:22,cursor:'pointer'}}><input type="checkbox" checked={dontAskBadTime} onChange={e=>setDontAskBadTime(e.target.checked)} style={{width:16,height:16,accentColor:'#38bdf8'}}/> Don't ask me again</label>
+          <div style={{display:'flex',justifyContent:'flex-end',gap:10}}>
+            <button onClick={()=>setBadTimeWarning(null)} style={{padding:'10px 17px',borderRadius:10,border:'1px solid #4b5563',background:'#242733',color:'#f8fafc',fontWeight:650,cursor:'pointer'}}>No, close</button>
+            <button onClick={()=>{if(dontAskBadTime){try{localStorage.setItem('ida-bad-time-dont-ask','1')}catch{}}const desktopInstance=badTimeWarning.desktopInstance;setBadTimeWarning(null);const app=APPS.find(a=>a.name==='Bad-Time');if(app){const k=(desktopInstance?'desktop:':'taskbar:')+'Bad-Time:'+Date.now();setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:{kind:'sans',appName:'Bad-Time',minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,1050),height:Math.min(window.innerHeight-90,720),z:maxZ+1,taskbarInstance:!desktopInstance,appInstanceId:'Bad-Time'}}});setActiveWindow(k)}}} style={{padding:'10px 17px',borderRadius:10,border:0,background:'#e5e7eb',color:'#111827',fontWeight:750,cursor:'pointer'}}>Yes, I'm ready</button>
+          </div>
+        </section>
+      </div>}
+</main>
   )
 }
 
