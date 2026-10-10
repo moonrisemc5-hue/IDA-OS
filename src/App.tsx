@@ -476,7 +476,22 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const addNewFile = (location:string='Desktop') => addNewFolder(location)
   const addNewFolder = (parent:string='Desktop') => { const id=`folder-${Date.now()}-${Math.random().toString(36).slice(2,7)}`; commitFolders([...folders,{id,name:'New Folder',parent,createdAt:Date.now()}]); return id }
   const addNote = (location:string='Desktop') => { const id=`note-${Date.now()}-${Math.random().toString(36).slice(2,7)}`; const next:UserFile[]=[...files,{id,name:'New Note',kind:'note' as const,location,createdAt:Date.now()}]; commitFiles(next); updateNotes({...notes,[id]:''}); setExplorerFolder(location==='Desktop'?'Desktop':location as ExplorerFolder); return id }
-  const importFiles = (list:FileList|null, location:string) => { if(!list?.length)return; const base=files.slice(); let remaining=list.length; Array.from(list).forEach(file=>{const id=`file-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;const reader=new FileReader();reader.onload=()=>{base.push({id,name:file.name,kind:'file',location,mime:file.type,data:String(reader.result),createdAt:Date.now()});remaining--;if(remaining===0)commitFiles(base)};reader.readAsDataURL(file)}) }
+  const importFiles = async (list:FileList|null, location:string) => {
+    if(!list?.length)return;
+    const added:UserFile[]=[];
+    for(const file of Array.from(list)){
+      const id=`file-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+      const mediaLike=file.type.startsWith('audio/')||file.type.startsWith('video/')||/\.(mp3|m4a|wav|ogg|flac|aac|mp4|webm|mov|m4v)$/i.test(file.name);
+      if(mediaLike){
+        try{await storeVideoBlob(id,file);added.push({id,name:file.name,kind:'file',location,mime:file.type||( /\.(mp3|m4a|wav|ogg|flac|aac)$/i.test(file.name)?'audio/mpeg':'video/mp4'),blobKey:id,createdAt:Date.now()})}
+        catch(error){console.error('IDA could not store imported media:',error);window.alert('IDA could not save '+file.name+'. Please check available browser storage and try again.')}
+      }else{
+        const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(reader.error);reader.readAsDataURL(file)});
+        added.push({id,name:file.name,kind:'file',location,mime:file.type,data,createdAt:Date.now()});
+      }
+    }
+    if(added.length)commitFiles([...files,...added]);
+  }
   const saveDaRawImage = (data:string, fileName:string) => { const clean=(fileName||'DaRaw-artwork').replace(/\.(png|jpe?g|webp|gif|bmp)$/i,'').trim()||'DaRaw-artwork'; const file:UserFile={id:`file-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name:clean+'.png',kind:'file',location:'Pictures',mime:'image/png',data,createdAt:Date.now()}; commitFiles([...files,file]); return file.id }
   const updateFileData = (id:string,data:string) => commitFiles(files.map(f=>f.id===id?{...f,data}:f))
   const deleteNote = (id:string) => { const nextFiles=files.filter(f=>f.id!==id); commitFiles(nextFiles); const nextNotes={...notes}; delete nextNotes[id]; updateNotes(nextNotes); setExplorerFolder('Notes') }
@@ -1125,7 +1140,21 @@ function DaFileExplorer({folder,setFolder,files,folders,folderApps,appLabels,app
   </div>
 }
 
-function DaMedia({file}:{file?:UserFile}){const [mediaSrc,setMediaSrc]=useState(file?.data||'');useEffect(()=>{let alive=true;let objectUrl:string|undefined;if(!file){setMediaSrc('');return}if(file.blobKey){getVideoBlob(file.blobKey).then(blob=>{if(alive&&blob){objectUrl=URL.createObjectURL(blob);setMediaSrc(objectUrl)}else if(alive)setMediaSrc('')}).catch(()=>{if(alive)setMediaSrc('')})}else setMediaSrc(file.data||'');return()=>{alive=false;if(objectUrl)URL.revokeObjectURL(objectUrl)}},[file?.id,file?.blobKey,file?.data]);if(!file)return <div className="explorer-empty"><Film size={42}/><strong>No media selected</strong><span>Open a photo or video from DaFile Explorer.</span></div>;return <div className="media-shell"><div className="media-toolbar"><div><span className="eyebrow">IDA</span><h2>DaMedia</h2></div><span>{file.name}</span></div><div className="media-stage">{file.mime?.startsWith('image/')?<img src={mediaSrc} alt={file.name}/>:mediaSrc?<video src={mediaSrc} controls autoPlay/>:<div className="explorer-empty"><Film size={32}/><span>Loading video…</span></div>}</div></div>}
+function DaMedia({file}:{file?:UserFile}){
+  const [mediaSrc,setMediaSrc]=useState(file?.data||'');
+  const [mediaError,setMediaError]=useState('');
+  useEffect(()=>{
+    let alive=true;let objectUrl:string|undefined;setMediaError('');
+    if(!file){setMediaSrc('');return}
+    if(file.blobKey){
+      getVideoBlob(file.blobKey).then(blob=>{if(alive&&blob){objectUrl=URL.createObjectURL(blob);setMediaSrc(objectUrl)}else if(alive){setMediaSrc('');setMediaError('This media file could not be found in browser storage. Please import it again.')}}).catch(()=>{if(alive){setMediaSrc('');setMediaError('Could not load this media file. Please import it again.')}});
+    }else setMediaSrc(file.data||'');
+    return()=>{alive=false;if(objectUrl)URL.revokeObjectURL(objectUrl)};
+  },[file?.id,file?.blobKey,file?.data]);
+  if(!file)return <div className="explorer-empty"><Film size={42}/><strong>No media selected</strong><span>Open a photo, video, or audio file from DaFile Explorer.</span></div>;
+  const isAudio=file.mime?.startsWith('audio/')||/\.(mp3|m4a|wav|ogg|flac|aac)$/i.test(file.name);
+  return <div className="media-shell"><div className="media-toolbar"><div><span className="eyebrow">IDA</span><h2>DaMedia</h2></div><span>{file.name}</span></div><div className="media-stage">{mediaError?<div className="explorer-empty"><Film size={32}/><strong>Unable to open media</strong><span>{mediaError}</span></div>:!mediaSrc?<div className="explorer-empty"><Film size={32}/><span>Loading media…</span></div>:isAudio?<div style={{width:'min(680px,90%)',padding:28,border:'1px solid #343744',borderRadius:18,background:'linear-gradient(145deg,#171923,#0d0e14)',display:'grid',justifyItems:'center',gap:18,color:'#f4f4f5'}}><div style={{width:112,height:112,borderRadius:28,display:'grid',placeItems:'center',background:'linear-gradient(135deg,#8b5cf6,#312e81)',boxShadow:'0 16px 40px #0007'}}><Film size={54}/></div><strong style={{fontSize:20,textAlign:'center',overflowWrap:'anywhere'}}>{file.name.replace(/\.[^.]+$/,'')}</strong><span style={{color:'#a5a8b5',fontSize:13}}>Now playing in DaMedia</span><audio key={file.id} src={mediaSrc} controls autoPlay style={{width:'100%'}} onError={()=>setMediaError('The browser could not decode this audio file. Try an MP3, WAV, or M4A file.')}/></div>:file.mime?.startsWith('image/')?<img src={mediaSrc} alt={file.name}/>:<video src={mediaSrc} controls autoPlay onError={()=>setMediaError('The browser could not play this video format.')}/>}</div></div>
+}
 function DaTrash({trash,onRestore,onEmpty,onPermanentDelete}:{trash:Array<{type:'app'|'file'|'folder';id:string;name:string;app?:AppItem;file?:UserFile;folder?:UserFolder;deletedAt:number}>;onRestore:(item:any)=>void;onEmpty:()=>void;onPermanentDelete:(item:any)=>void}){const [menu,setMenu]=useState<{x:number;y:number;item:any}|null>(null);const [confirm,setConfirm]=useState<any>(null);return <div className="trash-shell" onPointerDown={()=>setMenu(null)}><div className="trash-toolbar"><div><span className="eyebrow">IDA</span><h2>DaTrash</h2></div><button onClick={onEmpty} disabled={!trash.length}>Empty Trash</button></div>{trash.length===0?<div className="explorer-empty"><Trash2 size={42}/><strong>Trash is empty</strong><span>Deleted apps, files, and notes will appear here.</span></div>:<div className="explorer-grid">{trash.map(item=><div key={item.type+item.id} className="explorer-card trash-card" onContextMenu={e=>{e.preventDefault();e.stopPropagation();setMenu({x:e.clientX,y:e.clientY,item})}}><span className="explorer-card-icon">{item.type==='app'?<Trash2 size={27}/>:item.file?.kind==='note'?<FileText size={27}/>:<Folder size={27}/>}</span><strong>{item.name}</strong><small>{item.type==='app'?'App':item.file?.kind==='note'?'Note':'File'}</small></div>)}</div>}{menu&&<div className="desktop-context taskbar-context" style={{left:Math.min(menu.x,window.innerWidth-150),top:Math.min(menu.y,window.innerHeight-70),zIndex:100001}} onPointerDown={e=>e.stopPropagation()}><button onClick={()=>{onRestore(menu.item);setMenu(null)}}><Folder size={14}/> Restore</button><button onClick={()=>{setConfirm(menu.item);setMenu(null)}}><X size={14}/> Permanently delete</button></div>}{confirm&&<div className="rename-backdrop" onPointerDown={()=>setConfirm(null)}><div className="rename-dialog" onPointerDown={e=>e.stopPropagation()}><strong>Permanently delete?</strong><p>This will permanently delete “{confirm.name}”. This action cannot be undone.</p><div><button onClick={()=>setConfirm(null)}>Cancel</button><button className="rename-save" onClick={()=>{onPermanentDelete(confirm);setConfirm(null)}}>OK</button></div></div></div>}</div>}
 
 function BankIcon({size=38}:{size?:number}) {
