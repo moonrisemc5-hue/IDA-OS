@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
-<!-- transparent canvas; the skull fills the icon so it remains legible at small sizes -->
-<path fill="#090a0d" d="M30 15h12V9h44v6h12v8h9v12h7v19h-5v11h-6v12h-7v9h-9v7H41v-7h-9v-9h-7V75h-6V64h-5V43h6V31h7v-8h3z"/>
-<path fill="#f8f8f8" d="M32 18h10v-5h44v5h10v8h8v12h6v20h-5v10h-6v10h-7v8h-9v7H45v-7h-9v-8h-7V73h-6V61h-5V43h6V32h8z"/>
-<path fill="#bfc3ca" d="M32 22h8v-5h8v5H37v8h-7v10h-5v17h5v10h5v10h7v8h12v6H44v-7h-8v-8h-7V73h-6V61h-5V43h6V32h8zM83 17h3v5h10v8h7v10h5v17h-5V42h-5V32h-7v-6H83zM85 87h9v-8h7v-8h5V59h5v5h-5v11h-6v10h-8v7h-7z"/>
-<!-- left socket -->
-<path fill="#050608" d="M28 42h8v-5h23v5h7v8h5v14h-5v8h-8v5H43v-4h-9v-5h-6v-8h-4V49h4z"/>
-<path fill="#fff" d="M38 49h7v7h-7z"/>
-<!-- Sans's glowing right eye -->
-<path fill="#050608" d="M73 42h7v-5h23v5h7v8h5v14h-5v8h-8v5H87v-4h-9v-5h-6v-8h-4V49h5z"/>
-<path fill="#004b66" d="M85 46h15v4h5v6h3v8h-4v5h-5v4H85v-4h-5v-5h-3v-8h3v-6h5z"/>
-<path fill="#00d9ff" d="M88 48h9v4h4v4h3v7h-3v4h-4v3h-8v-3h-4v-4h-3v-7h3v-4h3z"/>
-<path fill="#83f4ff" d="M89 52h7v4h3v5h-3v4h-7v-4h-3v-5h3z"/>
-<path fill="#fff" d="M95 51h4v4h-4z"/>
-<path fill="#050608" d="M90 57h5v5h-5z"/>
-<!-- nasal cavity -->
-<path fill="#050608" d="M59 67h10v7h-4v8h-5v-8h-4v-4h3z"/>
-<!-- wide cheeky grin -->
-<path fill="#050608" d="M28 81h10v-5h7v5h38v-5h7v5h10v7h-7v7h-8v6H43v-6h-8v-7h-7z"/>
-<path fill="#fff" d="M39 82h8v8h-8zM49 82h10v10H49zM61 82h10v10H61zM73 82h10v10H73zM84 82h6v8h-6z"/>
-<path fill="#d9dce2" d="M40 90h7v3h-7zM51 92h7v2h-7zM63 92h7v2h-7zM75 92h7v2h-7z"/>
-<path fill="#090a0d" d="M43 99h42v5H43zM49 104h30v4H49z"/>
+<rect width="128" height="128" rx="12" fill="#050505"/>
+<!-- broad, round Sans skull silhouette -->
+<path fill="#f8f8f8" d="M39 10h50v5h10v7h8v10h6v13h4v22h-4v10h-5v10h-7v8h-9v6H36v-6h-9v-8h-7V77h-5V66h-4V44h4V31h6V22h8v-7h10z"/>
+<path fill="#c9cbd0" d="M39 10h14v5H39v6H29v9h-6v13h-4v20h5v10h5v10h7v8h10v6H36v-6h-9v-8h-7V77h-5V66h-4V44h4V31h6V22h8v-7h10zM88 10h1v5h10v7h8v10h6v13h4v22h-4v10h-5v10h-7v8h-9v6h-8v-6h10v-6h7v-8h6V69h4V45h-4V32h-6v-9h-8v-7H88z"/>
+<!-- deep black eye sockets -->
+<path fill="#030405" d="M23 43h7v-5h27v5h7v8h5v15h-5v8h-8v5H40v-4h-7v-5h-6v-8h-4z"/>
+<path fill="#030405" d="M69 43h7v-5h27v5h7v8h5v15h-5v8h-8v5H86v-4h-7v-5h-6v-8h-4z"/>
+<path fill="#fff" d="M37 50h8v8h-8z"/>
+<!-- cyan magic eye -->
+<path fill="#003b54" d="M83 45h15v4h5v5h4v9h-4v5h-5v4H83v-4h-5v-5h-4v-9h4v-5h5z"/>
+<path fill="#00dfff" d="M86 48h10v4h4v4h3v7h-3v4h-4v3H86v-3h-4v-4h-3v-7h3v-4h4z"/>
+<path fill="#8df7ff" d="M87 52h8v4h3v5h-3v4h-8v-4h-3v-5h3z"/>
+<path fill="#fff" d="M94 51h4v4h-4z"/>
+<path fill="#030405" d="M89 57h5v5h-5z"/>
+<!-- nose -->
+<path fill="#030405" d="M58 66h11v7h-4v9h-5v-9h-4v-4h2z"/>
+<!-- classic wide toothy Sans grin -->
+<path fill="#030405" d="M26 81h9v-5h8v5h42v-5h8v5h9v7h-6v7h-8v6H43v-6h-8v-7h-9z"/>
+<path fill="#fff" d="M38 82h8v9h-8zM48 82h10v11H48zM60 82h10v11H60zM72 82h10v11H72zM84 82h7v9h-7z"/>
+<path fill="#cfd2d8" d="M40 91h5v3h-5zM51 93h6v2h-6zM63 93h6v2h-6zM75 93h6v2h-6z"/>
+<path fill="#030405" d="M42 100h44v5H42zM49 105h30v4H49z"/>
 </svg>
