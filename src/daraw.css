@@ -35,3 +35,6 @@
 .daraw-canvas-frame.daraw-transparent-background canvas:first-child{background:transparent!important}
 .daraw-canvas-frame.daraw-white-background canvas:first-child{background:#fff}
 .daraw-actions button.active{background:#e8e1ff;border-color:#a996fa;color:#653ed0}
+
+.daraw-opacity{display:grid;grid-template-columns:auto;gap:5px;min-width:125px;align-items:center}.daraw-opacity label{font-size:11px;color:#6a6982;white-space:nowrap}.daraw-opacity label b{color:#6d43d8}.daraw-opacity input{width:125px;accent-color:#8156e8}.daraw-opacity-preview{width:28px;height:9px;border:1px solid #7777;border-radius:6px;justify-self:center;background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0}
+@media(max-width:760px){.daraw-opacity{min-width:100px}.daraw-opacity input{width:100px}}
