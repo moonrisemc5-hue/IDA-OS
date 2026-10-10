@@ -345,10 +345,14 @@ export function CloudGate() {
     originalMethods.current=null
   }
 
-  const loadUser=async(nextSession:IdaSession)=>{
-    setReady(false);setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
+  const loadUser=async(nextSession:IdaSession, options:{background?:boolean}={})=>{
+    if(!options.background)setReady(false)
+    setError('');activeUser.current=nextSession.accountId;activeSessionToken.current=nextSession.sessionToken
     const localBeforeCloud=readLocalState()
     const localChangesPending=localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId
+    // Start observing local edits before the network round-trip so a fast desktop
+    // can still save changes without the cloud response overwriting them.
+    if(options.background)installStorageSync()
     let resetWindowLayout=false
     try { resetWindowLayout=sessionStorage.getItem('ida-reset-window-layout-once')==='1' } catch {}
     const {data,error:loadError}=await supabase.rpc('ida_load_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken})
@@ -358,7 +362,8 @@ export function CloudGate() {
       }
       setError('Cloud sync is temporarily unavailable. Your IDA sign-in and local desktop are being kept.');installStorageSync();setReady(true);return
     }
-    if(data&&looksLikeIdaState(data)&&!localChangesPending){
+    const localChangesArrivedDuringLoad=localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId
+    if(data&&looksLikeIdaState(data)&&!localChangesPending&&!localChangesArrivedDuringLoad){
       let stateToApply=data
       if(resetWindowLayout){
         const repaired:CloudState={...data,keys:{...data.keys}}
@@ -367,10 +372,13 @@ export function CloudGate() {
         stateToApply=repaired
         await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:repaired})
       }
-      applyLocalState(stateToApply)
-    } else if(Object.keys(localBeforeCloud.keys).length || localChangesPending){
+      // During fast resume the desktop is already mounted from local storage; do not
+      // replace its backing storage underneath the live React state.
+      if(!options.background)applyLocalState(stateToApply)
+    } else if(Object.keys(localBeforeCloud.keys).length || localChangesPending || localChangesArrivedDuringLoad){
       // Preserve newer local edits instead of replacing them with an older cloud snapshot.
-      const {error:saveError}=await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:localBeforeCloud})
+      const stateToSave=localChangesArrivedDuringLoad?readLocalState():localBeforeCloud
+      const {error:saveError}=await supabase.rpc('ida_save_state',{p_account_id:nextSession.accountId,p_session_token:nextSession.sessionToken,p_state:stateToSave})
       if(saveError)setError(saveError.message)
       else if(localStorage.getItem(CLOUD_DIRTY_KEY)===nextSession.accountId) localStorage.removeItem(CLOUD_DIRTY_KEY)
     }
@@ -402,8 +410,9 @@ export function CloudGate() {
 
   useEffect(()=>{
     let mounted=true
-    // Start downloading every built-in wallpaper while the welcome/setup screens are visible.
-    // This warms the browser cache so the desktop is ready sooner after sign-in.
+    // Only preload wallpapers during first-time setup. Re-downloading six large images
+    // on every refresh competes with IDA's startup work and wastes bandwidth.
+    const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v3')==='1'
     const wallpaperUrls=[
       FIRSTBOOT_WALLPAPER,
       'https://images.pexels.com/photos/18928472/pexels-photo-18928472.jpeg?cs=srgb&dl=pexels-bylukemiller-18928472.jpg&fm=jpg',
@@ -413,15 +422,19 @@ export function CloudGate() {
       'https://images.pexels.com/photos/7348417/pexels-photo-7348417.jpeg?auto=compress&cs=tinysrgb&w=2400'
     ]
     try { const custom=localStorage.getItem('daapps-custom-wallpaper'); if(custom&&custom.startsWith('data:image/'))wallpaperUrls.push(custom) } catch {}
-    const preloadImages=wallpaperUrls.map(src=>{const image=new Image();image.decoding='async';image.src=src;return image})
-    const hadFirstBoot=localStorage.getItem('ida-firstboot-complete-v3')==='1'
+    const preloadImages=hadFirstBoot?[]:wallpaperUrls.map(src=>{const image=new Image();image.decoding='async';image.src=src;return image})
     setFirstBoot(!hadFirstBoot)
     const stored=readIdaSession()
     if(stored){
       setSession(stored)
       const powerLock=localStorage.getItem('ida-power-lock-v1')==='1'
-      setDesktopOpen(!powerLock && localStorage.getItem('ida-desktop-session-open-v1')==='1')
-      void loadUser(stored)
+      const resumeDesktop=!powerLock && localStorage.getItem('ida-desktop-session-open-v1')==='1'
+      setDesktopOpen(resumeDesktop)
+      // If IDA was already open, render its saved local desktop immediately and
+      // synchronize the account snapshot in the background instead of showing a
+      // blank/boot screen while waiting for the cloud round-trip.
+      if(resumeDesktop)setReady(true)
+      void loadUser(stored,{background:resumeDesktop})
     } else {
       setReady(true)
       if(localStorage.getItem(GUEST_LOCK_KEY)==='1'){setSession({accountId:'',sessionToken:'',displayName:'IDA User'});setDesktopOpen(false)}
