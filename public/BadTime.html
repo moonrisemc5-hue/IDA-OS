@@ -113,6 +113,45 @@
 		
 	</div>
 	
+	<!-- Keep the Construct 2 fight from monopolizing the browser's main thread. -->
+	<script>
+	(function(){
+	  var nativeRaf = window.requestAnimationFrame.bind(window);
+	  var nativeCancel = window.cancelAnimationFrame.bind(window);
+	  var lastFrame = 0;
+	  var pending = new Map();
+	  var nextId = 1;
+	  var frameInterval = 1000 / 30;
+	  window.requestAnimationFrame = function(callback) {
+	    var id = nextId++;
+	    var nativeId = nativeRaf(function(timestamp) {
+	      var wait = frameInterval - (timestamp - lastFrame);
+	      if (lastFrame && wait > 1) {
+	        var timer = window.setTimeout(function() {
+	          pending.delete(id);
+	          lastFrame = performance.now();
+	          callback(lastFrame);
+	        }, wait);
+	        pending.set(id, { timer: timer, nativeId: null });
+	      } else {
+	        pending.delete(id);
+	        lastFrame = timestamp;
+	        callback(timestamp);
+	      }
+	    });
+	    pending.set(id, { timer: null, nativeId: nativeId });
+	    return id;
+	  };
+	  window.cancelAnimationFrame = function(id) {
+	    var task = pending.get(id);
+	    if (!task) return;
+	    if (task.nativeId !== null) nativeCancel(task.nativeId);
+	    if (task.timer !== null) window.clearTimeout(task.timer);
+	    pending.delete(id);
+	  };
+	})();
+	</script>
+
 	<!-- Pages load faster with scripts at the bottom -->
 	
 	<!-- Construct 2 exported games require jQuery. -->
