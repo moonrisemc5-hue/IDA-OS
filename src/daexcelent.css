@@ -246,3 +246,26 @@
  .dx-excel-rebuild .dx-ribbon-group{padding-left:5px;padding-right:5px}
  .dx-excel-rebuild .dx-ribbon-btn{padding:4px}
 }
+
+
+/* Saved charts are workbook content, not a temporary preview dialog. */
+.dx-excel-rebuild .dx-saved-chart{position:absolute;z-index:80;right:18px;bottom:48px;width:min(420px,calc(100% - 36px));max-height:46%;display:flex;flex-direction:column;background:#fff;border:1px solid #bfc9c2;border-radius:4px;box-shadow:0 5px 18px #0002;overflow:hidden}
+.dx-excel-rebuild .dx-saved-chart>header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-bottom:1px solid #e2e7e3;background:#f7faf8}
+.dx-excel-rebuild .dx-saved-chart>header b{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dx-excel-rebuild .dx-saved-chart>header button{display:grid;place-items:center;width:25px;height:25px;border:0;background:transparent;border-radius:3px}
+.dx-excel-rebuild .dx-saved-chart>header button:hover{background:#e5eee8}
+.dx-excel-rebuild .dx-saved-chart-plot{display:flex;flex-direction:column;gap:5px;padding:10px;overflow:auto}
+.dx-excel-rebuild .dx-saved-chart-item{display:grid;grid-template-columns:minmax(55px,100px) 1fr 54px;align-items:center;gap:7px;min-height:18px;font-size:10px}
+.dx-excel-rebuild .dx-saved-chart-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#3b4540}
+.dx-excel-rebuild .dx-saved-chart-track{height:15px;display:flex;align-items:center;background:#f1f4f2;overflow:hidden}
+.dx-excel-rebuild .dx-saved-chart-bar{height:100%;min-width:2px;background:#217346}
+.dx-excel-rebuild .dx-saved-chart-value{text-align:right;font-variant-numeric:tabular-nums;color:#424a45}
+.dx-excel-rebuild .dx-saved-chart:not(.dx-saved-chart-bars) .dx-saved-chart-track{height:90px;align-items:flex-end}
+.dx-excel-rebuild .dx-saved-chart:not(.dx-saved-chart-bars) .dx-saved-chart-item{grid-template-columns:minmax(40px,72px) 1fr 44px}
+.dx-excel-rebuild .dx-saved-chart:not(.dx-saved-chart-bars) .dx-saved-chart-bar{width:100%;height:50%;max-height:100%}
+@media print{
+ body *{visibility:hidden!important}
+ .dx-excel-rebuild .dx-engine-workspace,.dx-excel-rebuild .dx-engine-workspace *{visibility:visible!important}
+ .dx-excel-rebuild .dx-engine-workspace{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;overflow:visible!important}
+ .dx-excel-rebuild .dx-titlebar,.dx-excel-rebuild .dx-excel-tabs,.dx-excel-rebuild .dx-ribbon,.dx-excel-rebuild .dx-formula,.dx-excel-rebuild .dx-status,.dx-excel-rebuild .dx-context-menu,.dx-excel-rebuild .dx-toast,.dx-excel-rebuild .dx-chart-backdrop,.dx-excel-rebuild .dx-saved-chart{display:none!important}
+}
