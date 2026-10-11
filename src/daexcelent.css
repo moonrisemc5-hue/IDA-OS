@@ -66,3 +66,19 @@
 .dx-excel-rebuild .dx-toast{position:absolute;right:15px;bottom:40px;z-index:150;display:flex;align-items:center;gap:7px;padding:9px 12px;background:#185c37;color:#fff;border-radius:4px;box-shadow:0 6px 18px #0002;animation:none!important}
 @media(max-width:900px){.dx-excel-rebuild .dx-titlebar{flex-wrap:wrap;gap:5px}.dx-excel-rebuild .dx-actions{flex-wrap:wrap}.dx-excel-rebuild .dx-actions button{padding:5px}.dx-excel-rebuild .dx-actions button svg{display:none}.dx-excel-rebuild .dx-workbook-name{width:90px}.dx-excel-rebuild .dx-ribbon{min-height:75px}.dx-excel-rebuild .dx-ribbon-btn span{display:none}.dx-excel-rebuild .dx-search{min-width:90px}}
 @media(prefers-reduced-motion:reduce){.dx-excel-rebuild *{animation:none!important;transition:none!important}}
+
+/* Excel-like cell context menu and restrained selection colors */
+.dx-excel-rebuild .dx-context-menu{position:fixed;z-index:10000;width:292px;max-height:min(78vh,620px);overflow-y:auto;padding:6px 0 8px;background:#fff;border:1px solid #8a8a8a;border-radius:3px;box-shadow:0 5px 18px #0003;color:#242424;font:13px/1.35 "Aptos","Segoe UI",Arial,sans-serif}
+.dx-excel-rebuild .dx-context-search{display:block;width:calc(100% - 12px);height:34px;margin:0 6px 7px;padding:6px 9px;border:1px solid #8a8a8a;border-radius:0;background:#fff;font:inherit;outline:none}
+.dx-excel-rebuild .dx-context-search:focus{border-color:#217346;box-shadow:inset 0 0 0 1px #217346}
+.dx-excel-rebuild .dx-context-menu>button{display:flex;width:100%;min-height:35px;align-items:center;gap:10px;padding:6px 12px;border:0;border-radius:0;background:#fff;text-align:left;font-size:13px;white-space:nowrap}
+.dx-excel-rebuild .dx-context-menu>button:hover{background:#eaf2ed}
+.dx-excel-rebuild .dx-context-menu .dx-context-strong{font-weight:600}
+.dx-excel-rebuild .dx-context-icon{display:inline-flex;width:20px;flex:0 0 20px;justify-content:center;color:#3c6d55;font-size:18px}
+.dx-excel-rebuild .dx-context-chevron{margin-left:auto;font-size:20px}
+.dx-excel-rebuild .dx-context-divider{height:1px;margin:5px 0;background:#d8d8d8}
+.dx-excel-rebuild .dx-paste-options{display:flex;align-items:center;gap:8px;padding:3px 12px 8px 42px;font-size:12px}
+.dx-excel-rebuild .dx-paste-options span{margin-right:auto;font-weight:600}
+.dx-excel-rebuild .dx-paste-options button{width:28px;height:30px;border:1px solid #ddd;background:#fff;border-radius:2px}
+.dx-excel-rebuild .dx-paste-options button:hover{background:#eaf2ed}
+.dx-excel-rebuild .dx-engine-workspace .luckysheet-cell-selected,.dx-excel-rebuild .dx-engine-workspace .luckysheet-cell-selected-focus{border-color:#217346!important}
