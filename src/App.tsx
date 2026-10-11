@@ -1435,17 +1435,18 @@ function WindowFrame({app,state,active,onFocus,onPatch,onMinimize,onClose,onMaxi
   const [closing, setClosing] = useState(false)
   const chromeTimer = useRef<number | undefined>(undefined)
   const topZone = useRef(false)
+  const revealChrome = () => {
+    if (!immersive) return
+    topZone.current = true
+    setChromeVisible(true)
+    if (chromeTimer.current) window.clearTimeout(chromeTimer.current)
+    chromeTimer.current = window.setTimeout(() => { setChromeVisible(false); topZone.current = false }, 2200)
+  }
   const handleImmersiveMouseMove = (e:React.MouseEvent<HTMLElement>) => {
     if (!immersive) return
     const atRoof = e.clientY <= 8
-    if (atRoof && !topZone.current) {
-      topZone.current = true
-      setChromeVisible(true)
-      if (chromeTimer.current) window.clearTimeout(chromeTimer.current)
-      chromeTimer.current = window.setTimeout(() => setChromeVisible(false), 2000)
-    } else if (!atRoof) {
-      topZone.current = false
-    }
+    if (atRoof && !topZone.current) revealChrome()
+    else if (!atRoof) topZone.current = false
   }
   const requestClose = () => {
     if (closing) return
@@ -1462,6 +1463,7 @@ function WindowFrame({app,state,active,onFocus,onPatch,onMinimize,onClose,onMaxi
     })
   }
   return <section ref={ref} className={'app-window desktop-window '+(active?'window-active ':'')+(immersive?'window-immersive ':'')+(closing?'window-closing':'')} style={{display:state.minimized?'none':undefined,left:immersive?0:(state.maximized?0:state.x),top:immersive?0:(state.maximized?0:state.y),right:immersive?0:(state.maximized?0:'auto'),bottom:immersive?0:(state.maximized?48:'auto'),width:immersive||state.maximized?'auto':state.width,height:immersive||state.maximized?'auto':state.height,zIndex:immersive?2147480001:Math.min(Number(state.z)||1,2147480000)}} onPointerDown={onFocus} onMouseMove={handleImmersiveMouseMove} onContextMenu={e=>{if(onContextMenu){e.preventDefault();e.stopPropagation();onContextMenu(e.clientX,e.clientY)}}} onContextMenuCapture={e=>{if((e.target as HTMLElement).closest('.desktop-context,.explorer-card,.desktop-file-tile,.app-tile,.explorer-main,.explorer-file-view,.trash-card')) return;if(onContextMenu){e.preventDefault();e.stopPropagation();onContextMenu(e.clientX,e.clientY)}}}>
+    {immersive && !chromeVisible && <div aria-hidden="true" className="window-chrome-reveal-zone" onMouseEnter={revealChrome} onMouseMove={revealChrome} style={{position:'absolute',top:0,left:0,right:0,height:14,zIndex:20,background:'transparent',pointerEvents:'auto'}} />}
     <div className={'window-bar '+(immersive && !chromeVisible ? 'chrome-hidden' : '')}>
       <div className="window-drag-area" onPointerDown={down} onPointerMove={move} onPointerUp={()=>drag.current=null} onDoubleClick={onMaximize}>
         <span className="window-title">{app.kind==='store'?<DappLogo size={19}/>:app.kind==='music'?<Music2 size={17}/>:app.kind==='trash'?<Trash2 size={17}/>:app.kind==='explorer'?<Folder size={17}/>:app.kind==='notes'?<FileText size={17}/>:app.kind==='settings'?<Gear size={17}/>:app.kind==='media'?<Film size={17}/>:app.name==='DaCourt'?<Scale size={17}/>:app.name==='Daculator'?<Calculator size={17} color="#6ee7b7"/>:app.name==='DaWord'?<span className="daword-app-logo" style={{width:19,height:19,fontSize:15}}>W</span>:<BankIcon size={17}/>} {app.name}</span>
