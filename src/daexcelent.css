@@ -82,3 +82,33 @@
 .dx-excel-rebuild .dx-paste-options button{width:28px;height:30px;border:1px solid #ddd;background:#fff;border-radius:2px}
 .dx-excel-rebuild .dx-paste-options button:hover{background:#eaf2ed}
 .dx-excel-rebuild .dx-engine-workspace .luckysheet-cell-selected,.dx-excel-rebuild .dx-engine-workspace .luckysheet-cell-selected-focus{border-color:#217346!important}
+
+
+/* Excel-like edit-in-place: keep the engine editor aligned to the active cell,
+   without the floating white card/shadow from the default Luckysheet theme. */
+.dx-excel-rebuild .luckysheet-input-box-inner {
+  border: 1px solid #217346 !important;
+  padding: 0 2px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  border-radius: 0 !important;
+  font: 13px/1.35 "Aptos", "Segoe UI", Calibri, Arial, sans-serif !important;
+  color: #242424 !important;
+}
+
+/* Tone down the default bright-blue drag/range overlay to Excel's restrained
+   green outline and very light range fill. */
+.dx-excel-rebuild .fortune-selection-highlight {
+  background-color: rgba(33, 115, 70, 0.08) !important;
+  border: 1px solid #217346 !important;
+}
+.dx-excel-rebuild .luckysheet-cell-selected {
+  border: 2px solid #217346 !important;
+  background: rgba(33, 115, 70, 0.03) !important;
+}
+.dx-excel-rebuild .luckysheet-cell-selected-focus {
+  border-color: #217346 !important;
+}
