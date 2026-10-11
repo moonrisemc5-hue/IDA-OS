@@ -8,15 +8,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortune-sheet/react": "^1.0.4",
+    "@supabase/supabase-js": "^2.117.3",
     "@vitejs/plugin-react": "^6.0.3",
-    "vite": "^8.1.5",
-    "typescript": "~7.0.2",
+    "convex": "^1.46.0",
+    "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "lucide-react": "^0.577.0",
-    "@supabase/supabase-js": "^2.117.3",
-    "@fortune-sheet/react": "^1.0.4",
+    "typescript": "~7.0.2",
+    "vite": "^8.1.5",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "jsdom": "^29.1.1",
+    "vitest": "^5.0.3"
+  }
 }
