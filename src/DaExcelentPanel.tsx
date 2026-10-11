@@ -15,12 +15,43 @@ const freshBook = ():Book => ({version:1,active:0,sheets:[{name:'Sheet1',cells:{
 const colName = (n:number) => { let s=''; while(n>=0){s=String.fromCharCode(n%26+65)+s;n=Math.floor(n/26)-1} return s }
 const parseRef = (s:string) => { const m=s.trim().toUpperCase().match(/^([A-Z]+)([1-9]\d*)$/); if(!m)return null; let c=0; for(const ch of m[1])c=c*26+ch.charCodeAt(0)-64; return {r:Number(m[2])-1,c:c-1} }
 const parseRange = (s:string) => { const parts=s.replace(/\$/g,'').split(':'); const a=parseRef(parts[0]); const b=parseRef(parts[1]||parts[0]); if(!a||!b)return null; return {r1:Math.min(a.r,b.r),r2:Math.max(a.r,b.r),c1:Math.min(a.c,b.c),c2:Math.max(a.c,b.c)} }
-const asText = (v:any) => v===null||v===undefined?'':String(v)
+const asText = (v:any):string => {
+ if(v===null||v===undefined)return ''
+ if(typeof v==='string')return v
+ if(typeof v==='number'||typeof v==='boolean'||typeof v==='bigint')return String(v)
+ if(Array.isArray(v))return v.map(item=>asText(item)).join('')
+ if(typeof v==='object'){
+  for(const key of ['m','v','text','value','label','f']){
+   const candidate=(v as any)[key]
+   if(candidate!==undefined&&candidate!==null&&typeof candidate!=='object')return String(candidate)
+  }
+  if(Array.isArray((v as any).runs))return (v as any).runs.map((run:any)=>asText(run?.text??run?.v??run)).join('')
+  return ''
+ }
+ return ''
+}
+function sanitizeBook(input:any):Book {
+ const fallback=freshBook()
+ if(!input||input.version!==1||!Array.isArray(input.sheets)||!input.sheets.length)return fallback
+ const sheets:Sheet[]=input.sheets.map((sheet:any,index:number)=>{
+  const cells:Record<string,Cell>={}
+  if(sheet?.cells&&typeof sheet.cells==='object')for(const [address,raw] of Object.entries(sheet.cells)){
+   if(!parseRef(address)||!raw||typeof raw!=='object')continue
+   const cell:any=raw
+   const value=asText(cell.v)
+   // Earlier engine snapshots accidentally stringified rich cell objects as "[object Object]".
+   if(value==='[object Object]'||value==='[object Promise]'||value==='[object Array]')continue
+   cells[address.toUpperCase()]={...cell,v:value}
+  }
+  return {name:asText(sheet?.name)||'Sheet'+(index+1),cells}
+ })
+ return {version:1,active:Math.max(0,Math.min(Number(input.active)||0,sheets.length-1)),sheets}
+}
 function bookToEngine(book:Book):ESheet[] {
  return (book.sheets?.length?book.sheets:freshBook().sheets).map((sheet,index)=>({name:sheet.name||'Sheet'+(index+1),order:index,status:index===book.active?1:0,row:100,column:26,defaultRowHeight:22,defaultColWidth:92,celldata:Object.entries(sheet.cells||{}).flatMap(([address,cell])=>{const p=parseRef(address);if(!p)return[];const formula=cell.v.startsWith('=');const numeric=!formula&&cell.v.trim()!==''&&Number.isFinite(Number(cell.v));const v:any={v:formula?null:(numeric?Number(cell.v):cell.v),m:formula?'':cell.v,ct:{fa:cell.fmt==='currency'?'$#,##0.00':cell.fmt==='percent'?'0.00%':cell.fmt==='number'?'#,##0.00':cell.fmt==='date'?'yyyy-mm-dd':'General',t:formula||numeric?'n':'g'}};if(formula)v.f=cell.v.replace(/^=/,'');if(cell.bold)v.bl=1;if(cell.italic)v.it=1;if(cell.underline)v.un=1;if(cell.color)v.fc=cell.color;if(cell.bg)v.bg=cell.bg;if(cell.align)v.ht=cell.align==='left'?1:cell.align==='center'?0:2;if(cell.wrap)v.tb=2;if(cell.font)v.ff=cell.font;if(cell.border)v.bd={left:{style:1,color:'#808080'},right:{style:1,color:'#808080'},top:{style:1,color:'#808080'},bottom:{style:1,color:'#808080'}};return[{r:p.r,c:p.c,v}]})}))
 }
 function engineToBook(data:ESheet[],active:number):Book {
- const sheets:Sheet[]=(data||[]).map((sheet,index)=>{const cells:Record<string,Cell>={};const put=(r:number,c:number,v:any)=>{if(!v)return;const address=colName(c)+String(r+1);const formula=typeof v.f==='string'&&v.f?'='+v.f.replace(/^=/,''):undefined;const raw=v.v??v.m??'';const cell:Cell={v:formula??asText(raw)};if(v.bl)cell.bold=true;if(v.it)cell.italic=true;if(v.un||v.cl)cell.underline=true;if(v.fc)cell.color=String(v.fc);if(v.bg)cell.bg=String(v.bg);if(v.ht===1)cell.align='left';if(v.ht===0)cell.align='center';if(v.ht===2)cell.align='right';if(v.tb)cell.wrap=true;if(v.bd)cell.border=true;if(v.ff)cell.font=String(v.ff);const fmt=String(v.ct?.fa||'').toLowerCase();if(fmt.includes('%'))cell.fmt='percent';else if(fmt.includes('$')||fmt.includes('€')||fmt.includes('£'))cell.fmt='currency';else if(fmt.includes('yy')||fmt.includes('dd'))cell.fmt='date';else if(fmt.includes('#')||fmt.includes('0.'))cell.fmt='number';if(cell.v!==''||cell.bold||cell.italic||cell.underline||cell.bg||cell.color||cell.border||cell.font||cell.fmt)cells[address]=cell}
+ const sheets:Sheet[]=(data||[]).map((sheet,index)=>{const cells:Record<string,Cell>={};const put=(r:number,c:number,v:any)=>{if(!v)return;const address=colName(c)+String(r+1);const formula=typeof v.f==='string'&&v.f?'='+v.f.replace(/^=/,''):undefined;const raw=(v.v!==undefined&&v.v!==null&&typeof v.v!=='object')?v.v:((v.m!==undefined&&v.m!==null&&typeof v.m!=='object')?v.m:'');const cleanValue=asText(raw);if(cleanValue==='[object Object]'||cleanValue==='[object Promise]'||cleanValue==='[object Array]')return;const cell:Cell={v:formula??cleanValue};if(v.bl)cell.bold=true;if(v.it)cell.italic=true;if(v.un||v.cl)cell.underline=true;if(v.fc)cell.color=String(v.fc);if(v.bg)cell.bg=String(v.bg);if(v.ht===1)cell.align='left';if(v.ht===0)cell.align='center';if(v.ht===2)cell.align='right';if(v.tb)cell.wrap=true;if(v.bd)cell.border=true;if(v.ff)cell.font=String(v.ff);const fmt=String(v.ct?.fa||'').toLowerCase();if(fmt.includes('%'))cell.fmt='percent';else if(fmt.includes('$')||fmt.includes('€')||fmt.includes('£'))cell.fmt='currency';else if(fmt.includes('yy')||fmt.includes('dd'))cell.fmt='date';else if(fmt.includes('#')||fmt.includes('0.'))cell.fmt='number';if(cell.v!==''||cell.bold||cell.italic||cell.underline||cell.bg||cell.color||cell.border||cell.font||cell.fmt)cells[address]=cell}
   if(Array.isArray(sheet.celldata))for(const e of sheet.celldata)if(e)put(e.r,e.c,e.v)
   if(Array.isArray(sheet.data))for(let r=0;r<sheet.data.length;r++){const row=sheet.data[r];if(Array.isArray(row))for(let c=0;c<row.length;c++){const v=row[c];if(v&&typeof v==='object'&&('v'in v||'f'in v||'m'in v))put(r,c,v);else if(v!==null&&v!==undefined&&v!=='')put(r,c,{v,m:String(v)})}}
   return {name:String(sheet.name||'Sheet'+(index+1)),cells}})
@@ -40,7 +71,7 @@ function bookToXlsx(book:Book):XLSX.WorkBook {
 const ribbonTabs=['Home','Insert','Draw','Page Layout','Formulas','Data','Review','View','Automate','Help','Acrobat']
 const cellContextMenu=['copy','paste','|','insert-row','insert-column','delete-row','delete-column','delete-cell','hide-row','hide-column','clear','sort','filter','chart','image','link','data','cell-format']
 export default function DaExcelentPanel({initialFile,availableFiles=[],onSaveToFiles}:{initialFile?:SavedFile;availableFiles?:SavedFile[];onSaveToFiles?:(name:string,mime:string,data:string)=>void}) {
- const [book,setBook]=useState<Book>(()=>{try{const x=JSON.parse(localStorage.getItem('ida-daexcelent-autosave-v1')||'null');return x?.version===1&&Array.isArray(x.sheets)&&x.sheets.length?x:freshBook()}catch{return freshBook()}})
+ const [book,setBook]=useState<Book>(()=>{try{return sanitizeBook(JSON.parse(localStorage.getItem('ida-daexcelent-autosave-v1')||'null'))}catch{return freshBook()}})
  const bookRef=useRef(book);bookRef.current=book
  const [engineData,setEngineData]=useState<ESheet[]>(()=>bookToEngine(book))
  const [engineKey,setEngineKey]=useState(0)
@@ -77,7 +108,7 @@ export default function DaExcelentPanel({initialFile,availableFiles=[],onSaveToF
  const pasteSelection=async()=>{const p=parseRef(selected);if(!p){setToast('Select a destination cell first');closeContextMenu();return}let matrix=internalClipboard.current;try{const text=await navigator.clipboard.readText();if(text)matrix=text.replace(/\r/g,'').split('\n').filter((line,i,all)=>!(i===all.length-1&&line==='')).map(line=>line.split('\t'))}catch{}if(!matrix.length){setToast('Nothing to paste yet');closeContextMenu();return}matrix.slice(0,200).forEach((row,ri)=>row.slice(0,100).forEach((value,ci)=>sheetRef.current?.setCellValue?.(p.r+ri,p.c+ci,value)));setToast('Cells pasted');closeContextMenu()}
  const contextAction=(action:string)=>{if(action==='Cut'){void copySelection(true);return}if(action==='Copy'){void copySelection(false);return}if(action==='Paste'){void pasteSelection();return}if(action==='Clear Contents'){eachSelected((r,col)=>sheetRef.current?.clearCell?.(r,col));setToast('Contents cleared')}else if(action==='Insert row')insertAxis('row');else if(action==='Insert column')insertAxis('column');else if(action==='Delete row')insertAxis('row',true);else if(action==='Delete column')insertAxis('column',true);else if(action==='Delete...'){if(window.confirm('Delete the selected cells?'))eachSelected((r,col)=>sheetRef.current?.clearCell?.(r,col));setToast('Selected contents deleted')}else if(action==='Format Cells...'){setTab('Home');setToast('Use the Home ribbon to format selected cells')}else if(action==='New Note'||action==='New Comment'){setToast(action+' is not supported by the spreadsheet engine yet')}else if(action==='Filter'||action==='Sort'){setTab('Data');setToast(action+' tools are available on the Data tab')}else if(action==='Define Name'){setToast('Select a cell and use the name box to navigate to a named range')}else if(action==='Paste Special...'){setToast('Use Paste to insert the copied cell values')}else if(action==='Get Data from Table/Range...'){setToast('Import a CSV or Excel file using Import')}closeContextMenu()}
  const contextItems=['Cut','Copy','Paste','Paste Special...','Insert row','Insert column','Delete row','Delete column','Delete...','Clear Contents','Filter','Sort','Get Data from Table/Range...','New Comment','New Note','Format Cells...','Define Name']
- const handleEngineChange=useCallback((data:any)=>{if(!Array.isArray(data))return;const current=bookRef.current;const next=engineToBook(data as ESheet[],current.active);if(JSON.stringify(next)!==JSON.stringify(current)){undoStack.current.push(current);if(undoStack.current.length>60)undoStack.current.shift();redoStack.current=[];persist(next)}},[persist])
+ const handleEngineChange=useCallback((data:any)=>{if(!Array.isArray(data))return;const current=bookRef.current;const next=sanitizeBook(engineToBook(data as ESheet[],current.active));if(JSON.stringify(next)!==JSON.stringify(current)){undoStack.current.push(sanitizeBook(current));if(undoStack.current.length>60)undoStack.current.shift();redoStack.current=[];persist(next)}},[persist])
  const undo=()=>{const previous=undoStack.current.pop();if(!previous){setToast('Nothing to undo yet');return}redoStack.current.push(book);bookRef.current=previous;setBook(previous);setEngineData(bookToEngine(previous));setEngineKey(k=>k+1);setToast('Undone')}
  const redo=()=>{const next=redoStack.current.pop();if(!next){setToast('Nothing to redo yet');return}undoStack.current.push(book);bookRef.current=next;setBook(next);setEngineData(bookToEngine(next));setEngineKey(k=>k+1);setToast('Redone')}
  const ribbonButton=(label:string,Icon:any,action:()=>void,active=false)=><button type="button" title={label} className={active?'dx-ribbon-btn active':'dx-ribbon-btn'} onClick={()=>{try{action()}catch(error){console.error('DaExcelent ribbon action failed:',label,error);setToast(label+' could not complete')}}}><Icon size={16}/><span>{label}</span></button>
