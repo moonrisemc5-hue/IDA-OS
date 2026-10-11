@@ -214,3 +214,35 @@
 .dx-excel-rebuild .dx-ribbon-btn[title="Conditional Formatting"] span,
 .dx-excel-rebuild .dx-ribbon-btn[title="Format as Table"] span,
 .dx-excel-rebuild .dx-ribbon-btn[title="Cell Styles"] span{font-size:10px;text-align:center}
+
+
+/* DaExcelent ribbon polish: tighter Excel-style groups, clearer hierarchy, and
+   more usable controls instead of oversized web-app buttons. */
+.dx-excel-rebuild .dx-excel-tabs{flex:0 0 38px;gap:0;padding:0 12px;background:#fff;overflow-x:auto;scrollbar-width:thin}
+.dx-excel-rebuild .dx-excel-tabs>button{padding:0 14px;font-size:13px;color:#333}
+.dx-excel-rebuild .dx-excel-tabs>button.active{color:#217346}
+.dx-excel-rebuild .dx-ribbon{min-height:112px;max-height:124px;padding:5px 7px 3px;align-items:stretch;background:#f6f7f9;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.dx-excel-rebuild .dx-ribbon-group{min-height:101px;justify-content:space-between;gap:3px;padding:3px 8px 2px;border-right:1px solid #d4d6d8}
+.dx-excel-rebuild .dx-ribbon-row{gap:2px;min-height:27px;align-items:center}
+.dx-excel-rebuild .dx-ribbon-btn{min-height:27px;padding:4px 6px;gap:5px;font-size:11px;color:#30343a;border-color:transparent;border-radius:2px}
+.dx-excel-rebuild .dx-ribbon-btn span{white-space:nowrap}
+.dx-excel-rebuild .dx-ribbon-btn:hover{background:#e8ecef;border-color:#cbd0d4}
+.dx-excel-rebuild .dx-ribbon-btn:focus-visible{outline:2px solid #217346;outline-offset:-2px}
+.dx-excel-rebuild .dx-ribbon-caption{padding-top:3px;border-top:1px solid #e3e4e5;color:#62676c;font-size:10px;line-height:13px}
+.dx-excel-rebuild .dx-ribbon-select{min-width:92px;gap:3px}
+.dx-excel-rebuild .dx-ribbon-select small{font-size:10px;color:#5e6368}
+.dx-excel-rebuild .dx-ribbon-select select{height:29px;font-size:12px;border-color:#b7bbc0;border-radius:3px}
+.dx-excel-rebuild .dx-ribbon-group .dx-ribbon-row:has(.dx-ribbon-select){min-height:35px}
+.dx-excel-rebuild .dx-engine-workspace{overscroll-behavior:contain;touch-action:pan-x pan-y}
+.dx-excel-rebuild .dx-context-menu{width:304px;max-height:min(72vh,560px);padding:5px 0;background:#fff;border:1px solid #b9bec3;border-radius:5px;box-shadow:0 8px 28px #0002;font-size:13px}
+.dx-excel-rebuild .dx-context-search{height:31px;margin:2px 7px 6px;width:calc(100% - 14px);border-color:#c8cdd1;border-radius:3px}
+.dx-excel-rebuild .dx-context-menu>button{min-height:32px;padding:5px 12px;gap:11px;font-size:12px}
+.dx-excel-rebuild .dx-context-menu>button:hover{background:#eaf3ed}
+.dx-excel-rebuild .dx-context-icon{width:22px;flex-basis:22px;font-size:16px;color:#4c6658}
+.dx-excel-rebuild .dx-context-divider{margin:4px 0;background:#e3e5e7}
+.dx-excel-rebuild .dx-context-menu>button:focus-visible{outline:2px solid #217346;outline-offset:-2px}
+@media(max-width:1100px){
+ .dx-excel-rebuild .dx-ribbon{min-height:100px;max-height:116px}
+ .dx-excel-rebuild .dx-ribbon-group{padding-left:5px;padding-right:5px}
+ .dx-excel-rebuild .dx-ribbon-btn{padding:4px}
+}
