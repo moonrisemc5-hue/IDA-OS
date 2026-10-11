@@ -269,3 +269,29 @@
  .dx-excel-rebuild .dx-engine-workspace{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;overflow:visible!important}
  .dx-excel-rebuild .dx-titlebar,.dx-excel-rebuild .dx-excel-tabs,.dx-excel-rebuild .dx-ribbon,.dx-excel-rebuild .dx-formula,.dx-excel-rebuild .dx-status,.dx-excel-rebuild .dx-context-menu,.dx-excel-rebuild .dx-toast,.dx-excel-rebuild .dx-chart-backdrop,.dx-excel-rebuild .dx-saved-chart{display:none!important}
 }
+
+
+/* Workbook charts behave like movable Excel chart objects. */
+.dx-excel-rebuild .dx-saved-chart{position:absolute;left:220px;top:90px;right:auto;bottom:auto;width:390px;min-width:300px;max-width:min(560px,calc(100% - 24px));max-height:360px;z-index:90;background:#fff;border:1px solid #c9d2cc;border-radius:2px;box-shadow:0 2px 7px #0002;overflow:hidden;resize:both}
+.dx-excel-rebuild .dx-saved-chart>header{height:31px;min-height:31px;display:flex;align-items:center;gap:7px;padding:0 7px 0 9px;background:#fff;border-bottom:0;cursor:move;user-select:none}
+.dx-excel-rebuild .dx-saved-chart>header b{flex:1;text-align:center;font-size:13px;font-weight:600;color:#404040}
+.dx-excel-rebuild .dx-saved-chart>header button{width:23px;height:23px;border:0;background:transparent;color:#666}
+.dx-excel-rebuild .dx-chart-grip{color:#89918b;font-size:18px;line-height:1;cursor:move}
+.dx-excel-rebuild .dx-saved-chart-plot{display:flex;flex-direction:column;gap:4px;padding:8px 12px 10px;overflow:auto;background:#fff}
+.dx-excel-rebuild .dx-saved-chart-grid{display:flex;flex-direction:column;gap:4px;min-height:170px;max-height:260px;overflow:auto}
+.dx-excel-rebuild .dx-saved-chart-item{display:grid;grid-template-columns:minmax(65px,90px) 1fr 48px;align-items:center;gap:7px;min-height:23px;font-size:10px}
+.dx-excel-rebuild .dx-saved-chart-label{font-size:10px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.dx-excel-rebuild .dx-saved-chart-track{height:18px;display:flex;align-items:center;overflow:hidden;background-color:#fff;background-image:linear-gradient(to right,#e5e9e6 1px,transparent 1px);background-size:25% 100%;border-bottom:1px solid #aab3ad}
+.dx-excel-rebuild .dx-saved-chart-bar{min-width:2px;background:#4472c4;border:0;border-radius:0}
+.dx-excel-rebuild .dx-saved-chart-value{font-size:10px;text-align:right;color:#444;font-variant-numeric:tabular-nums}
+.dx-excel-rebuild .dx-saved-chart-columns .dx-saved-chart-grid{display:flex;flex-direction:row;align-items:stretch;gap:8px;min-height:185px;padding:0 4px}
+.dx-excel-rebuild .dx-saved-chart-columns .dx-saved-chart-item{display:flex;flex:1;min-width:35px;flex-direction:column-reverse;justify-content:flex-start;gap:3px;min-height:185px}
+.dx-excel-rebuild .dx-saved-chart-columns .dx-saved-chart-track{display:flex;align-items:flex-end;justify-content:center;width:100%;height:125px;min-height:125px;border-bottom:1px solid #9ca6a0;background-image:linear-gradient(to bottom,#e5e9e6 1px,transparent 1px);background-size:100% 25%}
+.dx-excel-rebuild .dx-saved-chart-columns .dx-saved-chart-bar{width:68%;min-height:2px;background:#4472c4}
+.dx-excel-rebuild .dx-saved-chart-columns .dx-saved-chart-label{width:100%;text-align:center;font-size:10px}
+.dx-excel-rebuild .dx-saved-chart-columns .dx-saved-chart-value{width:100%;text-align:center;font-size:10px}
+.dx-excel-rebuild .dx-saved-chart-axis{display:flex;justify-content:space-between;margin-left:96px;padding-top:4px;border-top:1px solid #aab3ad;color:#777;font-size:9px}
+.dx-excel-rebuild .dx-saved-chart-bars .dx-saved-chart-grid{gap:7px}
+.dx-excel-rebuild .dx-saved-chart-bars .dx-saved-chart-track{height:19px}
+.dx-excel-rebuild .dx-saved-chart:hover{box-shadow:0 3px 12px #0003}
+.dx-excel-rebuild .dx-saved-chart>header:active{cursor:grabbing}
