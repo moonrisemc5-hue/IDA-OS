@@ -253,6 +253,36 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     return () => { window.cancelAnimationFrame(restoreFrame); mq.removeEventListener?.('change', syncDesktop); /* clock updates are isolated to the taskbar */ }
   }, [])
 
+  // Warm Bad-Time's files after the desktop has had a moment to render.
+  // Prefetching downloads the game resources without starting its animation loop,
+  // so it should open more smoothly without running a hidden game in the background.
+  useEffect(() => {
+    let cancelled = false
+    const links: HTMLLinkElement[] = []
+    const timer = window.setTimeout(() => {
+      if (cancelled || document.visibilityState === 'hidden') return
+      const resources: Array<{href:string;as:'document'|'script'}> = [
+        { href: import.meta.env.BASE_URL + 'BadTime.html', as: 'document' },
+        { href: 'https://jcw87.github.io/c2-sans-fight/jquery-3.4.1.min.js', as: 'script' },
+        { href: 'https://jcw87.github.io/c2-sans-fight/c2runtime.js', as: 'script' },
+      ]
+      for (const resource of resources) {
+        const link = document.createElement('link')
+        link.rel = 'prefetch'
+        link.href = resource.href
+        link.as = resource.as
+        if (resource.href.startsWith('https://jcw87.github.io/')) link.crossOrigin = 'anonymous'
+        document.head.appendChild(link)
+        links.push(link)
+      }
+    }, 1800)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+      links.forEach(link => link.remove())
+    }
+  }, [])
+
   useEffect(() => {
     let hideTimer: number | undefined
     let removeTimer: number | undefined
