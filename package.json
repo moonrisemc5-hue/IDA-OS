@@ -16,7 +16,9 @@
     "lucide-react": "^0.577.0",
     "@supabase/supabase-js": "^2.117.3",
     "@fortune-sheet/react": "^1.0.4",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "@convex-dev/auth": "^0.0.94",
+    "convex": "^1.46.0"
   },
   "devDependencies": {}
 }
