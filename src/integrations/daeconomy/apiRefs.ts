@@ -7,3 +7,4 @@ export const myEntitlements = makeFunctionReference<"query">("dapp:myEntitlement
 export const myBalance = makeFunctionReference<"query">("dapp:myBalance");
 export const hasPurchase = makeFunctionReference<"query">("dapp:hasPurchase");
 export const purchaseItem = makeFunctionReference<"mutation">("dapp:purchaseItem");
+export const claimBadTimeNormalReward = makeFunctionReference<"mutation">("dapp:claimBadTimeNormalReward");
