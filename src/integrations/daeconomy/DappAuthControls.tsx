@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth, useQuery } from "convex/react";
-import { myEntitlements } from "./apiRefs";
+import { myBalance, myEntitlements } from "./apiRefs";
 
 export function DaEconomyAuthControls() {
   const { signIn, signOut } = useAuthActions();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const entitlements = useQuery(myEntitlements as any, isAuthenticated ? {} : "skip") as any;
+  const balance = useQuery(myBalance as any, isAuthenticated ? {} : "skip") as any;
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,6 +38,7 @@ export function DaEconomyAuthControls() {
     : Array.isArray(entitlements?.value)
       ? entitlements.value
       : null;
+  const balanceValue = typeof balance?.balance === "number" ? balance.balance : null;
 
   return (
     <section style={{ margin: "12px 16px 0", padding: "12px 14px", border: "1px solid #e2e8f0", borderRadius: 14, background: "#ffffff", color: "#172033", display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", fontSize: 13 }}>
@@ -47,9 +49,14 @@ export function DaEconomyAuthControls() {
             ? "Signed in to DaEconomy"
             : "Use your existing DaEconomy username and password."}
         </span>
+        {isAuthenticated && (
+          <span style={{ display: "block", color: "#172033", marginTop: 5, fontWeight: 700 }}>
+            DaCoin balance: {balanceValue === null ? "Loading…" : `${balanceValue.toLocaleString()} DaCoins`}
+          </span>
+        )}
         {isAuthenticated && entitlementRows && (
           <span style={{ display: "block", color: "#64748b", marginTop: 3 }}>
-            {entitlementRows.length} entitlements loaded · read-only
+            {entitlementRows.length} owned apps
           </span>
         )}
         {message && <span role="status" style={{ display: "block", marginTop: 4, color: message.toLowerCase().includes("could not") || message.toLowerCase().includes("invalid") ? "#b91c1c" : "#475569" }}>{message}</span>}
