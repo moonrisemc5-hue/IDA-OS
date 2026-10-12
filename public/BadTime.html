@@ -216,17 +216,14 @@
       return true;
     }catch(e){return false}
   }
-  // Keep the price beside Normal until the player clicks Normal's menu row.
-  // The game is a remote Construct 2 export, so its internal mode event isn't
-  // guaranteed to be exposed in every browser build. Use the on-screen menu row
-  // as a fallback, limited to the row next to the label (not arbitrary clicks).
+  // The remote Construct 2 game does not give us a reliable menu hitbox.
+  // Since the price overlay has pointer-events:none, a click on Normal beneath it
+  // reaches the canvas. Hide on the first canvas click, never on a timer.
   function updatePrice(){if(price)price.style.display=(!menuDismissed&&!rewardSent)?"block":"none"}
   document.addEventListener("pointerdown",function(event){
     if(menuDismissed||rewardSent||!price)return;
-    var x=event.clientX/window.innerWidth, y=event.clientY/window.innerHeight;
-    // Normal's menu row sits around the price tag. Only a click in this narrow
-    // row dismisses it; clicking elsewhere or playing the fight won't.
-    if(x>0.30&&x<0.76&&y>0.15&&y<0.30){
+    var canvas=document.getElementById("c2canvas");
+    if(event.target===canvas || (canvas && canvas.contains(event.target))){
       menuDismissed=true;
       price.style.display="none";
     }
