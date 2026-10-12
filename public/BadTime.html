@@ -42,7 +42,7 @@
     
         #ida-sans-mute{position:fixed;right:170px;top:50%;transform:translateY(-50%);z-index:2147483647;width:42px;height:42px;display:grid;place-items:center;padding:4px;pointer-events:auto;border:0;border-radius:0;background:transparent;color:#fff;cursor:pointer;touch-action:manipulation;image-rendering:pixelated;box-shadow:none}
         #ida-sans-mute:hover{background:rgba(255,255,255,.08)}#ida-sans-mute svg{width:26px;height:26px;display:block;image-rendering:pixelated;shape-rendering:crispEdges}#ida-sans-mute:focus-visible{outline:1px dashed #fff;outline-offset:3px}
-        #ida-sans-normal-price{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:2147483647;display:block;padding:5px 8px;background:rgba(0,0,0,.92);border:2px solid #fff;color:#fff;font-family:monospace;font-size:clamp(16px,2.1vw,32px);font-weight:700;white-space:pre;pointer-events:none;text-shadow:2px 2px #000;image-rendering:pixelated;visibility:visible;opacity:1}
+        #ida-sans-normal-price{position:fixed;left:58%;top:22%;transform:none;z-index:2147483647;display:block;padding:3px 5px;background:rgba(0,0,0,.78);border:1px solid #fff;color:#fff;font-family:monospace;font-size:clamp(12px,1.55vw,22px);font-weight:700;white-space:pre;pointer-events:none;text-shadow:1px 1px #000;image-rendering:pixelated;visibility:visible;opacity:1}
         #ida-sans-win-message{position:absolute;left:50%;top:82%;transform:translateX(-50%);z-index:2147483646;display:none;color:#fff;font-family:monospace;font-size:clamp(12px,2.4vw,19px);font-weight:800;white-space:nowrap;pointer-events:none;text-shadow:2px 2px #000;image-rendering:pixelated}
     </style>
 	
@@ -220,11 +220,8 @@
   // browser build. Keep the pixel-font price visible on the menu and hide it as
   // soon as the player clicks a mode; no runtime-layout-name guess is required.
   function updatePrice(){if(price)price.style.display=(!menuDismissed&&!rewardSent)?"block":"none"}
-  document.addEventListener("click",function(event){
-    if(!price)return;
-    var y=event.clientY/window.innerHeight;
-    if(y>0.19&&y<0.55){menuDismissed=true;price.style.display="none"}
-  },true);
+  // Do not hide the reward label on arbitrary clicks: the fight may last many minutes.
+  // Hide it only when the runtime confirms a mode choice or a Normal victory.
   var tries=0,timer=window.setInterval(function(){tries++;attach();updatePrice();if(tries>240)window.clearInterval(timer)},100);
 })();
 </script>
