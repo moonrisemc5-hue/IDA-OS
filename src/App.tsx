@@ -1140,16 +1140,16 @@ function BadTimeSimulatorPanel({offline=false}:{offline?:boolean}){
   const [rewardMessage,setRewardMessage]=useState("");
   const claimStarted=useRef(false);
   useEffect(()=>{
-    const onMessage=(event:MessageEvent)=>{
-      if(event.source!==frameRef.current?.contentWindow)return;
-      if(event.data?.type!=="ida-badtime-normal-win")return;
+    const onVictory=(event:Event)=>{
+      const detail=(event as CustomEvent).detail;
+      if(detail?.source!==frameRef.current?.contentWindow)return;
       if(claimStarted.current)return;
       setPendingReward(true);
       setRewardState("prompt");
       setRewardMessage("");
     };
-    window.addEventListener("message",onMessage);
-    return ()=>window.removeEventListener("message",onMessage);
+    window.addEventListener("ida-badtime-normal-win",onVictory);
+    return ()=>window.removeEventListener("ida-badtime-normal-win",onVictory);
   },[]);
   useEffect(()=>{
     if(!pendingReward||isLoading||!isAuthenticated||claimStarted.current)return;
@@ -1168,7 +1168,7 @@ function BadTimeSimulatorPanel({offline=false}:{offline?:boolean}){
       setRewardMessage(error instanceof Error?error.message:"The reward could not be claimed. Please try again.");
     });
   },[pendingReward,isLoading,isAuthenticated,claimReward]);
-  const closeReward=()=>{setRewardState(null);if(!claimStarted.current)setPendingReward(false)};
+  const closeReward=()=>{setRewardState(null)};
   if(offline)return <div style={{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:10,background:'#11151d',color:'#fff',textAlign:'center'}}><Wifi size={42} opacity={.75}/><strong style={{fontSize:22}}>Waiting for Wi-Fi connection</strong><span style={{opacity:.65}}>Connect to Wi-Fi to play Bad-Time.</span></div>;
   return <div style={{position:'absolute',inset:0,overflow:'hidden',background:'#000'}}>
     <iframe ref={frameRef} title="Bad-Time" src={import.meta.env.BASE_URL+'BadTime.html'} loading="eager" allow="autoplay; fullscreen; gamepad" allowFullScreen style={{position:'absolute',inset:0,width:'100%',height:'100%',border:0,background:'#000',display:'block'}}/>
