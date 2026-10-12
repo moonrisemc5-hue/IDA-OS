@@ -4,5 +4,6 @@ import { makeFunctionReference } from "convex/server";
 // contain no credentials; authorization is enforced by the backend functions.
 export const dappListItems = makeFunctionReference<"query">("dapp:listItems");
 export const myEntitlements = makeFunctionReference<"query">("dapp:myEntitlements");
+export const myBalance = makeFunctionReference<"query">("dapp:myBalance");
 export const hasPurchase = makeFunctionReference<"query">("dapp:hasPurchase");
 export const purchaseItem = makeFunctionReference<"mutation">("dapp:purchaseItem");
