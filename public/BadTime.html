@@ -42,6 +42,8 @@
     
         #ida-sans-mute{position:fixed;right:170px;top:50%;transform:translateY(-50%);z-index:2147483647;width:42px;height:42px;display:grid;place-items:center;padding:4px;pointer-events:auto;border:0;border-radius:0;background:transparent;color:#fff;cursor:pointer;touch-action:manipulation;image-rendering:pixelated;box-shadow:none}
         #ida-sans-mute:hover{background:rgba(255,255,255,.08)}#ida-sans-mute svg{width:26px;height:26px;display:block;image-rendering:pixelated;shape-rendering:crispEdges}#ida-sans-mute:focus-visible{outline:1px dashed #fff;outline-offset:3px}
+        #ida-sans-normal-price{position:absolute;left:40%;top:18.9%;z-index:2147483646;display:none;color:#fff;font-family:monospace;font-size:clamp(10px,1.9vw,15px);font-weight:700;white-space:pre;pointer-events:none;text-shadow:1px 1px #000;image-rendering:pixelated}
+        #ida-sans-win-message{position:absolute;left:50%;top:82%;transform:translateX(-50%);z-index:2147483646;display:none;color:#fff;font-family:monospace;font-size:clamp(12px,2.4vw,19px);font-weight:800;white-space:nowrap;pointer-events:none;text-shadow:2px 2px #000;image-rendering:pixelated}
     </style>
 	
 
@@ -82,7 +84,9 @@
 })();
 </script>
 
-	<div id="fb-root"></div>
+	<div id="ida-sans-normal-price" aria-hidden="true">("10'000 DaCoins")</div>
+<div id="ida-sans-win-message" aria-live="polite">You win 10,000 DaCoins</div>
+<div id="fb-root"></div>
 	
 	<script>
 	// Issue a warning if trying to preview an exported project on disk.
@@ -181,5 +185,40 @@
 		gtag('js', new Date());
 		gtag('config', 'G-6S9Y2CXQ4H');
 	</script>
+<script>
+(function(){
+  var normalModeSelected = false, rewardSent = false, price = document.getElementById("ida-sans-normal-price"), winMessage = document.getElementById("ida-sans-win-message");
+  function layoutName(runtime){try{return String(runtime&&runtime.running_layout&&runtime.running_layout.name||"")}catch(e){return ""}}
+  function showVictory(){
+    if(rewardSent)return;
+    rewardSent=true;
+    if(price)price.style.display="none";
+    if(winMessage)winMessage.style.display="block";
+    try{window.parent.dispatchEvent(new CustomEvent("ida-badtime-normal-win",{detail:{source:window}}))}catch(e){}
+  }
+  function attach(){
+    try{
+      if(typeof window.cr_getC2Runtime!=="function"||!window.cr)return false;
+      var runtime=window.cr_getC2Runtime(), p=window.cr.plugins_&&window.cr.plugins_.Function;
+      var onFunction=p&&p.prototype&&p.prototype.cnds&&p.prototype.cnds.OnFunction;
+      if(!runtime||typeof runtime.trigger!=="function"||!onFunction||runtime.__idaBadTimeRewardHooked)return !!(runtime&&runtime.__idaBadTimeRewardHooked);
+      var originalTrigger=runtime.trigger;
+      runtime.trigger=function(condition,instance){
+        if(condition===onFunction&&instance){
+          var name=String(instance.funcName||instance.functionName||"");
+          if(name==="MenuModeNormal"){normalModeSelected=true;rewardSent=false;if(winMessage)winMessage.style.display="none"}
+          else if(/^MenuMode(Practice|Endless|Single|Custom)$/.test(name)){normalModeSelected=false;rewardSent=false}
+          else if(name==="Win1"&&normalModeSelected&&layoutName(runtime)==="BattleScreen")showVictory();
+        }
+        return originalTrigger.apply(this,arguments);
+      };
+      runtime.__idaBadTimeRewardHooked=true;
+      return true;
+    }catch(e){return false}
+  }
+  function updatePrice(){try{var r=typeof window.cr_getC2Runtime==="function"?window.cr_getC2Runtime():null;if(price)price.style.display=layoutName(r)==="MainMenu"?"block":"none"}catch(e){}}
+  var tries=0,timer=window.setInterval(function(){tries++;attach();updatePrice();if(tries>240)window.clearInterval(timer)},100);
+})();
+</script>
 </body> 
 </html> 
