@@ -216,12 +216,21 @@
       return true;
     }catch(e){return false}
   }
-  // The hosted Construct 2 build doesn't expose a stable layout name in every
-  // browser build. Keep the pixel-font price visible on the menu and hide it as
-  // soon as the player clicks a mode; no runtime-layout-name guess is required.
+  // Keep the price beside Normal until the player clicks Normal's menu row.
+  // The game is a remote Construct 2 export, so its internal mode event isn't
+  // guaranteed to be exposed in every browser build. Use the on-screen menu row
+  // as a fallback, limited to the row next to the label (not arbitrary clicks).
   function updatePrice(){if(price)price.style.display=(!menuDismissed&&!rewardSent)?"block":"none"}
-  // Do not hide the reward label on arbitrary clicks: the fight may last many minutes.
-  // Hide it only when the runtime confirms a mode choice or a Normal victory.
+  document.addEventListener("pointerdown",function(event){
+    if(menuDismissed||rewardSent||!price)return;
+    var x=event.clientX/window.innerWidth, y=event.clientY/window.innerHeight;
+    // Normal's menu row sits around the price tag. Only a click in this narrow
+    // row dismisses it; clicking elsewhere or playing the fight won't.
+    if(x>0.30&&x<0.76&&y>0.15&&y<0.30){
+      menuDismissed=true;
+      price.style.display="none";
+    }
+  },true);
   var tries=0,timer=window.setInterval(function(){tries++;attach();updatePrice();if(tries>240)window.clearInterval(timer)},100);
 })();
 </script>
