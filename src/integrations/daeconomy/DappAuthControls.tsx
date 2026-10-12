@@ -111,6 +111,6 @@ export function DaEconomyAuthControls() {
           {feedbackKind && message && <div role="status" aria-live="polite" className={"de-account-feedback "+feedbackKind}><span className="de-account-feedback-icon">{feedbackKind==="success"?<CheckCircle2 size={18}/>:<CircleAlert size={18}/>}</span><span>{message}</span></div>}
         </>
       )}
-    </section>ion>
+    </section>
   );
 }
