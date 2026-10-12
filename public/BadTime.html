@@ -42,7 +42,7 @@
     
         #ida-sans-mute{position:fixed;right:170px;top:50%;transform:translateY(-50%);z-index:2147483647;width:42px;height:42px;display:grid;place-items:center;padding:4px;pointer-events:auto;border:0;border-radius:0;background:transparent;color:#fff;cursor:pointer;touch-action:manipulation;image-rendering:pixelated;box-shadow:none}
         #ida-sans-mute:hover{background:rgba(255,255,255,.08)}#ida-sans-mute svg{width:26px;height:26px;display:block;image-rendering:pixelated;shape-rendering:crispEdges}#ida-sans-mute:focus-visible{outline:1px dashed #fff;outline-offset:3px}
-        #ida-sans-normal-price{position:absolute;left:40%;top:18.9%;z-index:2147483646;display:none;color:#fff;font-family:monospace;font-size:clamp(10px,1.9vw,15px);font-weight:700;white-space:pre;pointer-events:none;text-shadow:1px 1px #000;image-rendering:pixelated}
+        #ida-sans-normal-price{position:absolute;left:50%;top:24.5%;z-index:2147483646;display:block;color:#fff;font-family:monospace;font-size:clamp(10px,1.9vw,15px);font-weight:700;white-space:pre;pointer-events:none;text-shadow:1px 1px #000;image-rendering:pixelated}
         #ida-sans-win-message{position:absolute;left:50%;top:82%;transform:translateX(-50%);z-index:2147483646;display:none;color:#fff;font-family:monospace;font-size:clamp(12px,2.4vw,19px);font-weight:800;white-space:nowrap;pointer-events:none;text-shadow:2px 2px #000;image-rendering:pixelated}
     </style>
 	
@@ -187,7 +187,7 @@
 	</script>
 <script>
 (function(){
-  var normalModeSelected = false, rewardSent = false, price = document.getElementById("ida-sans-normal-price"), winMessage = document.getElementById("ida-sans-win-message");
+  var normalModeSelected = false, rewardSent = false, menuDismissed = false, price = document.getElementById("ida-sans-normal-price"), winMessage = document.getElementById("ida-sans-win-message");
   function layoutName(runtime){try{return String(runtime&&runtime.running_layout&&runtime.running_layout.name||"")}catch(e){return ""}}
   function showVictory(){
     if(rewardSent)return;
@@ -206,8 +206,8 @@
       runtime.trigger=function(condition,instance){
         if(condition===onFunction&&instance){
           var name=String(instance.funcName||instance.functionName||"");
-          if(name==="MenuModeNormal"){normalModeSelected=true;rewardSent=false;if(winMessage)winMessage.style.display="none"}
-          else if(/^MenuMode(Practice|Endless|Single|Custom)$/.test(name)){normalModeSelected=false;rewardSent=false}
+          if(name==="MenuModeNormal"){normalModeSelected=true;menuDismissed=true;rewardSent=false;if(winMessage)winMessage.style.display="none"}
+          else if(/^MenuMode(Practice|Endless|Single|Custom)$/.test(name)){normalModeSelected=false;menuDismissed=true;rewardSent=false}
           else if(name==="Win1"&&normalModeSelected&&layoutName(runtime)==="BattleScreen")showVictory();
         }
         return originalTrigger.apply(this,arguments);
@@ -216,7 +216,15 @@
       return true;
     }catch(e){return false}
   }
-  function updatePrice(){try{var r=typeof window.cr_getC2Runtime==="function"?window.cr_getC2Runtime():null;if(price)price.style.display=layoutName(r)==="MainMenu"?"block":"none"}catch(e){}}
+  // The hosted Construct 2 build doesn't expose a stable layout name in every
+  // browser build. Keep the pixel-font price visible on the menu and hide it as
+  // soon as the player clicks a mode; no runtime-layout-name guess is required.
+  function updatePrice(){if(price)price.style.display=(!menuDismissed&&!rewardSent)?"block":"none"}
+  document.addEventListener("click",function(event){
+    if(!price)return;
+    var y=event.clientY/window.innerHeight;
+    if(y>0.19&&y<0.55){menuDismissed=true;price.style.display="none"}
+  },true);
   var tries=0,timer=window.setInterval(function(){tries++;attach();updatePrice();if(tries>240)window.clearInterval(timer)},100);
 })();
 </script>
