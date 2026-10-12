@@ -48,26 +48,26 @@ export function DaEconomyAuthControls() {
   return (
     <section className="de-account-card">
       <style>{`
-        .de-account-card{position:relative;overflow:hidden;margin:12px 16px 0;padding:16px;border:1px solid #dce5f2;border-radius:18px;background:linear-gradient(135deg,#fff 0%,#f7faff 62%,#eef4ff 100%);color:#172033;box-shadow:0 5px 18px #223b6b0b;display:grid;gap:15px;font-size:13px;animation:deCardIn .35s cubic-bezier(.2,.8,.2,1) both}
+        .de-account-card{position:relative;overflow:hidden;margin:12px 16px 0;padding:16px;border:1px solid #252b3a;border-radius:18px;background:linear-gradient(145deg,#080b12 0%,#0d1220 62%,#111827 100%);color:#f8fafc;box-shadow:0 8px 28px #0005;display:grid;gap:15px;font-size:13px;animation:deCardIn .35s cubic-bezier(.2,.8,.2,1) both}
         .de-account-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(#818cf8,#38bdf8)}
         .de-account-head{display:flex;align-items:center;gap:11px;min-width:0}
         .de-account-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex:0 0 auto;color:#fff;background:linear-gradient(145deg,#4338ca,#2563eb);box-shadow:0 5px 12px #4f46e533}
         .de-account-title{font-size:14px;font-weight:800;letter-spacing:-.2px}
-        .de-account-subtitle{display:block;color:#64748b;margin-top:3px;font-size:12px}
+        .de-account-subtitle{display:block;color:#9ca9bd;margin-top:3px;font-size:12px}
         .de-account-connected{margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#dcfce7;color:#166534;font-size:11px;font-weight:750;white-space:nowrap}
-        .de-account-balance{display:flex;align-items:center;gap:12px;padding:12px 13px;border:1px solid #dbeafe;border-radius:14px;background:linear-gradient(115deg,#eff6ff,#fff 82%)}
-        .de-account-coin{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#dbeafe;color:#1d4ed8;flex:0 0 auto}
-        .de-account-balance-label{display:block;color:#64748b;font-size:11px;font-weight:700;letter-spacing:.35px;text-transform:uppercase}
-        .de-account-balance-value{display:block;color:#172554;font-size:21px;line-height:1.3;font-weight:850;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
-        .de-account-owned{margin-left:auto;color:#64748b;text-align:right;font-size:11px;line-height:1.5}
-        .de-account-owned strong{display:block;color:#334155;font-size:14px}
+        .de-account-balance{display:flex;align-items:center;gap:12px;padding:12px 13px;border:1px solid #29364d;border-radius:14px;background:linear-gradient(115deg,#111b2d,#0c111c 82%)}
+        .de-account-coin{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#1e3a5f;color:#93c5fd;flex:0 0 auto}
+        .de-account-balance-label{display:block;color:#a0aec0;font-size:11px;font-weight:700;letter-spacing:.35px;text-transform:uppercase}
+        .de-account-balance-value{display:block;color:#f8fafc;font-size:21px;line-height:1.3;font-weight:850;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+        .de-account-owned{margin-left:auto;color:#a0aec0;text-align:right;font-size:11px;line-height:1.5}
+        .de-account-owned strong{display:block;color:#e2e8f0;font-size:14px}
         .de-account-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-        .de-account-input{box-sizing:border-box;flex:1 1 140px;min-width:0;width:100%;border:1px solid #d5deeb;border-radius:11px;padding:11px 12px;background:#fff;color:#172033;outline:none;transition:border-color .18s,box-shadow .18s}
+        .de-account-input{box-sizing:border-box;flex:1 1 140px;min-width:0;width:100%;border:1px solid #30394b;border-radius:11px;padding:11px 12px;background:#111827;color:#f8fafc;outline:none;transition:border-color .18s,box-shadow .18s}
         .de-account-input:focus{border-color:#6366f1;box-shadow:0 0 0 3px #6366f122}
         .de-account-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:11px;background:linear-gradient(135deg,#3730a3,#2563eb);color:#fff;padding:11px 15px;cursor:pointer;font-weight:750;box-shadow:0 4px 10px #3730a322;transition:transform .18s,filter .18s,box-shadow .18s}
         .de-account-button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.05);box-shadow:0 7px 16px #3730a333}
         .de-account-button:disabled{opacity:.65;cursor:wait}
-        .de-account-button.secondary{background:#fff;color:#334155;border:1px solid #d5deeb;box-shadow:none}
+        .de-account-button.secondary{background:#151b28;color:#e2e8f0;border:1px solid #30394b;box-shadow:none}
         .de-account-feedback{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:12px;font-size:12px;line-height:1.45;font-weight:650;animation:deFeedbackIn .32s ease-out both}
         .de-account-feedback.success{color:#166534;background:#f0fdf4;border:1px solid #bbf7d0}
         .de-account-feedback.error{color:#991b1b;background:#fef2f2;border:1px solid #fecaca}
