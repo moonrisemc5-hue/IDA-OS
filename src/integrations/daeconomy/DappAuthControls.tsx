@@ -22,8 +22,13 @@ export function DaEconomyAuthControls() {
     setMessage("");
     setFeedbackKind(null);
     try {
+      const normalizedUsername = username.trim();
       await signIn("password", {
-        username: username.trim(),
+        // Convex Auth's Password provider uses email as its identifier.
+        // DaEconomy accounts are username-based, so pass the same username
+        // in both fields to match DaEconomy's own login form.
+        username: normalizedUsername,
+        email: normalizedUsername,
         password,
         flow: "signIn",
       });
@@ -32,7 +37,12 @@ export function DaEconomyAuthControls() {
       setMessage("Connected successfully. Your balance and owned apps are syncing.");
     } catch (error) {
       setFeedbackKind("error");
-      setMessage(error instanceof Error ? error.message : "Could not sign in. Check your DaEconomy username and password.");
+      const detail = error instanceof Error ? error.message : "";
+      setMessage(
+        /connection lost|network|websocket|in flight/i.test(detail)
+          ? "The connection to DaEconomy dropped before sign-in finished. Check your internet connection and try again. Your account and balance were not changed by this failed sign-in."
+          : detail || "Could not sign in. Check your DaEconomy username and password.",
+      );
     } finally {
       setBusy(false);
     }
