@@ -63,7 +63,7 @@ const climb=(state.pitch*14+(state.throttle-.48)*680-(state.speed<42?280:0));
 state.vertical=clamp(climb,-3500,3500);
 state.y=clamp(state.y+state.vertical/60*dt,0,25000);
 const rad=state.heading*Math.PI/180;state.x+=Math.sin(rad)*state.speed*1.5*dt;state.z+=Math.cos(rad)*state.speed*1.5*dt;
-if(state.y<15&&state.speed>45&&Math.abs(state.bank)<16&&Math.abs(state.pitch)<8&&Math.hypot(state.x-1200,state.z-1200)<420){state.landed=true;notify('Smooth landing! Flight complete ✦')}
+if(state.y<90&&state.speed>45&&Math.abs(state.bank)<16&&Math.abs(state.pitch)<8&&Math.hypot(state.x-2000,state.z)<420){state.landed=true;notify('Smooth landing! Flight complete ✦')}
 if(state.y<=0&&state.speed>38){state.y=0;state.crashed=true;notify('Hard landing — press R to fly again')}
 }
 function project(x,y,z){const rad=state.heading*Math.PI/180,dx=x-state.x,dz=z-state.z;const fwd=dx*Math.sin(rad)+dz*Math.cos(rad),side=dx*Math.cos(rad)-dz*Math.sin(rad);const scale=700/(fwd+220);return {x:W*.5+side*scale,y:H*.48+(state.y-y)*.12*scale-fwd*0.015*scale,scale,fwd,side}}
@@ -73,16 +73,16 @@ function drawSky(){const horizon=H*.49-state.pitch*4.6;const g=ctx.createLinearG
 ctx.save();ctx.translate(W/2,H/2);ctx.rotate(-state.bank*Math.PI/180);ctx.translate(-W/2,-H/2);ctx.fillStyle='#72b5d0';ctx.globalAlpha=.2;ctx.fillRect(0,horizon,W,H-horizon);ctx.restore()}
 function drawWorld(){const horizon=H*.49-state.pitch*4.6;ctx.save();ctx.translate(W/2,horizon);ctx.rotate(-state.bank*Math.PI/180*.42);ctx.translate(-W/2,-horizon);
 const sea=ctx.createLinearGradient(0,horizon,0,H);sea.addColorStop(0,'#4baac4');sea.addColorStop(1,'#164b70');ctx.fillStyle=sea;ctx.fillRect(0,horizon,W,H-horizon);
-for(let i=0;i<12;i++){const z=450+i*360,wiggle=Math.sin(i*4.1)*300;const p=project(wiggle,0,z),scale=clamp(750/(z+300),.3,2.6);ctx.beginPath();ctx.ellipse(p.x,p.y+100*scale,210*scale,115*scale,Math.sin(i)*.3,0,Math.PI*2);const grad=ctx.createLinearGradient(p.x,p.y-80*scale,p.x,p.y+130*scale);grad.addColorStop(0,'#6caa7d');grad.addColorStop(.5,'#3c8268');grad.addColorStop(1,'#245969');ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle='#a4d9aa55';ctx.lineWidth=1;ctx.stroke();
-for(let m=0;m<4;m++){const mx=wiggle+Math.sin(i*2+m*2)*90,my=z+Math.cos(i+m)*70;const mp=project(mx,70+m*10,my);ctx.fillStyle=['#d0e7d6','#94c9ae','#e2e7d4'][m%3];ctx.beginPath();ctx.moveTo(mp.x,mp.y-12*scale);ctx.lineTo(mp.x-24*scale,mp.y+12*scale);ctx.lineTo(mp.x+25*scale,mp.y+12*scale);ctx.closePath();ctx.fill()}}
+for(let i=0;i<12;i++){const x=450+i*360,wiggle=Math.sin(i*4.1)*300;const p=project(x,0,wiggle),scale=clamp(750/(x+300),.3,2.6);ctx.beginPath();ctx.ellipse(p.x,p.y+100*scale,210*scale,115*scale,Math.sin(i)*.3,0,Math.PI*2);const grad=ctx.createLinearGradient(p.x,p.y-80*scale,p.x,p.y+130*scale);grad.addColorStop(0,'#6caa7d');grad.addColorStop(.5,'#3c8268');grad.addColorStop(1,'#245969');ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle='#a4d9aa55';ctx.lineWidth=1;ctx.stroke();
+for(let m=0;m<4;m++){const mx=x+Math.sin(i*2+m*2)*90,my=wiggle+Math.cos(i+m)*70;const mp=project(mx,70+m*10,my);ctx.fillStyle=['#d0e7d6','#94c9ae','#e2e7d4'][m%3];ctx.beginPath();ctx.moveTo(mp.x,mp.y-12*scale);ctx.lineTo(mp.x-24*scale,mp.y+12*scale);ctx.lineTo(mp.x+25*scale,mp.y+12*scale);ctx.closePath();ctx.fill()}}
 ctx.restore();
 drawRunway()}
 function drawRunway(){// A long, visible runway in the local training area
-const rx=1200,rz=1200;
-polygon([[rx-95,0,rz-900],[rx+95,0,rz-900],[rx+95,0,rz+900],[rx-95,0,rz+900]],'#3d4c57','#d7e7ee66');
-for(let z=-750;z<850;z+=150){polygon([[rx-7,1,rz+z],[rx+7,1,rz+z],[rx+7,1,rz+z+72],[rx-7,1,rz+z+72]],'#edf5f4')}
-for(let side of [-1,1])for(let j=0;j<6;j++){const z=rz-780+j*35;polygon([[rx+side*65,1,z],[rx+side*84,1,z],[rx+side*84,1,z+18],[rx+side*65,1,z+18]],'#f2f5ee')}
-polygon([[rx-85,1,rz-850],[rx+85,1,rz-850],[rx+85,1,rz-810],[rx-85,1,rz-810]],'#f2f5ee');
+const rx=2000,rz=0;
+polygon([[rx-900,0,rz-95],[rx+900,0,rz-95],[rx+900,0,rz+95],[rx-900,0,rz+95]],'#3d4c57','#d7e7ee66');
+for(let x=rx-750;x<rx+850;x+=150){polygon([[x,1,rz-7],[x+72,1,rz-7],[x+72,1,rz+7],[x,1,rz+7]],'#edf5f4')}
+for(let side of [-1,1])for(let j=0;j<6;j++){const x=rx-780+j*35;polygon([[x,1,rz+side*65],[x+18,1,rz+side*65],[x+18,1,rz+side*84],[x,1,rz+side*84]],'#f2f5ee')}
+polygon([[rx-850,1,rz-85],[rx-810,1,rz-85],[rx-810,1,rz+85],[rx-850,1,rz+85]],'#f2f5ee');
 }
 function drawAircraft(){if(!chase)return;const cx=W/2,cy=H*.53;ctx.save();ctx.translate(cx,cy);ctx.rotate(state.bank*Math.PI/180*.55);ctx.fillStyle='#e7f5f8';ctx.strokeStyle='#233c50';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-28);ctx.lineTo(7,-4);ctx.lineTo(62,12);ctx.lineTo(62,19);ctx.lineTo(7,14);ctx.lineTo(10,34);ctx.lineTo(1,39);ctx.lineTo(-7,14);ctx.lineTo(-62,19);ctx.lineTo(-62,12);ctx.lineTo(-7,-4);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#54c8f0';ctx.beginPath();ctx.ellipse(0,-6,3,10,0,0,Math.PI*2);ctx.fill();ctx.restore()}
 function drawCockpit(){if(chase)return;const roll=state.bank*Math.PI/180;ctx.save();ctx.translate(W/2,H*.49);ctx.rotate(-roll*.48);ctx.strokeStyle='#eaffffb0';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-85,0);ctx.lineTo(-32,0);ctx.moveTo(32,0);ctx.lineTo(85,0);ctx.moveTo(0,-42);ctx.lineTo(0,-15);ctx.moveTo(0,15);ctx.lineTo(0,42);ctx.stroke();ctx.restore();const bottom=H+20;const g=ctx.createLinearGradient(0,H-100,0,H);g.addColorStop(0,'#1a3b4f');g.addColorStop(1,'#06111c');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,bottom);ctx.lineTo(0,H-30);ctx.quadraticCurveTo(W*.5,H-130,W,H-30);ctx.lineTo(W,bottom);ctx.closePath();ctx.fill();ctx.strokeStyle='#b7e9ff55';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H-30);ctx.quadraticCurveTo(W*.5,H-130,W,H-30);ctx.stroke();ctx.fillStyle='#d4eaf4';ctx.font='10px Segoe UI';ctx.fillText('DA-01  ·  TRAINER',W/2-50,H-24)}
