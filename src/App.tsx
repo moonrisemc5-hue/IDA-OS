@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 
 
-type AppKind = 'external' | 'scope' | 'music' | 'settings' | 'explorer' | 'notes' | 'trash' | 'media' | 'store' | 'drift' | 'flight' | 'sans' | 'calculator | 'paint' | 'word' | 'excel'
+type AppKind = 'external' | 'scope' | 'music' | 'settings' | 'explorer' | 'notes' | 'trash' | 'media' | 'store' | 'drift' | 'flight' | 'sans' | 'calculator' | 'paint' | 'word' | 'excel'
 type AppItem = { name: string; kind: AppKind; url?: string; tone: 'yellow' | 'violet' | 'blue' | 'slate' }
 type Position = { x: number; y: number }
 type UserFile = { id:string; name:string; kind:'file'|'note'; location:string; mime?:string; data?:string; blobKey?:string; createdAt:number }
