@@ -50,7 +50,6 @@ const APPS: AppItem[] = [
   { name: 'DaRaw', kind: 'paint', tone: 'violet' },
   { name: 'DaWord', kind: 'word', tone: 'blue' },
   { name: 'DaExcelent', kind: 'excel', tone: 'blue' },
-  { name: 'GeoFS', kind: 'external', url: 'https://www.geo-fs.com/geofs.php', tone: 'blue' },
 ]
 
 const DEFAULT_POSITIONS: Record<string, Position> = {
@@ -89,7 +88,6 @@ const DAPP_CATALOG: DappCatalogItem[] = [
   {name:'DaRaw',tagline:'Your colourful digital canvas',description:'A paint studio with pencil, brush, marker, spray, eraser, fill bucket, shapes, text, colour picker, adjustable brush size, undo and redo, image import, zoom and PNG export.',category:'Creativity',tone:'violet'},
   {name:'DaWord',tagline:'Documents, made beautifully',description:'A Word-inspired document editor with rich text formatting, headings, lists, alignment, tables, autosave, print and export.',category:'Productivity',tone:'blue'},
   {name:'DaExcelent',tagline:'Make your numbers make sense',description:'A spreadsheet studio with formulas, SUM, AVERAGE, MIN, MAX, COUNT, formatting, worksheets, autosave and saving workbooks directly into DaFiles.',category:'Productivity',tone:'blue'},
-  {name:'GeoFS',tagline:'Take off and fly around the world',description:'A browser-based flight simulator with aircraft, airports, worldwide satellite scenery, and multiplayer. Requires an internet connection and WebGL 2.0. Some browser settings may require opening GeoFS in a separate tab.',category:'Games',tone:'blue',key:'geofs',price:500,available:true},
 ]
 
 const WALLPAPERS: Record<string, string> = {
@@ -1096,7 +1094,7 @@ function DaScopeSearch({offline=false}:{offline?:boolean}){
   </div>
 }
 function DaExcelentLogo({size=38}:{size?:number}){return <svg width={size} height={size} viewBox="0 0 40 40" aria-label="DaExcelent spreadsheet logo" role="img" style={{display:'block',flexShrink:0}}><path d="M9 2h18l7 7v28H9z" fill="#fff"/><path d="M27 2v8h7" fill="#b7e4c7"/><path d="M3 10h20v25H3z" fill="#107c41"/><path d="M7 15h12M7 20h12M7 25h12M7 30h12M13 15v15M18 15v15" stroke="#fff" strokeWidth="1.5"/><path d="M25 15h5M25 21h5M25 27h5" stroke="#107c41" strokeWidth="2"/></svg>}
-function IdaAppIcon({name,size=28}:{name:string;size?:number}){return name==='DAPP'?<DappLogo size={size}/>:name==='DaScope'?<DaScopeLogo size={size}/>:name==='DaEconomy'?<BankIcon size={size}/>:name==='DaCourt'?<Scale size={size}/>:name==='DaMusic'?<Music2 size={size}/>:name==='DaFile Explorer'?<Folder size={size}/>:name==='DaNotes'?<FileText size={size}/>:name==='DaTrash'?<Trash2 size={size}/>:name==='DaSettings'?<Gear size={size}/> :name==='DaMedia'?<Film size={size}/>:name==='DaTV'?<DaTVLogo size={size}/>:name==='DaDrift'?<DaDriftLogo size={size}/>:name==='Bad-Time'?<img src="/IDA-OS/Sans-Blaster2.png" alt="" draggable={false} style={{width:size,height:size,objectFit:'contain',imageRendering:'pixelated'}}/>:name==='Daculator'?<Calculator size={size} color="#6ee7b7" strokeWidth={2.4}/>:name==='DaRaw'?<span className="daraw-app-logo" style={{width:size,height:size,fontSize:size*.82}}>🖌️</span>:name==='DaWord'?<span className="daword-app-logo" style={{width:size,height:size,fontSize:size*.78}}>W</span>:name==='DaExcelent'?<DaExcelentLogo size={size}/>:name==='GeoFS'?<span style={{width:size,height:size,borderRadius:size*.2,background:'#25405e',color:'#fff',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:size*.34,fontWeight:900,letterSpacing:'-.08em'}}>GFS</span>:<Folder size={size}/>} 
+function IdaAppIcon({name,size=28}:{name:string;size?:number}){return name==='DAPP'?<DappLogo size={size}/>:name==='DaScope'?<DaScopeLogo size={size}/>:name==='DaEconomy'?<BankIcon size={size}/>:name==='DaCourt'?<Scale size={size}/>:name==='DaMusic'?<Music2 size={size}/>:name==='DaFile Explorer'?<Folder size={size}/>:name==='DaNotes'?<FileText size={size}/>:name==='DaTrash'?<Trash2 size={size}/>:name==='DaSettings'?<Gear size={size}/> :name==='DaMedia'?<Film size={size}/>:name==='DaTV'?<DaTVLogo size={size}/>:name==='DaDrift'?<DaDriftLogo size={size}/>:name==='Bad-Time'?<img src="/IDA-OS/Sans-Blaster2.png" alt="" draggable={false} style={{width:size,height:size,objectFit:'contain',imageRendering:'pixelated'}}/>:name==='Daculator'?<Calculator size={size} color="#6ee7b7" strokeWidth={2.4}/>:name==='DaRaw'?<span className="daraw-app-logo" style={{width:size,height:size,fontSize:size*.82}}>🖌️</span>:name==='DaWord'?<span className="daword-app-logo" style={{width:size,height:size,fontSize:size*.78}}>W</span>:name==='DaExcelent'?<DaExcelentLogo size={size}/>:<Folder size={size}/>} 
 
 function DappStoreInner({internetOn,installed,onInstall,onUninstall,onOpen}:{internetOn:boolean;installed:(name:string)=>boolean;onInstall:(name:string)=>void;onUninstall:(name:string)=>void;onOpen:(name:string)=>void}){
   const remoteCatalog = useQuery(dappListItems as any, internetOn ? {} : 'skip') as any
