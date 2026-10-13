@@ -580,6 +580,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   }
   const openWebAppInstance = (app: AppItem, allowMultiple=false) => {
     const appId=app.name; const baseApp=appForId(appId); if(!baseApp||baseApp.kind!=='external'||!baseApp.url) return
+    if(appId==='GeoFS'){ window.open(baseApp.url,'_blank','noopener,noreferrer'); return }
     app={...baseApp,name:appId}
     if(app.kind!=='external'||!app.url) return
     if(!allowMultiple){
@@ -594,6 +595,7 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
   const openApp = (app: AppItem, desktopInstance=false) => {
     const requestedId=app.name; const baseApp=appForId(requestedId); if(!baseApp)return
     app={...baseApp,name:requestedId}
+    if(requestedId==='GeoFS' && baseApp.url){ window.open(baseApp.url,'_blank','noopener,noreferrer'); return }
     setContextMenu(null); setStartOpen(false); setSearchOpen(false)
     if (app.kind==='store') { const k=requestedId==='DAPP'?'DAPP':'desktop:'+requestedId+':'+Date.now(); setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,[k]:prev[k]?{...prev[k],minimized:false,z:maxZ+1}:{kind:'store',appName:'DAPP',minimized:false,maximized:false,x:35,y:30,width:Math.min(window.innerWidth-40,980),height:Math.min(window.innerHeight-90,680),z:maxZ+1,taskbarInstance:false}}}); setActiveWindow(k); return }
     if (app.kind==='trash' && requestedId==='DaTrash') { setWindows(prev=>{const maxZ=Math.max(0,...Object.values(prev).map((w:any)=>Number(w?.z)||0));return {...prev,DaTrash:prev.DaTrash?{...prev.DaTrash,minimized:false,z:maxZ+1}:{kind:'trash',appName:'DaTrash',minimized:false,maximized:false,x:60,y:45,width:Math.min(window.innerWidth-40,900),height:Math.min(window.innerHeight-90,620),z:maxZ+1,taskbarInstance:true}}}); setActiveWindow('DaTrash'); return }
