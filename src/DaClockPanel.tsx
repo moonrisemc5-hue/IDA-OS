@@ -29,7 +29,7 @@ export default function DaClockPanel(){
  useEffect(()=>()=>{if(audioRef.current){audioRef.current.pause();audioRef.current=null}},[])
  const saveAlarm=(alarm:Alarm)=>{setAlarms(old=>old.some(a=>a.id===alarm.id)?old.map(a=>a.id===alarm.id?alarm:a):[...old,alarm].sort((a,b)=>a.time.localeCompare(b.time)));setEditing(null);setToast('Alarm saved')}
  useEffect(()=>{if(!ringing||ringing.customData)return;const id=window.setInterval(()=>playChime(ringing.sound),2600);return()=>window.clearInterval(id)},[ringing])
- const stopRinging=()=>if(audioRef.current){audioRef.current.pause();audioRef.current.currentTime=0;audioRef.current=null}setRinging(null)}
+ const stopRinging=()=>{if(audioRef.current){audioRef.current.pause();audioRef.current.currentTime=0;audioRef.current=null}setRinging(null)}
  const currentTime=twentyFour?now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false}):now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',hour12:true})
  const dateLabel=now.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})
  const worldTime=useMemo(()=>{try{return new Intl.DateTimeFormat([], {timeZone:CITY_ZONES[worldCity]||'Europe/Prague',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!twentyFour}).format(now)}catch{return '--:--'}},[now,worldCity,twentyFour])
