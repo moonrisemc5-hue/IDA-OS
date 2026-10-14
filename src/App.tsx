@@ -395,6 +395,16 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
     setExplorerPositions(next)
     try { localStorage.setItem('ida-explorer-y', JSON.stringify(next)) } catch {}
   }
+  const desktopItemPositions = (() => {
+    const occupied:Position[] = desktopApps.map(id=>positions[id]||positions[appBaseId(id)]||DEFAULT_POSITIONS[appBaseId(id)]).filter(Boolean) as Position[]
+    const result:Record<string,Position>={}
+    const items=[...folders.filter(f=>f.parent==='Desktop').map(f=>({id:f.id,pos:filePositions[f.id]})),...files.filter(f=>f.location==='Desktop').map(f=>({id:f.id,pos:filePositions[f.id]}))]
+    const candidates:Position[]=[]
+    for(let y=3;y<=87;y+=12)for(let x=3;x<=80;x+=11)candidates.push({x,y})
+    const free=(p:Position)=>!occupied.some(q=>Math.abs(p.x-q.x)/100*window.innerWidth<100&&Math.abs(p.y-q.y)/100*window.innerHeight<100)
+    for(const item of items){const saved=item.pos&&!(item.pos.x===5&&item.pos.y===34)?item.pos:undefined;const chosen=saved&&free(saved)?saved:candidates.find(free)||{x:3,y:3};result[item.id]=chosen;occupied.push(chosen)}
+    return result
+  })()
 
   const saveTaskbar = (next: string[]) => { setTaskbarApps(next); try { localStorage.setItem('ida-taskbar', JSON.stringify(next)) } catch {} }
   const saveDesktopApps = (next:string[]) => { const added=next.filter(id=>!desktopApps.includes(id));let nextPositions={...positions};const used=next.filter(id=>!added.includes(id)).map(id=>nextPositions[id]||nextPositions[appBaseId(id)]||DEFAULT_POSITIONS[appBaseId(id)]).filter(Boolean) as Position[];const candidates:Position[]=[];for(let y=3;y<=87;y+=12)for(let x=3;x<=80;x+=11)candidates.push({x,y});for(const id of added){const app=appForId(id);if(!app)continue;const currentPos=nextPositions[id];if(currentPos)continue;const occupied=used.some(p=>Math.abs(p.x-(nextPositions[app.name]||DEFAULT_POSITIONS[app.name]||{x:-100}).x)<0.1&&Math.abs(p.y-(nextPositions[app.name]||DEFAULT_POSITIONS[app.name]||{y:-100}).y)<0.1);const spot=candidates.find(p=>!used.some(q=>{const w=window.innerWidth,h=window.innerHeight;return Math.abs(p.x-q.x)/100*w<100&&Math.abs(p.y-q.y)/100*h<100}));if(spot){nextPositions[id]=spot;used.push(spot)}else if(!occupied){const base=nextPositions[app.name]||DEFAULT_POSITIONS[app.name];if(base&&!used.some(q=>Math.abs(q.x-base.x)<8&&Math.abs(q.y-base.y)<8)){nextPositions[id]=base;used.push(base)}}}setDesktopApps(next);if(Object.keys(nextPositions).some(k=>nextPositions[k]!==positions[k])){setPositions(nextPositions);try{localStorage.setItem('daapps-positions',JSON.stringify(nextPositions))}catch{}}try { localStorage.setItem('ida-desktop-apps', JSON.stringify(next)) } catch {} }
@@ -882,9 +892,9 @@ export function DaApps({onRestartToLock}:{onRestartToLock?:()=>void} = {}) {
             shortcutId={desktopEntry}
           />
         )})}
-        {desktop && folders.filter(f=>f.parent==='Desktop').map((folder,index)=>{const savedPos=filePositions[folder.id];const pos=savedPos&&!(savedPos.x===5&&savedPos.y===34)?savedPos:{x:18+(index%5)*14,y:10+Math.floor(index/5)*14};return <DesktopFolderTile key={folder.id} folder={folder} scale={iconScale} left={pos.x} top={pos.y} selected={selectedDesktopItem?.type==='folder'&&selectedDesktopItem.id===folder.id || selectedDesktopIds.includes(folder.id)} onSelect={()=>{setSelectedApp(null);setSelectedDesktopItem({type:'folder',id:folder.id});setSelectedDesktopIds([folder.id]);setSelectedDesktopApps([])}} onOpen={()=>openExplorerFolder(folder.id)} onContext={(x,y)=>setContextMenu({x,y,scope:'desktop',folderItem:folder,folder:'Desktop'})} onMove={(p)=>moveDesktopItem('folder',folder.id,p)} onDropTarget={(target)=>moveDraggedItem('folder',folder.id,target)} />})}
+        {desktop && folders.filter(f=>f.parent==='Desktop').map((folder,index)=>{const pos=desktopItemPositions[folder.id]||{x:18+(index%5)*14,y:10+Math.floor(index/5)*14};return <DesktopFolderTile key={folder.id} folder={folder} scale={iconScale} left={pos.x} top={pos.y} selected={selectedDesktopItem?.type==='folder'&&selectedDesktopItem.id===folder.id || selectedDesktopIds.includes(folder.id)} onSelect={()=>{setSelectedApp(null);setSelectedDesktopItem({type:'folder',id:folder.id});setSelectedDesktopIds([folder.id]);setSelectedDesktopApps([])}} onOpen={()=>openExplorerFolder(folder.id)} onContext={(x,y)=>setContextMenu({x,y,scope:'desktop',folderItem:folder,folder:'Desktop'})} onMove={(p)=>moveDesktopItem('folder',folder.id,p)} onDropTarget={(target)=>moveDraggedItem('folder',folder.id,target)} />})}
         {desktop && files.filter(f=>f.location==='Desktop').map((file,index)=>{
-          const savedPos=filePositions[file.id]; const pos=savedPos&&!(savedPos.x===5&&savedPos.y===34)?savedPos:{x:18+(index%5)*14,y:10+Math.floor(index/5)*14}
+          const pos=desktopItemPositions[file.id]||{x:18+(index%5)*14,y:10+Math.floor(index/5)*14}
           return <DesktopFileTile key={file.id} file={file} scale={iconScale} left={pos.x} top={pos.y} selected={selectedDesktopItem?.type==='file'&&selectedDesktopItem.id===file.id || selectedDesktopIds.includes(file.id)} onSelect={()=>{setSelectedApp(null);setSelectedDesktopItem({type:'file',id:file.id});setSelectedDesktopIds([file.id]);setSelectedDesktopApps([])}} onOpen={()=>openUserFile(file)} onContext={(x,y)=>setContextMenu({x,y,scope:'desktop',file,folder:file.id})} onMove={(p)=>moveDesktopItem('file',file.id,p)} onDropTarget={(target,type,sourceId)=>moveDraggedItem(type||'file',sourceId||file.id,target)} />
         })}
       </div>
