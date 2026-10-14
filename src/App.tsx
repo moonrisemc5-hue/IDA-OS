@@ -55,22 +55,22 @@ const DEFAULT_POSITIONS: Record<string, Position> = {
   // Keeping every built-in app on its own slot also prevents fresh accounts from
   // inheriting the old DaScope / File Explorer overlap.
   DAPP: { x: 3, y: 3 },
-  DaEconomy: { x: 3, y: 19 },
-  DaCourt: { x: 3, y: 35 },
-  DaMusic: { x: 3, y: 51 },
-  DaScope: { x: 3, y: 67 },
-  'DaFile Explorer': { x: 3, y: 83 },
+  DaEconomy: { x: 3, y: 15 },
+  DaCourt: { x: 3, y: 27 },
+  DaMusic: { x: 3, y: 39 },
+  DaScope: { x: 3, y: 51 },
+  'DaFile Explorer': { x: 3, y: 63 },
   DaSettings: { x: 14, y: 3 },
-  DaTrash: { x: 14, y: 19 },
-  DaNotes: { x: 14, y: 35 },
-  DaMedia: { x: 14, y: 51 },
-  DaTV: { x: 14, y: 67 },
-  DaDrift: { x: 14, y: 83 },
+  DaTrash: { x: 14, y: 15 },
+  DaNotes: { x: 14, y: 27 },
+  DaMedia: { x: 14, y: 39 },
+  DaTV: { x: 14, y: 51 },
+  DaDrift: { x: 14, y: 63 },
   Daculator: { x: 25, y: 3 },
-  DaRaw: { x: 25, y: 19 },
-  DaWord: { x: 25, y: 35 },
-  DaExcelent: { x: 25, y: 51 },
-  DaClock: { x: 25, y: 67 }, 
+  DaRaw: { x: 25, y: 15 },
+  DaWord: { x: 25, y: 27 },
+  DaExcelent: { x: 25, y: 39 },
+  DaClock: { x: 25, y: 51 }, 
 }
 
 type DappCatalogItem = { name:string; tagline:string; description:string; category:string; tone:'yellow'|'violet'|'blue'|'slate'|'red'|'amber'; key?:string; price?:number; available?:boolean }
@@ -1309,7 +1309,7 @@ function MusicPanel({ volume }: { volume: number }) {
   useEffect(()=>{let alive=true;const urls:string[]=[];(async()=>{const hydrated=await Promise.all(customTracks.map(async t=>{if(t.src)return t;try{const blob=await getVideoBlob(t.blobKey);if(!blob)return t;const src=URL.createObjectURL(blob);urls.push(src);return {...t,src}}catch{return t}}));if(alive)setCustomTracks(old=>old.map(t=>hydrated.find(h=>h.id===t.id)||t))})();return()=>{alive=false;urls.forEach(URL.revokeObjectURL)}},[]);
   useEffect(()=>{const onImport=(event:Event)=>{const file=(event as CustomEvent).detail?.file as UserFile|undefined;if(!file?.blobKey){window.alert('This audio file is missing its saved media data. Please import it into DaFile Explorer again.');return}getVideoBlob(file.blobKey).then(blob=>{if(!blob){window.alert('IDA could not find the saved audio data for this file. Please import the MP3 into DaFile Explorer again.');return}const src=URL.createObjectURL(blob);setAddDraft({fileId:file.id,name:file.name,blobKey:file.blobKey,src,title:file.name.replace(/\.[^.]+$/,''),artist:'',image:undefined});setView('add')}).catch(error=>{console.error('DaMusic import failed:',error);window.alert('Could not load this audio file. Please import it into DaFile Explorer again.')})};window.addEventListener('ida-damusic-import-file',onImport);return()=>window.removeEventListener('ida-damusic-import-file',onImport)},[]);
   const current=libraryTracks[track]||libraryTracks[0];
-  useEffect(()=>{let alive=true;let done=0;const total=libraryTracks.length;if(!total){setPreloadProgress(0);return}setPreloadProgress(0);const jobs=libraryTracks.map(t=>new Promise<void>(resolve=>{const audio=new Audio();audio.preload='auto';const finish=()=>{audio.oncanplaythrough=null;audio.onloadeddata=null;audio.onerror=null;done++;if(alive)setPreloadProgress(Math.round(done/total*100));resolve()};audio.oncanplaythrough=finish;audio.onloadeddata=finish;audio.onerror=finish;audio.src=t.src;audio.load();window.setTimeout(finish,12000)}));Promise.all(jobs).then(()=>{});return()=>{alive=false}},[libraryTracks.length]);
+  useEffect(()=>{let alive=true;let done=0;const finished=new Set<number>();const total=libraryTracks.length;if(!total){setPreloadProgress(0);return}setPreloadProgress(0);const jobs=libraryTracks.map(t=>new Promise<void>(resolve=>{const audio=new Audio();audio.preload='auto';const finish=()=>{if(finished.has(libraryTracks.indexOf(t)))return;finished.add(libraryTracks.indexOf(t));audio.oncanplaythrough=null;audio.onloadeddata=null;audio.onerror=null;done++;if(alive)setPreloadProgress(Math.round(done/total*100));resolve()};audio.oncanplaythrough=finish;audio.onloadeddata=finish;audio.onerror=finish;audio.src=t.src;audio.load();window.setTimeout(finish,12000)}));Promise.all(jobs).then(()=>{});return()=>{alive=false}},[libraryTracks.length]);
   useEffect(()=>{if(!current)return;window.dispatchEvent(new CustomEvent('ida-music-state',{detail:{title:current.title,artist:'IDA Default',image:current.image,playing}}));return()=>{window.dispatchEvent(new CustomEvent('ida-music-state',{detail:null}))}},[current,playing]);
   const formatTime=(seconds:number)=>{if(!Number.isFinite(seconds)||seconds<0)return '0:00';const whole=Math.floor(seconds);return Math.floor(whole/60)+':'+String(whole%60).padStart(2,'0')};
   useEffect(()=>{try{localStorage.setItem('ida-music-playlists',JSON.stringify(playlists))}catch{}},[playlists]);
