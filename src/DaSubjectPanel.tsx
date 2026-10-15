@@ -115,7 +115,7 @@ export default function DaSubjectPanel() {
       .ds-dossier-foot { display:flex;justify-content:space-between;gap:8px;margin-top:24px;font-size:9px;letter-spacing:.12em;color:#64748b; }
 
 
-      .ds-office-bg{position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(2,7,17,.88) 0%,rgba(2,7,17,.5) 37%,rgba(2,7,17,.16) 70%,rgba(2,7,17,.38) 100%),linear-gradient(0deg,rgba(2,6,15,.8),transparent 40%,rgba(2,6,15,.22)),url('/dasubject-office.svg');background-size:cover;background-position:center center;transform:scale(1.02);animation:ds-city-reveal 1.8s ease-out both}
+      .ds-office-bg{position:absolute;inset:0;z-index:0;background-image:linear-gradient(90deg,rgba(2,7,17,.88) 0%,rgba(2,7,17,.5) 37%,rgba(2,7,17,.16) 70%,rgba(2,7,17,.38) 100%),linear-gradient(0deg,rgba(2,6,15,.8),transparent 40%,rgba(2,6,15,.22)),url('/dasubject-office.svg?scene=2');background-size:cover;background-position:center center;transform:scale(1.02);animation:ds-city-reveal 1.8s ease-out both;pointer-events:none}
       @keyframes ds-city-reveal{from{transform:scale(1.09);filter:brightness(.55)}to{transform:scale(1.02);filter:brightness(1)}}
       .ds-settings-wrap{width:100%;max-width:620px;margin:auto;position:relative;z-index:2}
       .ds-settings-kicker{font-size:10px;letter-spacing:.34em;color:#67e8f9}
