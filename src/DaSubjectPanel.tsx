@@ -15,9 +15,9 @@ function makeCode() {
 }
 
 export default function DaSubjectPanel() {
-  const [unlocked, setUnlocked] = useState(false)
-  const [intro, setIntro] = useState<'loading'|'password'|'entering'|'ready'>('loading')
-  useEffect(() => { const timer = window.setTimeout(() => setIntro('password'), 2400); return () => window.clearTimeout(timer) }, [])
+  const [unlocked, setUnlocked] = useState(() => { try { return localStorage.getItem(ACCESS_KEY) === 'yes' } catch { return false } })
+  const [intro, setIntro] = useState<'loading'|'password'|'entering'|'ready'>(() => { try { return localStorage.getItem(ACCESS_KEY) === 'yes' ? 'ready' : 'loading' } catch { return 'loading' } })
+  useEffect(() => { try { if (localStorage.getItem(ACCESS_KEY) === 'yes') { setUnlocked(true); setIntro('ready'); return } } catch {} const timer = window.setTimeout(() => setIntro('password'), 2400); return () => window.clearTimeout(timer) }, [])
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
@@ -38,8 +38,9 @@ export default function DaSubjectPanel() {
   const enter = () => {
     if (password !== PASS) { setPasswordError('ACCESS DENIED — this project is still classified.'); return }
     setPasswordError('')
+    if (remember) { try { localStorage.setItem(ACCESS_KEY, 'yes') } catch {} }
     setIntro('entering')
-    window.setTimeout(() => { setUnlocked(true); setIntro('ready'); if (remember) { try { localStorage.setItem(ACCESS_KEY, 'yes') } catch {} } }, 1500)
+    window.setTimeout(() => { setUnlocked(true); setIntro('ready'); }, 1500)
   }
   const createLobby = () => {
     const code = makeCode()
