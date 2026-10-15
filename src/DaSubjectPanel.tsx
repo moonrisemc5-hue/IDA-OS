@@ -60,11 +60,11 @@ export default function DaSubjectPanel() {
     setScreen('lobby')
   }
   const back = () => { setStatus(''); setScreen(screen === 'lobby' ? 'play' : screen === 'create' || screen === 'join' ? 'play' : 'menu') }
-  const card = 'rounded-2xl border border-cyan-100/15 bg-slate-950/55 backdrop-blur-xl shadow-[0_18px_60px_rgba(0,0,0,.32)]'
-  const btn = 'group flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.045] px-5 py-4 text-left text-white transition duration-200 hover:border-cyan-300/60 hover:bg-cyan-300/10 focus:outline-none focus:ring-2 focus:ring-cyan-300/70'
+  const card = 'rounded-2xl border border-white/10 bg-slate-950/65 backdrop-blur-2xl shadow-[0_24px_80px_rgba(0,0,0,.48)]'
+  const btn = 'group flex w-full items-center justify-between rounded-xl border border-white/[0.09] bg-slate-950/45 px-5 py-4 text-left text-white transition duration-300 hover:-translate-y-0.5 hover:border-cyan-200/50 hover:bg-cyan-200/[0.07] focus:outline-none focus:ring-2 focus:ring-cyan-300/70'
   const smallBtn = 'rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2.5 text-sm text-slate-100 transition hover:border-cyan-300/60 hover:bg-cyan-300/10'
   const heading = 'text-2xl font-semibold tracking-[.12em] text-white'
-  const panel = useMemo(() => ({ background: 'radial-gradient(ellipse at 72% 10%, rgba(8,145,178,.17), transparent 34%), linear-gradient(115deg,rgba(2,6,23,.97),rgba(8,20,38,.88) 52%,rgba(3,10,22,.96))' }), [])
+  const panel = useMemo(() => ({ background: 'radial-gradient(ellipse at 78% 30%, rgba(8,145,178,.22), transparent 38%), radial-gradient(ellipse at 12% 82%, rgba(249,115,22,.09), transparent 35%), linear-gradient(125deg,#02040b 0%,#071321 52%,#020611 100%)' }), [])
 
   return <div className="relative h-full min-h-[560px] w-full overflow-hidden rounded-xl bg-slate-950 text-white" style={panel}>
     <style>{`
@@ -73,15 +73,19 @@ export default function DaSubjectPanel() {
       @keyframes ds-scan { from{transform:translateY(-100%)} to{transform:translateY(650%)} }
       @keyframes ds-flicker { 0%,96%,100%{opacity:1} 97%{opacity:.82} 98%{opacity:.96} }
       .ds-grid { background-image:linear-gradient(rgba(34,211,238,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.055) 1px,transparent 1px);background-size:42px 42px; }
-      .ds-city { position:absolute;bottom:0;left:0;right:0;height:48%;opacity:.82;overflow:hidden; }
-      .ds-building { position:absolute;bottom:0;border:1px solid rgba(103,232,249,.17);background:linear-gradient(90deg,rgba(5,20,37,.96),rgba(13,42,62,.84),rgba(2,12,27,.97));box-shadow:inset 0 0 26px rgba(34,211,238,.05); }
+      .ds-city { position:absolute;bottom:0;left:0;right:0;height:58%;opacity:.68;overflow:hidden;mask-image:linear-gradient(to top,black 0%,black 52%,transparent 100%); }
+      .ds-building { position:absolute;bottom:0;border:1px solid rgba(103,232,249,.14);background:linear-gradient(90deg,rgba(3,10,23,.98),rgba(10,31,49,.9),rgba(2,7,18,.99));box-shadow:inset 0 0 36px rgba(34,211,238,.06),0 0 24px rgba(0,0,0,.5); }
       .ds-windows { position:absolute;inset:10px 6px;background-image:repeating-linear-gradient(0deg,transparent 0 10px,rgba(34,211,238,.36) 10px 12px),repeating-linear-gradient(90deg,transparent 0 12px,rgba(251,146,60,.25) 12px 14px);mask-image:linear-gradient(to bottom,black,transparent); }
-      .ds-scanline { position:absolute;left:0;right:0;height:35px;background:linear-gradient(transparent,rgba(34,211,238,.05),transparent);animation:ds-scan 10s linear infinite;pointer-events:none; }
+      .ds-scanline { position:absolute;left:0;right:0;height:35px;background:linear-gradient(transparent,rgba(34,211,238,.035),transparent);animation:ds-scan 14s linear infinite;pointer-events:none; }
+      .ds-grain { position:absolute;inset:0;opacity:.07;pointer-events:none;background-image:url(\"data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E\");mix-blend-mode:screen;}
+      .ds-kicker { font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:rgba(165,243,252,.8); }
+      @media (prefers-reduced-motion: reduce) { .ds-scanline { animation:none; } }
     `}</style>
     <div className="ds-grid absolute inset-0 opacity-70" />
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_20%,transparent_0%,rgba(2,6,23,.25)_48%,rgba(2,6,23,.9)_100%)]" />
     <div className="absolute -right-20 top-8 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
     <div className="absolute left-1/4 top-1/3 h-56 w-56 rounded-full bg-orange-500/[0.06] blur-3xl" />
+    <div className="ds-grain" />
     <div className="ds-city" aria-hidden="true">
       {Array.from({length:24},(_,i)=><div key={i} className="ds-building" style={{left:(i*4.4-1)+'%',width:(2.8+(i%4)*.45)+'%',height:(28+(i*37)%68)+'%'}}>
         <div className="ds-windows" style={{opacity:.3+(i%5)*.12}} />
@@ -121,15 +125,31 @@ export default function DaSubjectPanel() {
         </div>
       </div> : <>
         <main className="flex flex-1 flex-col px-5 py-6 sm:px-8 sm:py-8">
-          {screen==='menu' && <div className="flex flex-1 flex-col justify-center pb-24 sm:pb-28">
-            <div className="mb-5 flex items-center gap-2 text-[10px] tracking-[.32em] text-cyan-200"><span className="h-px w-8 bg-cyan-300"/> YEAR 2091 <span className="text-slate-600">/</span> EARTH POPULATION: CRITICAL</div>
-            <h1 className="max-w-3xl text-5xl font-black leading-[.92] tracking-[-.06em] sm:text-7xl" style={{animation:motion?'ds-flicker 8s infinite':undefined}}>DA <span className="text-cyan-300">SUBJECT</span><span className="text-orange-300">.</span></h1>
-            <p className="mt-5 max-w-lg text-sm leading-6 text-slate-300 sm:text-base">A world with no room left to breathe. A secret that should not exist. Your story begins in the city of 2091.</p>
-            <div className="mt-8 flex max-w-md flex-col gap-3">
-              <button className="flex items-center justify-between rounded-xl bg-cyan-300 px-5 py-4 text-left font-bold tracking-[.18em] text-slate-950 transition hover:bg-cyan-200" onClick={()=>setScreen('play')}><span className="flex items-center gap-3"><Zap size={18}/> PLAY</span><ChevronRight size={19}/></button>
-              <button className={btn} onClick={()=>setScreen('credits')}><span className="flex items-center gap-3"><Users size={18} className="text-cyan-200"/> CREDITS</span><ChevronRight size={18} className="text-slate-500 transition group-hover:translate-x-1"/></button>
-              <button className={btn} onClick={()=>setScreen('settings')}><span className="flex items-center gap-3"><Monitor size={18} className="text-cyan-200"/> SETTINGS</span><ChevronRight size={18} className="text-slate-500 transition group-hover:translate-x-1"/></button>
-            </div>
+          {screen==='menu' && <div className="grid flex-1 items-center gap-10 py-8 pb-24 lg:grid-cols-[1.15fr_.85fr] sm:pb-28">
+            <section className="relative z-10 flex flex-col justify-center">
+              <div className="mb-6 flex items-center gap-3"><span className="h-px w-9 bg-cyan-300"/><span className="ds-kicker">YEAR 2091</span><span className="text-slate-700">/</span><span className="text-[10px] tracking-[.18em] text-slate-500">EARTH POPULATION: CRITICAL</span></div>
+              <div className="mb-3 text-[10px] font-medium tracking-[.48em] text-slate-500">A STORY ABOUT SURVIVAL</div>
+              <h1 className="max-w-3xl text-5xl font-black leading-[.86] tracking-[-.075em] sm:text-7xl xl:text-8xl" style={{animation:motion?'ds-flicker 10s infinite':undefined}}>DA<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-400 to-cyan-700">SUBJECT</span><span className="text-orange-300">.</span></h1>
+              <p className="mt-6 max-w-md border-l border-cyan-300/40 pl-4 text-sm leading-7 text-slate-300 sm:text-base">A world with no room left to breathe. A secret that should not exist. Your story begins in the city of 2091.</p>
+              <div className="mt-8 flex max-w-sm flex-col gap-2.5">
+                <button className="group flex items-center justify-between rounded-lg border border-cyan-100/30 bg-cyan-200 px-5 py-4 text-left font-bold tracking-[.2em] text-slate-950 shadow-[0_0_35px_rgba(34,211,238,.12)] transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-100" onClick={()=>setScreen('play')}><span className="flex items-center gap-3"><Zap size={18}/> BEGIN STORY</span><ArrowRight size={19} className="transition group-hover:translate-x-1"/></button>
+                <div className="grid grid-cols-2 gap-2.5"><button className={btn+' !px-4 !py-3'} onClick={()=>setScreen('credits')}><span className="flex items-center gap-2"><Users size={16} className="text-cyan-200"/> CREDITS</span><ChevronRight size={16} className="text-slate-500"/></button><button className={btn+' !px-4 !py-3'} onClick={()=>setScreen('settings')}><span className="flex items-center gap-2"><Monitor size={16} className="text-cyan-200"/> SETTINGS</span><ChevronRight size={16} className="text-slate-500"/></button></div>
+              </div>
+            </section>
+            <aside className="relative hidden min-h-[340px] items-center justify-center lg:flex">
+              <div className="absolute right-5 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full border border-cyan-200/10"/>
+              <div className="absolute right-12 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full border border-dashed border-cyan-200/15" style={{animation:motion?'spin 45s linear infinite':undefined}}/>
+              <div className="relative w-full max-w-sm border-y border-cyan-200/20 py-6">
+                <div className="mb-5 flex items-center justify-between"><span className="ds-kicker">CLASSIFIED DOSSIER</span><span className="rounded-sm border border-orange-300/30 px-2 py-1 text-[9px] tracking-[.2em] text-orange-200">EYES ONLY</span></div>
+                <div className="text-4xl font-light tracking-tight text-white">TWO STRANGERS<span className="text-cyan-300">.</span><br/>ONE ISLAND<span className="text-cyan-300">.</span></div>
+                <div className="mt-5 h-px w-full bg-gradient-to-r from-cyan-300/60 via-white/10 to-transparent"/>
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <div><div className="ds-kicker">SUBJECT 01</div><div className="mt-1 text-lg font-semibold">IVOR</div><div className="mt-1 text-xs leading-5 text-slate-500">An exhausted worker with nothing left.</div></div>
+                  <div><div className="ds-kicker">SUBJECT 02</div><div className="mt-1 text-lg font-semibold">TENO</div><div className="mt-1 text-xs leading-5 text-slate-500">A traveler who never reached America.</div></div>
+                </div>
+                <div className="mt-6 flex items-center justify-between text-[9px] tracking-[.18em] text-slate-600"><span>FILE: DS-2091-02</span><span>STATUS: REDACTED</span></div>
+              </div>
+            </aside>
           </div>}
 
           {screen==='play' && <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center">
