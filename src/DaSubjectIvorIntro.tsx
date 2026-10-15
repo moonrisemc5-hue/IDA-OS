@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 
 type Props = { soundEnabled: boolean; onBack: () => void }
@@ -28,7 +28,10 @@ function blip() {
 export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
   const [loading, setLoading] = useState(true)
   const [line, setLine] = useState(0)
-  const [pos, setPos] = useState({ x: 50, y: 70 })
+  const [pos, setPos] = useState({ x: 50, y: 68 })
+  const [facing, setFacing] = useState('down')
+  const [walking, setWalking] = useState(false)
+  const held = useRef(new Set<string>())
   useEffect(() => { const t = window.setTimeout(() => setLoading(false), 1900); return () => window.clearTimeout(t) }, [])
   const advance = () => {
     if (line < lines.length) {
@@ -37,26 +40,17 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
     }
   }
   useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (loading) return
-      if (line < lines.length) {
-        if (e.key.toLowerCase() === 'n' || e.key === 'Enter') { e.preventDefault(); advance() }
-        return
-      }
-      const k = e.key.toLowerCase()
-      if (!['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)) return
-      e.preventDefault()
-      const dx = k === 'arrowleft' || k === 'a' ? -2 : k === 'arrowright' || k === 'd' ? 2 : 0
-      const dy = k === 'arrowup' || k === 'w' ? -2 : k === 'arrowdown' || k === 's' ? 2 : 0
-      setPos(p => ({ x: Math.max(3, Math.min(97, p.x + dx)), y: Math.max(24, Math.min(82, p.y + dy)) }))
-    }
-    window.addEventListener('keydown', key)
-    return () => window.removeEventListener('keydown', key)
-  }, [loading, line, soundEnabled])
+    const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(loading)return;if(line<lines.length&&(k==='n'||e.key==='Enter')){e.preventDefault();setLine(v=>Math.min(lines.length,v+1));if(soundEnabled)blip();return}if(line>=lines.length&&['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();held.current.add(k)}}
+    const up=(e:KeyboardEvent)=>held.current.delete(e.key.toLowerCase()),clear=()=>held.current.clear()
+    window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',clear)
+    let frame=0,last=0
+    const tick=(now:number)=>{const dt=last?Math.min(32,now-last):16;last=now;if(!loading&&line>=lines.length){const k=held.current;let dx=Number(k.has('d')||k.has('arrowright'))-Number(k.has('a')||k.has('arrowleft')),dy=Number(k.has('s')||k.has('arrowdown'))-Number(k.has('w')||k.has('arrowup'));const moving=dx!==0||dy!==0;setWalking(moving);if(moving){if(Math.abs(dx)>=Math.abs(dy)&&dx!==0)setFacing(dx<0?'left':'right');else setFacing(dy<0?'up':'down');const m=Math.hypot(dx,dy)||1;dx=dx/m*.00028*dt*100;dy=dy/m*.00028*dt*100;setPos(p=>{const nx=Math.max(2.5,Math.min(97.5,p.x+dx)),ny=Math.max(23,Math.min(85,p.y+dy));const hit=Array.from({length:12},(_,i)=>({x:1+(i%6)*17,y:48+Math.floor(i/6)*23,w:15,h:7})).some(d=>nx>d.x-2&&nx<d.x+d.w+2&&ny>d.y-3&&ny<d.y+d.h+3);return hit?p:{x:nx,y:ny}})}}frame=requestAnimationFrame(tick)}
+    frame=requestAnimationFrame(tick);return()=>{cancelAnimationFrame(frame);window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',clear)}
+  },[loading,line,soundEnabled])
   return <section className="dsi-root">
     <style>{`
       .dsi-root{position:relative;min-height:570px;height:100%;overflow:hidden;background:#081522;border:3px solid #29465e;box-shadow:5px 5px 0 #0009;font-family:ui-monospace,monospace;isolation:isolate}
-      .dsi-scene{position:absolute;inset:0;overflow:hidden;background:linear-gradient(#162b42 0 8%,#253c50 8% 10%,#24394a 10% 34%,#172a3b 34% 100%);image-rendering:pixelated}
+      .dsi-scene{position:absolute;inset:0;overflow:hidden;background:linear-gradient(#162b42 0 8%,#253c50 8% 10%,#24394a 10% 34%,#172a3b 34% 100%);image-rendering:pixelated;transform:scale(1.1)}
       .dsi-top{position:absolute;z-index:4;left:0;right:0;top:0;height:8%;display:flex;align-items:center;justify-content:space-between;padding:0 2%;background:#071321;border-bottom:4px solid #45657a;color:#9cebf5;font-size:clamp(7px,.8vw,10px);letter-spacing:.12em}
       .dsi-window{position:absolute;left:2%;right:2%;top:10%;height:25%;border:8px solid #203a51;background:linear-gradient(#182d50,#cb7a68);box-shadow:inset 0 0 0 3px #62839a}
       .dsi-city{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-around;background:linear-gradient(#253a61,#d68c70)}
@@ -73,7 +67,7 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
       .dsi-desk{position:absolute;z-index:3;width:15%;height:5.5%;background:#79583d;border:3px solid #263443;box-shadow:0 7px #0a1420}
       .dsi-desk:before{content:'';position:absolute;left:30%;top:-100%;width:42%;height:100%;background:#0a1b2b;border:3px solid #55798d}
       .dsi-desk:after{content:'';position:absolute;left:12%;right:12%;top:100%;height:75%;border-left:3px solid #3b4651;border-right:3px solid #3b4651}
-      .dsi-ivor{position:absolute;z-index:6;width:42px;transform:translate(-50%,-50%);filter:drop-shadow(2px 3px #0008);image-rendering:pixelated;transition:left .08s linear,top .08s linear}
+      .dsi-ivor{position:absolute;z-index:6;width:30px;transform:translate(-50%,-50%);filter:drop-shadow(2px 3px #0008);image-rendering:pixelated}.dsi-ivor svg{width:30px;height:42px;image-rendering:pixelated}.dsi-ivor.walking svg{animation:dsi-step .18s steps(2,end) infinite}@keyframes dsi-step{50%{translate:0 -2px}}
       .dsi-ivor svg{width:42px;height:54px;image-rendering:pixelated}.dsi-ivor small{display:block;text-align:center;color:#d8fbff;font-size:8px;text-shadow:1px 1px #000;letter-spacing:.12em}
       .dsi-bottom-label{position:absolute;z-index:5;left:2%;right:2%;bottom:2%;display:flex;justify-content:space-between;color:#9bb3c6;font-size:8px;letter-spacing:.12em;text-shadow:1px 1px #000}
       .dsi-dialogue{position:absolute;z-index:10;left:3%;right:3%;bottom:4%;width:94%;display:flex;align-items:center;gap:14px;padding:14px 17px;text-align:left;background:#07101f!important;color:#fff!important;border:3px solid #e1edf6!important;box-shadow:5px 5px 0 #000a!important}
