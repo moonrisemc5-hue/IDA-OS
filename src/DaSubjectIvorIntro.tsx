@@ -38,24 +38,70 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
   const [walking, setWalking] = useState(false)
   const [fadingOut, setFadingOut] = useState(() => !!readProgress().fadingOut)
   const [doorHint, setDoorHint] = useState(() => !!readProgress().doorHint)
+  const [sceneStage, setSceneStage] = useState(() => readProgress().sceneStage || 'office')
+  const [drivingFrame, setDrivingFrame] = useState(0)
   const held = useRef(new Set<string>())
   useEffect(() => { const oldOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; return()=>{document.body.style.overflow=oldOverflow} }, [])
   useEffect(() => { if (readProgress().started) return; const t=window.setTimeout(()=>setLoading(false),1800); const city=window.setTimeout(()=>setCityIntro(false),5200); return()=>{window.clearTimeout(t);window.clearTimeout(city)} }, [])
-  useEffect(() => { try { localStorage.setItem(PROGRESS_KEY, JSON.stringify({started: !loading && !cityIntro, line, typed, pos, facing, fadingOut, doorHint})) } catch {} }, [loading, cityIntro, line, typed, pos, facing, fadingOut, doorHint])
+  useEffect(() => { try { localStorage.setItem(PROGRESS_KEY, JSON.stringify({started: !loading && !cityIntro, line, typed, pos, facing, fadingOut, doorHint, sceneStage})) } catch {} }, [loading, cityIntro, line, typed, pos, facing, fadingOut, doorHint])
   useEffect(() => { if(loading||cityIntro||line>=lines.length)return; setTyped(''); let i=0; let timer=0; const type=()=>{if(i>=lines[line].length)return;setTyped(lines[line].slice(0,++i));if(soundEnabled&&lines[line][i-1]!==' ')blip();timer=window.setTimeout(type,42+Math.random()*20)};timer=window.setTimeout(type,180);return()=>window.clearTimeout(timer)},[line,loading,cityIntro,soundEnabled])
   useEffect(() => { if(!walking)return;const t=window.setInterval(()=>setStepFrame(v=>v+1),130);return()=>window.clearInterval(t)},[walking])
   const advance = () => { if (line < lines.length) { if (typed.length < lines[line].length) setTyped(lines[line]); else setLine(v => v + 1) } }
   useEffect(() => {
-    const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(loading||fadingOut)return;if(line<lines.length&&(k==='n'||e.key==='Enter')){e.preventDefault();if(typed.length<lines[line].length)setTyped(lines[line]);else setLine(v=>Math.min(lines.length,v+1));return}if(line>=lines.length&&k==='enter'){const nearDoor=pos.x<9&&pos.y>38&&pos.y<78;if(nearDoor){e.preventDefault();setFadingOut(true);held.current.clear();window.setTimeout(()=>setDoorHint(true),350);return}}if(line>=lines.length&&['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();held.current.add(k)}}
+    const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(loading||fadingOut)return;if(line<lines.length&&(k==='n'||e.key==='Enter')){e.preventDefault();if(typed.length<lines[line].length)setTyped(lines[line]);else setLine(v=>Math.min(lines.length,v+1));return}if(k==='enter'&&sceneStage==='office'&&line>=lines.length){const nearDoor=pos.x<12&&pos.y>38&&pos.y<78;if(nearDoor){e.preventDefault();setSceneStage('parking');setPos({x:50,y:72});held.current.clear();return}}if(k==='enter'&&sceneStage==='parking'){e.preventDefault();setSceneStage('driving');setDrivingFrame(0);held.current.clear();window.setTimeout(()=>{setSceneStage('home');setPos({x:24,y:72});setFacing('down')},6500);return}if(k==='enter'&&sceneStage==='home'){if(pos.x>72&&pos.y<62){e.preventDefault();setFadingOut(true);held.current.clear();window.setTimeout(()=>setDoorHint(true),350);return}}if(line>=lines.length&&['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();held.current.add(k)}}
     const up=(e:KeyboardEvent)=>held.current.delete(e.key.toLowerCase()),clear=()=>held.current.clear()
     window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',clear)
     let frame=0,last=0
-    const tick=(now:number)=>{const dt=last?Math.min(32,now-last):16;last=now;if(!loading&&!fadingOut&&line>=lines.length){const k=held.current;let dx=Number(k.has('d')||k.has('arrowright'))-Number(k.has('a')||k.has('arrowleft')),dy=Number(k.has('s')||k.has('arrowdown'))-Number(k.has('w')||k.has('arrowup'));const moving=dx!==0||dy!==0;setWalking(moving);if(moving){if(Math.abs(dx)>=Math.abs(dy)&&dx!==0)setFacing(dx<0?'left':'right');else setFacing(dy<0?'up':'down');const m=Math.hypot(dx,dy)||1;dx=dx/m*.00020*dt*100;dy=dy/m*.00020*dt*100;setPos(p=>{const nx=Math.max(2.5,Math.min(97.5,p.x+dx)),ny=Math.max(23,Math.min(85,p.y+dy));const desks=Array.from({length:12},(_,i)=>({x:1+(i%6)*17,y:48+Math.floor(i/6)*23,w:7,h:2.5}));const workers=Array.from({length:12},(_,i)=>({x:6.7+(i%6)*17,y:39+Math.floor(i/6)*23,w:2.2,h:6.5}));const hit=desks.some(d=>nx>d.x-2&&nx<d.x+d.w+2&&ny>d.y-2&&ny<d.y+d.h+5)||workers.some(w=>nx>w.x-2&&nx<w.x+w.w+2&&ny>w.y-2&&ny<w.y+w.h+2);return hit?p:{x:nx,y:ny}})}}frame=requestAnimationFrame(tick)}
+    const tick=(now:number)=>{const dt=last?Math.min(32,now-last):16;last=now;if(!loading&&!fadingOut&&line>=lines.length&&(sceneStage==='office'||sceneStage==='home')){const k=held.current;let dx=Number(k.has('d')||k.has('arrowright'))-Number(k.has('a')||k.has('arrowleft')),dy=Number(k.has('s')||k.has('arrowdown'))-Number(k.has('w')||k.has('arrowup'));const moving=dx!==0||dy!==0;setWalking(moving);if(moving){if(Math.abs(dx)>=Math.abs(dy)&&dx!==0)setFacing(dx<0?'left':'right');else setFacing(dy<0?'up':'down');const m=Math.hypot(dx,dy)||1;dx=dx/m*.00020*dt*100;dy=dy/m*.00020*dt*100;setPos(p=>{const nx=Math.max(2.5,Math.min(97.5,p.x+dx)),ny=Math.max(23,Math.min(85,p.y+dy));if(sceneStage==='home')return {x:nx,y:ny};const desks=Array.from({length:12},(_,i)=>({x:1+(i%6)*17,y:48+Math.floor(i/6)*23,w:7,h:2.5}));const workers=Array.from({length:12},(_,i)=>({x:6.7+(i%6)*17,y:39+Math.floor(i/6)*23,w:2.2,h:6.5}));const hit=desks.some(d=>nx>d.x-2&&nx<d.x+d.w+2&&ny>d.y-2&&ny<d.y+d.h+5)||workers.some(w=>nx>w.x-2&&nx<w.x+w.w+2&&ny>w.y-2&&ny<w.y+w.h+2);return hit?p:{x:nx,y:ny}})}}frame=requestAnimationFrame(tick)}
     frame=requestAnimationFrame(tick);return()=>{cancelAnimationFrame(frame);window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',clear)}
-  },[loading,line,soundEnabled,typed,fadingOut,pos])
+  },[loading,line,soundEnabled,typed,fadingOut,pos,sceneStage])
   return <section className="dsi-root">
     <style>{`
-      .dsi-root{position:fixed;inset:0;z-index:99999;width:100vw;height:100dvh;min-height:0;overflow:hidden;background:#081522;border:3px solid #29465e;box-shadow:5px 5px 0 #0009;font-family:ui-monospace,monospace;isolation:isolate}
+      
+      .dsi-story-scene{position:absolute;z-index:12;inset:0;overflow:hidden;font-family:ui-monospace,monospace;image-rendering:pixelated;color:#e3faff}
+      .dsi-story-top{position:absolute;z-index:5;top:0;left:0;right:0;padding:18px 3%;background:#071321e8;border-bottom:3px solid #527187;letter-spacing:.15em;font-size:clamp(9px,1.1vw,13px);display:flex;justify-content:space-between}
+      .dsi-story-prompt{position:absolute;bottom:3%;left:50%;transform:translateX(-50%);white-space:nowrap;max-width:94%;padding:10px 14px;background:#06101feF;border:2px solid #a4eff7;color:#e7fdff;font-size:clamp(9px,1vw,12px);text-align:center}
+      .dsi-parking{background:linear-gradient(#172432 0 12%,#39434a 12% 14%,#202a33 14% 100%)}
+      .dsi-parking:before{content:'';position:absolute;left:0;right:0;top:13%;height:3px;background:#91b8c6;box-shadow:0 14px 0 #111c27,0 28px 0 #111c27}
+      .dsi-parking-pillars{position:absolute;inset:14% 0 10%;display:flex;justify-content:space-around}
+      .dsi-parking-pillars i{width:5%;height:100%;background:linear-gradient(90deg,#101923,#69737a 45%,#26313b);border:3px solid #111a23;box-shadow:inset 0 0 0 3px #3f505b}
+      .dsi-parking-lines{position:absolute;left:0;right:0;bottom:12%;height:28%;background:repeating-linear-gradient(90deg,transparent 0 12%,#e6c76d 12.2% 12.6%,transparent 12.8% 24%);opacity:.8;clip-path:polygon(28% 0,72% 0,100% 100%,0 100%)}
+      .dsi-car{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:min(31vw,300px);height:19%;min-height:100px;border:5px solid #101923;border-radius:32% 32% 14% 14%;background:linear-gradient(#79a3b6 0 18%,#1b4c67 19% 70%,#0b263a 71%);box-shadow:inset 0 0 0 5px #3f7187,0 15px 0 #101923;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.2em;color:#bcecf5}
+      .dsi-car-window{position:absolute;top:10%;left:17%;right:17%;height:36%;background:linear-gradient(110deg,#12293d,#79a7b9,#152b3e);border:4px solid #101923;border-radius:25% 25% 4% 4%}
+      .dsi-car-wheel{position:absolute;bottom:-14%;width:19%;height:27%;background:#080d14;border:5px solid #4b5962;border-radius:25%}.dsi-car-wheel.left{left:12%}.dsi-car-wheel.right{right:12%}
+      .dsi-story-ivor{position:absolute;z-index:4;width:25px;height:42px;transform:translate(-50%,-50%);filter:drop-shadow(2px 3px #0008)}
+      .dsi-story-ivor b{position:absolute;left:7px;top:0;width:12px;height:12px;background:#d5a17d;border:3px solid #292a34}
+      .dsi-story-ivor i{position:absolute;left:3px;top:13px;width:20px;height:17px;background:#26364a;border:2px solid #111c2a}
+      .dsi-story-ivor em{position:absolute;left:5px;top:30px;width:6px;height:11px;background:#171e2a;box-shadow:9px 0 #171e2a}
+      .dsi-driving{background:#0b1426}
+      .dsi-drive-sky{position:absolute;inset:0 0 38%;background:linear-gradient(#071327,#283d61 58%,#df8b71)}
+      .dsi-drive-city{position:absolute;left:0;right:0;bottom:38%;height:48%;display:flex;align-items:flex-end;justify-content:space-around}
+      .dsi-drive-city i{width:4.5%;background:#081727;border:2px solid #1b354c;box-shadow:inset 0 0 0 2px #0c2235}
+      .dsi-drive-city i:after{content:'';display:block;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent 0 13px,#57d8e7 14px 16px);opacity:.6}
+      .dsi-drive-road{position:absolute;left:-20%;right:-20%;bottom:-7%;height:48%;background:#202b35;clip-path:polygon(35% 0,65% 0,100% 100%,0 100%);border-top:5px solid #7d8d94}
+      .dsi-road-markings{position:absolute;left:49%;top:4%;height:100%;width:2%;background:repeating-linear-gradient(0deg,#e6d8a3 0 24px,transparent 24px 48px);animation:dsi-road-move .45s linear infinite}
+      @keyframes dsi-road-move{to{background-position:0 48px}}
+      .dsi-drive-car{position:absolute;left:50%;bottom:12%;width:22%;height:19%;transform:translateX(-50%);background:linear-gradient(#7ea4b2,#174762 35%,#0c2538);border:5px solid #091521;border-radius:28% 28% 10% 10%;box-shadow:0 10px 0 #050b12}
+      .dsi-drive-car div{position:absolute;left:18%;right:18%;top:8%;height:36%;background:#a1c5cd;border:4px solid #101923;border-radius:30% 30% 0 0}
+      .dsi-drive-car i{position:absolute;left:12%;right:12%;bottom:14%;height:5px;background:#f5c1a0;box-shadow:0 0 15px #ffc4a4}
+      .dsi-driving-caption{position:absolute;top:10%;left:50%;transform:translateX(-50%);font-size:clamp(17px,3vw,32px);letter-spacing:.18em;text-align:center;text-shadow:3px 3px #071321}
+      .dsi-driving-caption small{display:block;margin-top:12px;font-size:10px;color:#a7dce8;letter-spacing:.2em}
+      .dsi-driving-subtitle{position:absolute;bottom:2%;left:0;right:0;text-align:center;color:#d5e6ed;font-size:11px;text-shadow:2px 2px #000}
+      .dsi-home{background:#101d30}
+      .dsi-home-sky{position:absolute;inset:0 0 42%;background:linear-gradient(#101b35,#45516a 65%,#e3a17e)}
+      .dsi-home-sky span{position:absolute;top:13%;left:5%;font-size:10px;letter-spacing:.2em;color:#c8e8f0}
+      .dsi-home-ground{position:absolute;inset:58% 0 0;background:linear-gradient(#364b45,#172a2b)}
+      .dsi-house{position:absolute;right:9%;top:22%;width:min(40vw,420px);height:54%}
+      .dsi-roof{position:absolute;left:-8%;top:0;width:116%;height:34%;background:#263344;clip-path:polygon(50% 0,100% 100%,0 100%);filter:drop-shadow(0 6px #101923)}
+      .dsi-house-wall{position:absolute;left:4%;right:4%;top:28%;bottom:0;background:linear-gradient(90deg,#8e7869,#b7a08a 50%,#796b64);border:6px solid #202b36;box-shadow:inset 0 0 0 5px #d1b89a}
+      .dsi-house-wall>i{position:absolute;top:17%;width:19%;height:24%;background:#243e52;border:5px solid #2a3037;box-shadow:inset 0 0 0 3px #8fbdc3}
+      .dsi-house-wall>i:first-child{left:9%}.dsi-house-wall>i:nth-child(2){right:9%}
+      .dsi-house-door{position:absolute;bottom:0;left:43%;width:25%;height:55%;background:linear-gradient(90deg,#362d2d,#684a3b);border:5px solid #282d32}
+      .dsi-house-door:after{content:'';position:absolute;right:12%;top:52%;width:5px;height:5px;background:#e5c17c}
+      .dsi-house-number{position:absolute;right:16%;top:46%;color:#f2e2c9;font-size:13px}
+      .dsi-home-path{position:absolute;right:20%;bottom:0;width:20%;height:37%;background:#8c8c7c;clip-path:polygon(38% 0,62% 0,100% 100%,0 100%)}
+      .dsi-home-door-hint{position:absolute;z-index:6;right:13%;top:65%;padding:8px;background:#071321eF;border:1px solid #b8f5ff;color:#fff;font-size:10px}
+\n      .dsi-root{position:fixed;inset:0;z-index:99999;width:100vw;height:100dvh;min-height:0;overflow:hidden;background:#081522;border:3px solid #29465e;box-shadow:5px 5px 0 #0009;font-family:ui-monospace,monospace;isolation:isolate}
       .dsi-scene{position:absolute;inset:0;overflow:hidden;background:linear-gradient(#162b42 0 8%,#253c50 8% 10%,#24394a 10% 34%,#172a3b 34% 100%);image-rendering:pixelated;transform:none;transform-origin:center;animation:dsi-office-reveal 1.2s ease-out 4.1s both}@keyframes dsi-office-reveal{from{opacity:0;filter:blur(8px);transform:scale(1.04)}to{opacity:1;filter:blur(0);transform:scale(1)}}
       .dsi-left-reveal{background:linear-gradient(90deg,#101c2b 0%,#263c4b 24%,#172a3b 55%,#172a3b 100%)}.dsi-left-reveal .dsi-window,.dsi-left-reveal .dsi-city,.dsi-left-reveal .dsi-ceiling-lights{opacity:0}.dsi-left-reveal .dsi-door{left:7%;top:40%;width:8%;height:32%;opacity:1;pointer-events:auto;border-width:4px;background:linear-gradient(90deg,#080f1b,#334b5b 50%,#080f1b);box-shadow:0 0 24px #8dd7e755}.dsi-left-reveal .dsi-door:before{height:7px}.dsi-left-reveal .dsi-top:after{content:'WEST WING // EXIT CORRIDOR';position:absolute;left:12%;top:16%;color:#a9edf5;font-size:10px;letter-spacing:.16em}.dsi-top{position:absolute;z-index:4;left:0;right:0;top:0;height:8%;display:flex;align-items:center;justify-content:space-between;padding:0 2%;background:#071321;border-bottom:4px solid #45657a;color:#9cebf5;font-size:clamp(7px,.8vw,10px);letter-spacing:.12em}
       .dsi-window{position:absolute;left:2%;right:2%;top:10%;height:22%;border:8px solid #203a51;background:linear-gradient(#182d50,#cb7a68);box-shadow:inset 0 0 0 3px #62839a}
@@ -87,7 +133,7 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
       .dsi-back{position:absolute;z-index:30;top:12px;left:12px;padding:6px 9px;background:#06101fdd!important;border:1px solid #46677d!important;color:#bceefa!important;font-size:9px!important;letter-spacing:.12em}
       @media(max-width:640px){.dsi-root{min-height:520px}.dsi-worker{width:5%}.dsi-window{height:21%}.dsi-dialogue{padding:9px;gap:8px}.dsi-face{width:39px;height:48px}}
     `}</style>
-    <div className={"dsi-scene"+(pos.x<13?" dsi-left-reveal":"")}>
+    <div className={"dsi-scene"+(pos.x<13?" dsi-left-reveal":"")} style={{visibility:sceneStage==='office'?'visible':'hidden'}}>
       <div className="dsi-top"><span>DEPARTMENT 07 / LABOR ALLOCATION</span><span>YEAR 2091 • SHIFT 06:00—02:00</span></div>
       <div className="dsi-ceiling-lights"/>
       <div className="dsi-window"><div className="dsi-city">{Array.from({length:16},(_,i)=><i key={i}/>)}</div></div>
@@ -97,6 +143,31 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
       <div className={"dsi-ivor"+(walking?" walking":"")} style={{left:pos.x+'%',top:pos.y+'%'}}><svg viewBox="0 0 32 40" shapeRendering="crispEdges" style={{transform:facing==='left'?'scaleX(-1)':'none'}}><rect x="10" y="2" width="12" height="3" fill="#282630"/><rect x="7" y="5" width="18" height="4" fill="#282630"/><rect x="6" y="9" width="20" height="10" fill={facing==='up'?'#282630':'#e0ad86'}/><rect x="8" y="7" width="5" height="3" fill="#282630"/><rect x="13" y="5" width="8" height="3" fill="#282630"/><rect x="22" y="8" width="4" height="5" fill="#282630"/><rect x="9" y="12" width="3" height="2" fill={facing==='up'?'#282630':'#111827'}/><rect x="20" y="12" width="3" height="2" fill={facing==='up'?'#282630':'#111827'}/><rect x="13" y="17" width="7" height="1" fill="#704334"/><rect x="13" y="19" width="6" height="3" fill="#e0ad86"/><rect x="9" y="22" width="14" height="11" fill="#26364a"/><path d="M11 22 L16 27 L21 22" fill="#edf2f7"/>{facing!=='up'&&<path d="M15 24 L17 24 L16 30Z" fill="#9b2c3d"/>}<rect x="5" y="23" width="4" height="10" fill="#e0ad86"/><rect x="23" y="23" width="4" height="10" fill="#e0ad86"/><rect x={stepFrame%2?8:10} y={stepFrame%2?32:33} width="5" height="5" fill="#334155"/><rect x={stepFrame%2?19:18} y="33" width="5" height="4" fill="#334155"/><rect x="9" y="37" width="7" height="2" fill="#171923"/><rect x="17" y="37" width="7" height="2" fill="#171923"/></svg><small>IVOR</small></div>
       {line>=lines.length&&!fadingOut&&pos.x<12&&pos.y>38&&pos.y<78&&<div className="dsi-enter-hint">[ ENTER ] ENTER DOOR</div>}<div className="dsi-bottom-label"><span>OPEN OFFICE / FLOOR 38</span><span>WORKERS PRESENT: 684</span></div>
     </div>
+
+    {sceneStage==='parking'&&<div className="dsi-story-scene dsi-parking">
+      <div className="dsi-story-top">CITY PARKING // LEVEL B2 <span>06:42 AM</span></div>
+      <div className="dsi-parking-pillars">{Array.from({length:7},(_,i)=><i key={i}/>)}</div>
+      <div className="dsi-parking-lines"/>
+      <div className="dsi-car" aria-label="Ivor's car"><div className="dsi-car-window"/><div className="dsi-car-wheel left"/><div className="dsi-car-wheel right"/><span>IVOR'S CAR</span></div>
+      <div className="dsi-story-ivor" style={{left:'48%',top:'72%'}}><b/><i/><em/></div>
+      <div className="dsi-story-prompt">THE PARKING LOT — Walk to your car and press ENTER</div>
+    </div>}
+    {sceneStage==='driving'&&<div className="dsi-story-scene dsi-driving">
+      <div className="dsi-drive-sky"/><div className="dsi-drive-city">{Array.from({length:22},(_,i)=><i key={i} style={{height:(22+(i*31)%58)+'%'}}/>)}</div>
+      <div className="dsi-drive-road"><div className="dsi-road-markings"/></div>
+      <div className="dsi-drive-car"><div/><i/></div>
+      <div className="dsi-driving-caption">{drivingFrame<1?'LEAVING WORK…':'DRIVING HOME…'}<small>ANOTHER LONG DAY IS OVER</small></div>
+      <div className="dsi-driving-subtitle">The city lights pass by as Ivor drives home.</div>
+    </div>}
+    {sceneStage==='home'&&<div className="dsi-story-scene dsi-home">
+      <div className="dsi-home-sky"><span>EVENING // 2091</span></div><div className="dsi-home-ground"/>
+      <div className="dsi-house"><div className="dsi-roof"/><div className="dsi-house-wall"><i/><i/><div className="dsi-house-door"/></div><div className="dsi-house-number">38</div></div>
+      <div className="dsi-home-path"/>
+      <div className="dsi-story-ivor" style={{left:pos.x+'%',top:pos.y+'%'}}><b/><i/><em/></div>
+      {pos.x>68&&pos.y<64&&<div className="dsi-home-door-hint">[ ENTER ] GO INSIDE</div>}
+      <div className="dsi-story-top">IVOR'S HOME <span>06:58 AM</span></div>
+      <div className="dsi-story-prompt">HOME — Walk to the front door and press ENTER</div>
+    </div>}
     {!loading && cityIntro && <div className="dsi-city-cinematic"><div className="sky"/>{Array.from({length:17},(_,i)=><div key={i} className="tower" style={{left:(i*6.1)+'%',height:(30+(i*37)%65)+'%'}}/>)}<div className="caption">EARTH // 2091<br/><span style={{fontSize:'.38em',letterSpacing:'.3em'}}>POPULATION: CRITICAL</span></div></div>}
     {loading && <div className="dsi-loading"><div className="dsi-load-mark">DS</div><div className="mt-5 text-xs tracking-[.3em]">LOADING OFFICE SIMULATION</div><div className="mt-4 h-2 w-56 overflow-hidden border border-cyan-900 bg-slate-950"><div className="h-full w-1/2 bg-cyan-300" style={{animation:'ds-loader 1.1s ease-in-out infinite'}}/></div><div className="mt-3 text-[9px] tracking-[.2em] text-slate-500">RECONSTRUCTING WORKPLACE // 2091</div></div>}
     {!loading && line < lines.length && <div className="dsi-dialogue"><span className="dsi-face"><svg viewBox="0 0 32 40" shapeRendering="crispEdges"><rect x="8" y="5" width="16" height="3" fill="#282630"/><rect x="6" y="8" width="20" height="16" fill="#e0ad86"/><rect x="7" y="5" width="5" height="5" fill="#282630"/><rect x="12" y="3" width="10" height="5" fill="#282630"/><rect x="22" y="7" width="4" height="8" fill="#282630"/><rect x="10" y="14" width="3" height="2" fill="#222"/><rect x="20" y="14" width="3" height="2" fill="#222"/><rect x="13" y="20" width="7" height="2" fill="#694637"/></svg></span><span className="flex-1"><span className="dsi-line block">{typed}</span><span className="dsi-hint block">▸</span></span></div>}
