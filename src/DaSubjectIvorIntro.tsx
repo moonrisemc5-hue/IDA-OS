@@ -36,9 +36,9 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
   const [pos, setPos] = useState(() => readProgress().pos || { x: 50, y: 68 })
   const [facing, setFacing] = useState(() => readProgress().facing || 'down')
   const [walking, setWalking] = useState(false)
-  const [fadingOut, setFadingOut] = useState(() => !!readProgress().fadingOut)
-  const [doorHint, setDoorHint] = useState(() => !!readProgress().doorHint)
-  const [sceneStage, setSceneStage] = useState(() => readProgress().sceneStage || 'office')
+  const [fadingOut, setFadingOut] = useState(false)
+  const [doorHint, setDoorHint] = useState(false)
+  const [sceneStage, setSceneStage] = useState(() => { const saved=readProgress().sceneStage; return saved==='office'||saved==='parking'||saved==='driving'||saved==='home' ? saved : 'office' })
   const [drivingFrame, setDrivingFrame] = useState(0)
   const held = useRef(new Set<string>())
   useEffect(() => { const oldOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; return()=>{document.body.style.overflow=oldOverflow} }, [])
@@ -48,7 +48,7 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
   useEffect(() => { if(!walking)return;const t=window.setInterval(()=>setStepFrame(v=>v+1),130);return()=>window.clearInterval(t)},[walking])
   const advance = () => { if (line < lines.length) { if (typed.length < lines[line].length) setTyped(lines[line]); else setLine(v => v + 1) } }
   useEffect(() => {
-    const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(loading||fadingOut)return;if(line<lines.length&&(k==='n'||e.key==='Enter')){e.preventDefault();if(typed.length<lines[line].length)setTyped(lines[line]);else setLine(v=>Math.min(lines.length,v+1));return}if(k==='enter'&&sceneStage==='office'&&line>=lines.length){const nearDoor=pos.x<12&&pos.y>38&&pos.y<78;if(nearDoor){e.preventDefault();setSceneStage('parking');setPos({x:50,y:72});held.current.clear();return}}if(k==='enter'&&sceneStage==='parking'&&pos.x>34&&pos.x<66&&pos.y>35&&pos.y<64){e.preventDefault();setSceneStage('driving');setDrivingFrame(0);held.current.clear();window.setTimeout(()=>{setSceneStage('home');setPos({x:24,y:72});setFacing('down')},6500);return}if(k==='enter'&&sceneStage==='home'){if(pos.x>72&&pos.y<62){e.preventDefault();setFadingOut(true);held.current.clear();window.setTimeout(()=>setDoorHint(true),350);return}}if(line>=lines.length&&['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();held.current.add(k)}}
+    const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(loading||fadingOut)return;if(line<lines.length&&(k==='n'||e.key==='Enter')){e.preventDefault();if(typed.length<lines[line].length)setTyped(lines[line]);else setLine(v=>Math.min(lines.length,v+1));return}if(k==='enter'&&sceneStage==='office'&&line>=lines.length){const nearDoor=pos.x<12&&pos.y>38&&pos.y<78;if(nearDoor){e.preventDefault();setSceneStage('parking');setPos({x:50,y:72});held.current.clear();return}}if(k==='enter'&&sceneStage==='parking'&&pos.x>34&&pos.x<66&&pos.y>35&&pos.y<64){e.preventDefault();setSceneStage('driving');setDrivingFrame(0);held.current.clear();window.setTimeout(()=>{setSceneStage('home');setPos({x:24,y:72});setFacing('down')},6500);return}if(k==='enter'&&sceneStage==='home'){if(pos.x>72&&pos.y<62){e.preventDefault();setFadingOut(true);held.current.clear();window.setTimeout(()=>{setFadingOut(false);setDoorHint(true);setSceneStage('inside')},900);return}}if(line>=lines.length&&['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();held.current.add(k)}}
     const up=(e:KeyboardEvent)=>held.current.delete(e.key.toLowerCase()),clear=()=>held.current.clear()
     window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',clear)
     let frame=0,last=0
@@ -152,6 +152,7 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
       <div className="dsi-story-ivor" style={{left:pos.x+'%',top:pos.y+'%'}}><b/><i/><em/></div>
       <div className="dsi-story-prompt">THE PARKING LOT — Walk to your car and press ENTER</div>
     </div>}
+    {sceneStage==='inside'&&<div className="dsi-story-scene dsi-home"><div className="dsi-story-top">IVOR'S HOME <span>06:59 AM</span></div><div className="dsi-home-ground"/><div style={{position:'absolute',left:'20%',top:'25%',fontSize:'clamp(18px,3vw,32px)',letterSpacing:'.15em'}}>HOME, AT LAST.</div><div className="dsi-story-prompt">END OF THIS SCENE</div></div>}
     {sceneStage==='driving'&&<div className="dsi-story-scene dsi-driving">
       <div className="dsi-drive-sky"/><div className="dsi-drive-city">{Array.from({length:22},(_,i)=><i key={i} style={{height:(22+(i*31)%58)+'%'}}/>)}</div>
       <div className="dsi-drive-road"><div className="dsi-road-markings"/></div>
@@ -172,6 +173,6 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
     {loading && <div className="dsi-loading"><div className="dsi-load-mark">DS</div><div className="mt-5 text-xs tracking-[.3em]">LOADING OFFICE SIMULATION</div><div className="mt-4 h-2 w-56 overflow-hidden border border-cyan-900 bg-slate-950"><div className="h-full w-1/2 bg-cyan-300" style={{animation:'ds-loader 1.1s ease-in-out infinite'}}/></div><div className="mt-3 text-[9px] tracking-[.2em] text-slate-500">RECONSTRUCTING WORKPLACE // 2091</div></div>}
     {!loading && line < lines.length && <div className="dsi-dialogue"><span className="dsi-face"><svg viewBox="0 0 32 40" shapeRendering="crispEdges"><rect x="8" y="5" width="16" height="3" fill="#282630"/><rect x="6" y="8" width="20" height="16" fill="#e0ad86"/><rect x="7" y="5" width="5" height="5" fill="#282630"/><rect x="12" y="3" width="10" height="5" fill="#282630"/><rect x="22" y="7" width="4" height="8" fill="#282630"/><rect x="10" y="14" width="3" height="2" fill="#222"/><rect x="20" y="14" width="3" height="2" fill="#222"/><rect x="13" y="20" width="7" height="2" fill="#694637"/></svg></span><span className="flex-1"><span className="dsi-line block">{typed}</span><span className="dsi-hint block">▸</span></span></div>}
     
-    {fadingOut&&<div className="dsi-fade">{doorHint?'DOOR OPENING…':'IVOR ENTERS THE DOOR…'}</div>}<button className="dsi-back" onClick={onBack}><ArrowLeft size={12} className="inline mr-1"/> EXIT TO MENU</button>
+    {fadingOut&&<div className="dsi-fade">IVOR ENTERS THE DOOR…</div>}<button className="dsi-back" onClick={onBack}><ArrowLeft size={12} className="inline mr-1"/> EXIT TO MENU</button>
   </section>
 }
