@@ -50,7 +50,7 @@ export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
   return <section className="dsi-root">
     <style>{`
       .dsi-root{position:relative;min-height:570px;height:100%;overflow:hidden;background:#081522;border:3px solid #29465e;box-shadow:5px 5px 0 #0009;font-family:ui-monospace,monospace;isolation:isolate}
-      .dsi-scene{position:absolute;inset:0;overflow:hidden;background:linear-gradient(#162b42 0 8%,#253c50 8% 10%,#24394a 10% 34%,#172a3b 34% 100%);image-rendering:pixelated;transform:scale(1.1)}
+      .dsi-scene{position:absolute;inset:0;overflow:hidden;background:linear-gradient(#162b42 0 8%,#253c50 8% 10%,#24394a 10% 34%,#172a3b 34% 100%);image-rendering:pixelated;transform:scale(.92);transform-origin:center}
       .dsi-top{position:absolute;z-index:4;left:0;right:0;top:0;height:8%;display:flex;align-items:center;justify-content:space-between;padding:0 2%;background:#071321;border-bottom:4px solid #45657a;color:#9cebf5;font-size:clamp(7px,.8vw,10px);letter-spacing:.12em}
       .dsi-window{position:absolute;left:2%;right:2%;top:10%;height:25%;border:8px solid #203a51;background:linear-gradient(#182d50,#cb7a68);box-shadow:inset 0 0 0 3px #62839a}
       .dsi-city{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-around;background:linear-gradient(#253a61,#d68c70)}
