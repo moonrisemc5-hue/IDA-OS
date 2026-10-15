@@ -230,17 +230,15 @@ export default function DaSubjectPanel() {
             </aside>
           </div>}
 
-          {screen==='play' && <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center">
-            <button onClick={back} className="mb-8 flex w-fit items-center gap-2 text-xs tracking-[.16em] text-slate-400 transition hover:text-cyan-200"><ArrowLeft size={15}/> BACK TO MENU</button>
-            <div className="mb-2 text-xs tracking-[.3em] text-cyan-200">MULTIPLAYER / STORY MODE</div><h2 className={heading}>CONNECT YOUR CREW</h2>
-            <p className="mb-7 mt-3 max-w-xl text-sm leading-6 text-slate-400">Two survivors. One impossible island. Bring a friend into the story.</p>
+          {screen==='play' && <div className="ds-play-wrap ds-enter">
+            <button onClick={back} className="ds-settings-back"><ArrowLeft size={15}/> BACK TO MENU</button>
+            <div className="ds-kicker">MULTIPLAYER / STORY MODE</div><h2 className="ds-page-title">FIND YOUR PARTNER<span className="text-cyan-300">.</span></h2>
+            <p className="ds-page-copy">Create a private session for a friend, or enter an invite code to join theirs.</p>
             <div className="grid gap-4 sm:grid-cols-2">
-              <button className={card+' group p-6 text-left transition hover:border-cyan-300/60'} onClick={createLobby}><div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-300/10 text-cyan-200"><RadioTower size={23}/></div><h3 className="text-lg font-semibold">CREATE LOBBY</h3><p className="mt-2 text-sm leading-6 text-slate-400">Host a session and get a unique code for your partner.</p><div className="mt-5 flex items-center gap-2 text-xs font-semibold tracking-wider text-cyan-200">GENERATE ROOM CODE <ArrowRight size={14}/></div></button>
-              <button className={card+' group p-6 text-left transition hover:border-orange-300/60'} onClick={()=>{setStatus('');setScreen('join')}}><div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-300/10 text-orange-200"><Users size={23}/></div><h3 className="text-lg font-semibold">JOIN LOBBY</h3><p className="mt-2 text-sm leading-6 text-slate-400">Enter a friend's six-character room code to join them.</p><div className="mt-5 flex items-center gap-2 text-xs font-semibold tracking-wider text-orange-200">ENTER INVITE CODE <ArrowRight size={14}/></div></button>
+              <button className="ds-choice-card" onClick={createLobby}><span className="ds-brand-mark"><RadioTower size={22}/></span><span><span className="ds-choice-title block">CREATE LOBBY</span><span className="ds-choice-copy block">Host a session and generate a code to share with your partner.</span></span><span className="mt-6 flex items-center gap-2 text-xs font-bold tracking-widest text-cyan-200">CREATE SESSION <ArrowRight size={15}/></span></button>
+              <button className="ds-choice-card" onClick={()=>{setStatus('');setScreen('join')}}><span className="ds-brand-mark"><Users size={22}/></span><span><span className="ds-choice-title block">JOIN LOBBY</span><span className="ds-choice-copy block">Have a code already? Enter it to join your friend's session.</span></span><span className="mt-6 flex items-center gap-2 text-xs font-bold tracking-widest text-orange-200">ENTER INVITE CODE <ArrowRight size={15}/></span></button>
             </div>
-            <p className="mt-6 text-[11px] leading-5 text-slate-600">MULTIPLAYER CONNECTIVITY IS A PREVIEW PROTOTYPE. Cross-device synchronization will be wired up after the menu flow is approved.</p>
           </div>}
-
           {screen==='join' && <div className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center">
             <button onClick={back} className="mb-8 flex w-fit items-center gap-2 text-xs tracking-[.16em] text-slate-400 hover:text-cyan-200"><ArrowLeft size={15}/> BACK</button>
             <div className="mb-2 text-xs tracking-[.3em] text-orange-200">PLAYER TWO / JOIN SESSION</div><h2 className={heading}>ENTER LOBBY CODE</h2><p className="mt-3 text-sm text-slate-400">Ask the host for the six-character code.</p>
