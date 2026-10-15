@@ -66,7 +66,7 @@ export default function DaSubjectPanel() {
   const heading = 'text-2xl font-semibold tracking-[.12em] text-white'
   const panel = useMemo(() => ({ background: 'radial-gradient(ellipse at 78% 30%, rgba(8,145,178,.22), transparent 38%), radial-gradient(ellipse at 12% 82%, rgba(249,115,22,.09), transparent 35%), linear-gradient(125deg,#02040b 0%,#071321 52%,#020611 100%)' }), [])
 
-  return <div className="relative h-full min-h-[560px] w-full overflow-hidden rounded-xl bg-slate-950 text-white" style={panel}>
+  return <div className="ds-shell relative h-full min-h-[560px] w-full overflow-hidden rounded-xl bg-slate-950 text-white" style={panel}>
     <style>{`
       @keyframes ds-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
       @keyframes ds-pulse { 0%,100%{opacity:.25} 50%{opacity:.75} }
@@ -76,6 +76,46 @@ export default function DaSubjectPanel() {
       @keyframes ds-reveal { from{opacity:0;filter:blur(12px);transform:scale(1.035)} to{opacity:1;filter:blur(0);transform:scale(1)} }
       @keyframes ds-loader { 0%{transform:translateX(-110%)} 100%{transform:translateX(300%)} }
       @keyframes ds-orbit { to{transform:rotate(360deg)} }
+
+      /* Explicit component styles: keep the embedded DAPP polished even if Tailwind utilities are purged. */
+      .ds-shell { font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f8fafc; }
+      .ds-shell * { box-sizing:border-box; }
+      .ds-shell header { min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.1); }
+      .ds-brand { display:flex;align-items:center;gap:12px; }
+      .ds-brand-mark { display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(103,232,249,.35);border-radius:10px;background:rgba(34,211,238,.09);color:#a5f3fc; }
+      .ds-brand-title { font-size:11px;font-weight:700;letter-spacing:.3em;color:#a5f3fc; }
+      .ds-brand-sub { margin-top:4px;font-size:10px;letter-spacing:.18em;color:#64748b; }
+      .ds-network { display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;color:#64748b; }
+      .ds-shell main { flex:1;min-height:0;padding:28px;display:flex;flex-direction:column; }
+      .ds-shell footer { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 28px;border-top:1px solid rgba(255,255,255,.1);font-size:9px;letter-spacing:.14em;color:#64748b; }
+      .ds-shell h1,.ds-shell h2,.ds-shell h3,.ds-shell p { margin-top:0; }
+      .ds-shell button { font:inherit;cursor:pointer; }
+      .ds-shell button:disabled { cursor:not-allowed; }
+      .ds-shell input:not([type=checkbox]) { font:inherit;color:#f8fafc; }
+      .ds-shell input::placeholder { color:#64748b; }
+      .ds-menu-layout { display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);align-items:center;gap:clamp(28px,5vw,72px);flex:1;padding:22px 0 60px; }
+      .ds-menu-copy { position:relative;z-index:2;min-width:0; }
+      .ds-menu-title { margin:0;font-size:clamp(54px,7.5vw,100px);font-weight:900;line-height:.86;letter-spacing:-.075em; }
+      .ds-menu-description { max-width:440px;margin:24px 0 0;border-left:1px solid rgba(103,232,249,.45);padding-left:16px;font-size:15px;line-height:1.85;color:#cbd5e1; }
+      .ds-menu-actions { display:flex;flex-direction:column;gap:10px;width:min(100%,370px);margin-top:30px; }
+      .ds-action-primary { display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border:1px solid rgba(165,243,252,.4);border-radius:8px;background:#a5f3fc;color:#04111c;font-weight:800;letter-spacing:.16em;text-align:left;box-shadow:0 0 34px rgba(34,211,238,.12);transition:transform .22s,background .22s; }
+      .ds-action-primary:hover { transform:translateY(-2px);background:#cffafe; }
+      .ds-action-row { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+      .ds-action-secondary { display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 14px;border:1px solid rgba(255,255,255,.11);border-radius:8px;background:rgba(2,6,23,.6);color:#e2e8f0;font-size:12px;letter-spacing:.08em;text-align:left;transition:border-color .2s,background .2s; }
+      .ds-action-secondary:hover { border-color:rgba(103,232,249,.5);background:rgba(34,211,238,.08); }
+      .ds-dossier { position:relative;z-index:1;width:100%;max-width:430px;justify-self:end;border-top:1px solid rgba(103,232,249,.28);border-bottom:1px solid rgba(103,232,249,.2);padding:24px 0; }
+      .ds-dossier-top { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:22px;font-size:10px;letter-spacing:.22em;color:#a5f3fc; }
+      .ds-classified { padding:6px 9px;border:1px solid rgba(253,186,116,.35);border-radius:3px;color:#fdba74;font-size:9px;letter-spacing:.16em; }
+      .ds-dossier-heading { font-size:clamp(27px,3vw,40px);font-weight:300;line-height:1.15;letter-spacing:-.04em; }
+      .ds-dossier-rule { height:1px;margin:20px 0;background:linear-gradient(90deg,rgba(103,232,249,.65),rgba(255,255,255,.08),transparent); }
+      .ds-subjects { display:grid;grid-template-columns:1fr 1fr;gap:18px; }
+      .ds-subject-label { font-size:10px;letter-spacing:.2em;color:#67e8f9; }
+      .ds-subject-name { margin-top:5px;font-size:19px;font-weight:700;letter-spacing:.06em; }
+      .ds-subject-desc { margin-top:6px;font-size:12px;line-height:1.7;color:#94a3b8; }
+      .ds-dossier-foot { display:flex;justify-content:space-between;gap:8px;margin-top:24px;font-size:9px;letter-spacing:.12em;color:#64748b; }
+      .ds-glass-card { border:1px solid rgba(255,255,255,.11);border-radius:15px;background:rgba(2,6,23,.68);box-shadow:0 24px 80px rgba(0,0,0,.42);backdrop-filter:blur(18px); }
+      @media(max-width:760px) { .ds-shell header,.ds-shell main { padding-left:18px;padding-right:18px; } .ds-menu-layout { grid-template-columns:1fr;gap:28px;padding-top:26px; } .ds-menu-title { font-size:clamp(54px,13vw,82px); } .ds-dossier { display:none; } .ds-shell footer { padding:10px 18px;font-size:8px; } .ds-network { display:none; } }
+
       .ds-enter { animation:ds-rise .8s cubic-bezier(.2,.75,.25,1) both; }
       .ds-reveal { animation:ds-reveal 1.1s cubic-bezier(.2,.7,.2,1) both; }
       .ds-grid { background-image:linear-gradient(rgba(34,211,238,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.055) 1px,transparent 1px);background-size:42px 42px; }
@@ -111,7 +151,7 @@ export default function DaSubjectPanel() {
       </div> : intro === 'entering' ? <div className="relative text-center ds-reveal"><div className="text-[10px] tracking-[.5em] text-cyan-200">IDENTITY VERIFIED</div><div className="mt-4 text-4xl font-black tracking-[.14em]">WELCOME TO <span className="text-cyan-300">2091</span></div><div className="mx-auto mt-6 h-px w-48 bg-gradient-to-r from-transparent via-cyan-200 to-transparent"/></div> : null}
     </div>}
     <div className={'relative z-10 flex min-h-[560px] h-full flex-col '+(intro==='ready'?'ds-reveal':'')}>
-      <header className="flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-8">
+      <header>
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-300/35 bg-cyan-300/10 text-cyan-200"><RadioTower size={19}/></div>
           <div><div className="text-[11px] font-semibold tracking-[.32em] text-cyan-200">IDA ORIGINAL</div><div className="text-[10px] tracking-[.2em] text-slate-500">CLASSIFIED BUILD // 2091</div></div>
@@ -138,31 +178,24 @@ export default function DaSubjectPanel() {
           <div className="mt-5 border-t border-white/10 pt-4 text-[10px] tracking-[.14em] text-slate-600">PRIVATE PREVIEW • UNAUTHORIZED ENTRY PROHIBITED</div>
         </div>
       </div> : <>
-        <main className="flex flex-1 flex-col px-5 py-6 sm:px-8 sm:py-8">
-          {screen==='menu' && <div className="grid flex-1 items-center gap-10 py-8 pb-24 lg:grid-cols-[1.15fr_.85fr] sm:pb-28">
-            <section className="relative z-10 flex flex-col justify-center">
+        <main>
+          {screen==='menu' && <div className="ds-menu-layout">
+            <section className="ds-menu-copy">
               <div className="mb-6 flex items-center gap-3"><span className="h-px w-9 bg-cyan-300"/><span className="ds-kicker">YEAR 2091</span><span className="text-slate-700">/</span><span className="text-[10px] tracking-[.18em] text-slate-500">EARTH POPULATION: CRITICAL</span></div>
               <div className="mb-3 text-[10px] font-medium tracking-[.48em] text-slate-500">A STORY ABOUT SURVIVAL</div>
-              <h1 className="max-w-3xl text-5xl font-black leading-[.86] tracking-[-.075em] sm:text-7xl xl:text-8xl" style={{animation:motion?'ds-flicker 10s infinite':undefined}}>DA<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-400 to-cyan-700">SUBJECT</span><span className="text-orange-300">.</span></h1>
-              <p className="mt-6 max-w-md border-l border-cyan-300/40 pl-4 text-sm leading-7 text-slate-300 sm:text-base">A world with no room left to breathe. A secret that should not exist. Your story begins in the city of 2091.</p>
-              <div className="mt-8 flex max-w-sm flex-col gap-2.5">
-                <button className="group flex items-center justify-between rounded-lg border border-cyan-100/30 bg-cyan-200 px-5 py-4 text-left font-bold tracking-[.2em] text-slate-950 shadow-[0_0_35px_rgba(34,211,238,.12)] transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-100" onClick={()=>setScreen('play')}><span className="flex items-center gap-3"><Zap size={18}/> BEGIN STORY</span><ArrowRight size={19} className="transition group-hover:translate-x-1"/></button>
-                <div className="grid grid-cols-2 gap-2.5"><button className={btn+' !px-4 !py-3'} onClick={()=>setScreen('credits')}><span className="flex items-center gap-2"><Users size={16} className="text-cyan-200"/> CREDITS</span><ChevronRight size={16} className="text-slate-500"/></button><button className={btn+' !px-4 !py-3'} onClick={()=>setScreen('settings')}><span className="flex items-center gap-2"><Monitor size={16} className="text-cyan-200"/> SETTINGS</span><ChevronRight size={16} className="text-slate-500"/></button></div>
+              <h1 className="ds-menu-title" style={{animation:motion?'ds-flicker 10s infinite':undefined}}>DA<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-400 to-cyan-700">SUBJECT</span><span className="text-orange-300">.</span></h1>
+              <p className="ds-menu-description">A world with no room left to breathe. A secret that should not exist. Your story begins in the city of 2091.</p>
+              <div className="ds-menu-actions">
+                <button className="ds-action-primary" onClick={()=>setScreen('play')}><span className="flex items-center gap-3"><Zap size={18}/> BEGIN STORY</span><ArrowRight size={19}/></button>
+                <div className="ds-action-row"><button className="ds-action-secondary" onClick={()=>setScreen('credits')}><span className="flex items-center gap-2"><Users size={16} className="text-cyan-200"/> CREDITS</span><ChevronRight size={16}/></button><button className="ds-action-secondary" onClick={()=>setScreen('settings')}><span className="flex items-center gap-2"><Monitor size={16} className="text-cyan-200"/> SETTINGS</span><ChevronRight size={16}/></button></div>
               </div>
             </section>
-            <aside className="relative hidden min-h-[340px] items-center justify-center lg:flex">
-              <div className="absolute right-5 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full border border-cyan-200/10"/>
-              <div className="absolute right-12 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full border border-dashed border-cyan-200/15" style={{animation:motion?'spin 45s linear infinite':undefined}}/>
-              <div className="relative w-full max-w-sm border-y border-cyan-200/20 py-6">
-                <div className="mb-5 flex items-center justify-between"><span className="ds-kicker">CLASSIFIED DOSSIER</span><span className="rounded-sm border border-orange-300/30 px-2 py-1 text-[9px] tracking-[.2em] text-orange-200">EYES ONLY</span></div>
-                <div className="text-4xl font-light tracking-tight text-white">TWO STRANGERS<span className="text-cyan-300">.</span><br/>ONE ISLAND<span className="text-cyan-300">.</span></div>
-                <div className="mt-5 h-px w-full bg-gradient-to-r from-cyan-300/60 via-white/10 to-transparent"/>
-                <div className="mt-5 grid grid-cols-2 gap-4">
-                  <div><div className="ds-kicker">SUBJECT 01</div><div className="mt-1 text-lg font-semibold">IVOR</div><div className="mt-1 text-xs leading-5 text-slate-500">An exhausted worker with nothing left.</div></div>
-                  <div><div className="ds-kicker">SUBJECT 02</div><div className="mt-1 text-lg font-semibold">TENO</div><div className="mt-1 text-xs leading-5 text-slate-500">A traveler who never reached America.</div></div>
-                </div>
-                <div className="mt-6 flex items-center justify-between text-[9px] tracking-[.18em] text-slate-600"><span>FILE: DS-2091-02</span><span>STATUS: REDACTED</span></div>
-              </div>
+            <aside className="ds-dossier" style={{animation:motion?'ds-rise 1s .2s both':undefined}}>
+              <div className="ds-dossier-top"><span>CLASSIFIED DOSSIER</span><span className="ds-classified">EYES ONLY</span></div>
+              <div className="ds-dossier-heading">TWO STRANGERS<span className="text-cyan-300">.</span><br/>ONE ISLAND<span className="text-cyan-300">.</span></div>
+              <div className="ds-dossier-rule"/>
+              <div className="ds-subjects"><div><div className="ds-subject-label">SUBJECT 01</div><div className="ds-subject-name">IVOR</div><div className="ds-subject-desc">An exhausted worker with nothing left.</div></div><div><div className="ds-subject-label">SUBJECT 02</div><div className="ds-subject-name">TENO</div><div className="ds-subject-desc">A traveler who never reached America.</div></div></div>
+              <div className="ds-dossier-foot"><span>FILE: DS-2091-02</span><span>STATUS: REDACTED</span></div>
             </aside>
           </div>}
 
