@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 
 type Props = { soundEnabled: boolean; onBack: () => void }
+const PROGRESS_KEY = 'ida-dasubject-ivor-progress-v1'
+function readProgress(): any { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null') || {} } catch { return {} } }
 const lines = [
   'Another day of work.',
   'What is sleep nowadays?',
@@ -26,19 +28,20 @@ function blip() {
   } catch {}
 }
 export default function DaSubjectIvorIntro({ soundEnabled, onBack }: Props) {
-  const [loading, setLoading] = useState(true)
-  const [line, setLine] = useState(0)
-  const [typed, setTyped] = useState('')
-  const [cityIntro, setCityIntro] = useState(true)
+  const [loading, setLoading] = useState(() => !readProgress().started)
+  const [line, setLine] = useState(() => Number(readProgress().line ?? 0))
+  const [typed, setTyped] = useState(() => String(readProgress().typed ?? ''))
+  const [cityIntro, setCityIntro] = useState(() => !readProgress().started)
   const [stepFrame, setStepFrame] = useState(0)
-  const [pos, setPos] = useState({ x: 50, y: 68 })
-  const [facing, setFacing] = useState('down')
+  const [pos, setPos] = useState(() => readProgress().pos || { x: 50, y: 68 })
+  const [facing, setFacing] = useState(() => readProgress().facing || 'down')
   const [walking, setWalking] = useState(false)
-  const [fadingOut, setFadingOut] = useState(false)
-  const [doorHint, setDoorHint] = useState(false)
+  const [fadingOut, setFadingOut] = useState(() => !!readProgress().fadingOut)
+  const [doorHint, setDoorHint] = useState(() => !!readProgress().doorHint)
   const held = useRef(new Set<string>())
   useEffect(() => { const oldOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; return()=>{document.body.style.overflow=oldOverflow} }, [])
-  useEffect(() => { const t=window.setTimeout(()=>setLoading(false),1800); const city=window.setTimeout(()=>setCityIntro(false),5200); return()=>{window.clearTimeout(t);window.clearTimeout(city)} }, [])
+  useEffect(() => { if (readProgress().started) return; const t=window.setTimeout(()=>setLoading(false),1800); const city=window.setTimeout(()=>setCityIntro(false),5200); return()=>{window.clearTimeout(t);window.clearTimeout(city)} }, [])
+  useEffect(() => { try { localStorage.setItem(PROGRESS_KEY, JSON.stringify({started: !loading && !cityIntro, line, typed, pos, facing, fadingOut, doorHint})) } catch {} }, [loading, cityIntro, line, typed, pos, facing, fadingOut, doorHint])
   useEffect(() => { if(loading||cityIntro||line>=lines.length)return; setTyped(''); let i=0; let timer=0; const type=()=>{if(i>=lines[line].length)return;setTyped(lines[line].slice(0,++i));if(soundEnabled&&lines[line][i-1]!==' ')blip();timer=window.setTimeout(type,42+Math.random()*20)};timer=window.setTimeout(type,180);return()=>window.clearTimeout(timer)},[line,loading,cityIntro,soundEnabled])
   useEffect(() => { if(!walking)return;const t=window.setInterval(()=>setStepFrame(v=>v+1),130);return()=>window.clearInterval(t)},[walking])
   const advance = () => { if (line < lines.length) { if (typed.length < lines[line].length) setTyped(lines[line]); else setLine(v => v + 1) } }
