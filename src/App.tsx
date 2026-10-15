@@ -2,6 +2,7 @@ import DaRawPanel from './DaRawPanel'
 import DaWordPanel from './DaWordPanel'
 import DaExcelentPanel from './DaExcelentPanel'
 import DaClockPanel from './DaClockPanel'
+import DaSubjectPanel from './DaSubjectPanel'
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ChevronDown, ChevronUp, ChevronRight, Download, Gauge, CheckCircle2, CarFront, Settings as Gear, Music2, Film, Trash2, Moon, Skull, Plus,
