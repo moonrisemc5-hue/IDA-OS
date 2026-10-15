@@ -9,6 +9,7 @@ const PASS = 'Moha4ever'
 const ACCESS_KEY = 'ida-dasubject-access-v1'
 const ROOM_KEY = 'ida-dasubject-room-v1'
 const CHARACTER_KEY = 'ida-dasubject-character-v1'
+const SCREEN_KEY = 'ida-dasubject-last-screen-v1'
 
 function makeCode() {
   return Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('')
@@ -22,7 +23,8 @@ export default function DaSubjectPanel() {
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const [remember, setRemember] = useState(true)
-  const [screen, setScreen] = useState<Screen>('menu')
+  const [screen, setScreen] = useState<Screen>(() => { try { return localStorage.getItem(ACCESS_KEY)==='yes' && localStorage.getItem(SCREEN_KEY)==='ivor' ? 'ivor' : 'menu' } catch { return 'menu' } })
+  useEffect(() => { try { if (unlocked && screen==='ivor') localStorage.setItem(SCREEN_KEY,'ivor'); else localStorage.setItem(SCREEN_KEY,screen) } catch {} }, [screen,unlocked])
   const [roomCode, setRoomCode] = useState('')
   const [joinCode, setJoinCode] = useState('')
   const [roomRole, setRoomRole] = useState<'host'|'guest'>('host')
