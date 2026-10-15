@@ -114,6 +114,26 @@ export default function DaSubjectPanel() {
       .ds-subject-desc { margin-top:6px;font-size:12px;line-height:1.7;color:#94a3b8; }
       .ds-dossier-foot { display:flex;justify-content:space-between;gap:8px;margin-top:24px;font-size:9px;letter-spacing:.12em;color:#64748b; }
 
+
+      .ds-office-bg{position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(2,7,17,.88) 0%,rgba(2,7,17,.5) 37%,rgba(2,7,17,.16) 70%,rgba(2,7,17,.38) 100%),linear-gradient(0deg,rgba(2,6,15,.8),transparent 40%,rgba(2,6,15,.22)),url('/dasubject-office.svg');background-size:cover;background-position:center center;transform:scale(1.02);animation:ds-city-reveal 1.8s ease-out both}
+      @keyframes ds-city-reveal{from{transform:scale(1.09);filter:brightness(.55)}to{transform:scale(1.02);filter:brightness(1)}}
+      .ds-settings-wrap{width:100%;max-width:620px;margin:auto;position:relative;z-index:2}
+      .ds-settings-kicker{font-size:10px;letter-spacing:.34em;color:#67e8f9}
+      .ds-settings-title{margin:9px 0 6px;font-size:clamp(38px,5vw,58px);font-weight:900;line-height:1;letter-spacing:-.06em}
+      .ds-settings-subtitle{font-size:13px;line-height:1.7;color:#94a3b8}
+      .ds-settings-card{margin-top:25px;overflow:hidden;border:1px solid rgba(103,232,249,.22);border-radius:15px;background:linear-gradient(145deg,rgba(3,14,29,.92),rgba(2,7,17,.88));box-shadow:0 22px 80px rgba(0,0,0,.4);backdrop-filter:blur(20px)}
+      .ds-setting-row{display:flex;width:100%;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);background:transparent;color:#f1f5f9;transition:background .2s}
+      .ds-setting-row:hover{background:rgba(34,211,238,.06)}
+      .ds-setting-icon{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border:1px solid rgba(103,232,249,.22);border-radius:10px;background:rgba(34,211,238,.08);color:#a5f3fc}
+      .ds-setting-name{font-size:13px;font-weight:650}
+      .ds-setting-description{margin-top:5px;font-size:11px;line-height:1.5;color:#8494aa}
+      .ds-toggle{position:relative;width:42px;height:24px;flex-shrink:0;border:1px solid rgba(148,163,184,.35);border-radius:99px;background:#1e293b;transition:background .2s}
+      .ds-toggle:after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#94a3b8;transition:transform .2s,background .2s}
+      .ds-toggle.on{background:#0891b2;border-color:#67e8f9}.ds-toggle.on:after{transform:translateX(18px);background:#ecfeff}
+      .ds-settings-back{display:flex;align-items:center;gap:9px;margin-bottom:30px;border:0;background:transparent;color:#9caec2;font-size:10px;font-weight:700;letter-spacing:.2em}
+      .ds-settings-back:hover{color:#a5f3fc}
+      .ds-danger-button{margin-top:12px;padding:10px 13px;border:1px solid rgba(251,146,60,.3);border-radius:7px;background:rgba(249,115,22,.07);color:#fdba74;font-size:10px;font-weight:700;letter-spacing:.1em}
+
       .ds-access-screen{position:relative;z-index:3;display:flex;flex:1;align-items:center;justify-content:center;padding:32px 24px}
       .ds-access-card{width:100%;max-width:430px;padding:34px;border:1px solid rgba(103,232,249,.22);border-radius:18px;background:linear-gradient(145deg,rgba(5,17,31,.96),rgba(2,7,18,.94));box-shadow:0 25px 100px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(24px)}
       .ds-lock-icon{display:grid;place-items:center;width:54px;height:54px;margin-bottom:24px;border:1px solid rgba(103,232,249,.3);border-radius:14px;background:rgba(34,211,238,.09);color:#a5f3fc}
@@ -150,21 +170,8 @@ export default function DaSubjectPanel() {
       .ds-kicker { font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:rgba(165,243,252,.8); }
       @media (prefers-reduced-motion: reduce) { .ds-scanline { animation:none; } }
     `}</style>
-    <div className="ds-grid absolute inset-0 opacity-70" />
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_20%,transparent_0%,rgba(2,6,23,.25)_48%,rgba(2,6,23,.9)_100%)]" />
-    <div className="absolute -right-20 top-8 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-    <div className="absolute left-1/4 top-1/3 h-56 w-56 rounded-full bg-orange-500/[0.06] blur-3xl" />
-    <div className="ds-grain" />
-    <div className="ds-city" aria-hidden="true">
-      {Array.from({length:24},(_,i)=><div key={i} className="ds-building" style={{left:(i*4.4-1)+'%',width:(2.8+(i%4)*.45)+'%',height:(28+(i*37)%68)+'%'}}>
-        <div className="ds-windows" style={{opacity:.3+(i%5)*.12}} />
-        {i%5===0 && <div className="absolute -top-4 left-1/2 h-4 w-px bg-cyan-300/60"><div className="absolute -top-1 -left-1 h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_12px_3px_rgba(34,211,238,.7)]" /></div>}
-      </div>)}
-      <div className="absolute bottom-[18%] left-0 right-0 h-px bg-cyan-300/30 shadow-[0_0_18px_3px_rgba(34,211,238,.16)]" />
-      <div className="absolute bottom-[20%] left-[18%] h-2 w-24 skew-x-[-25deg] bg-orange-400/70 shadow-[0_0_18px_3px_rgba(251,146,60,.4)]" />
-      <div className="absolute bottom-[28%] right-[15%] h-1 w-36 skew-x-[-25deg] bg-cyan-300/80 shadow-[0_0_18px_3px_rgba(34,211,238,.4)]" />
-    </div>
-    <div className="ds-city-haze"/><div className="ds-city-glow"/><div className="ds-skyline-label">NEW TOKYO // SECTOR 09</div><div className="ds-scanline" />
+    <div className="ds-office-bg" aria-hidden="true"/><div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_50%_20%,transparent_0%,rgba(2,6,23,.05)_48%,rgba(2,6,23,.5)_100%)] pointer-events-none"/>
+    <div className="ds-scanline" />
     {intro !== 'ready' && <div className="absolute inset-0 z-30 flex min-h-[560px] items-center justify-center bg-[#020611]/95 px-6 backdrop-blur-xl">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(8,145,178,.17),transparent_48%)]"/>
       {intro === 'loading' ? <div className="relative w-full max-w-sm text-center ds-enter">
@@ -215,7 +222,7 @@ export default function DaSubjectPanel() {
             </section>
             <aside className="ds-dossier" style={{animation:motion?'ds-rise 1s .2s both':undefined}}>
               <div className="ds-dossier-top"><span>CLASSIFIED DOSSIER</span><span className="ds-classified">EYES ONLY</span></div>
-              <div className="ds-dossier-heading">TWO STRANGERS<span className="text-cyan-300">.</span><br/>ONE ISLAND<span className="text-cyan-300">.</span></div>
+              <div className="ds-dossier-heading">TWO LIVES<span className="text-cyan-300">.</span><br/>ONE SECRET<span className="text-cyan-300">.</span></div>
               <div className="ds-dossier-rule"/>
               <div className="ds-subjects"><div><div className="ds-subject-label">SUBJECT 01</div><div className="ds-subject-name">IVOR</div><div className="ds-subject-desc">An exhausted worker with nothing left.</div></div><div><div className="ds-subject-label">SUBJECT 02</div><div className="ds-subject-name">TENO</div><div className="ds-subject-desc">A traveler who never reached America.</div></div></div>
               <div className="ds-dossier-foot"><span>FILE: DS-2091-02</span><span>STATUS: REDACTED</span></div>
@@ -270,12 +277,13 @@ export default function DaSubjectPanel() {
             <div className={card+' mt-6 space-y-5 p-6'}><div><div className="text-[10px] tracking-[.22em] text-slate-500">CREATED BY</div><div className="mt-1 text-xl font-semibold">The IDA Studio</div></div><div><div className="text-[10px] tracking-[.22em] text-slate-500">STORY & GAME DESIGN</div><div className="mt-1 text-xl font-semibold">DaSubject Team</div></div><div><div className="text-[10px] tracking-[.22em] text-slate-500">SETTING</div><div className="mt-1 text-xl font-semibold">Earth, 2091 — a world out of room.</div></div></div>
           </div>}
 
-          {screen==='settings' && <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center">
-            <button onClick={back} className="mb-8 flex w-fit items-center gap-2 text-xs tracking-[.16em] text-slate-400 hover:text-cyan-200"><ArrowLeft size={15}/> BACK TO MENU</button><div className="mb-2 text-xs tracking-[.3em] text-cyan-200">CONFIGURATION</div><h2 className={heading}>SETTINGS</h2>
-            <div className={card+' mt-6 divide-y divide-white/10 px-5'}>
-              <button className="flex w-full items-center justify-between py-5 text-left" onClick={()=>setSound(v=>!v)}><span><span className="block font-medium">Interface sound</span><span className="mt-1 block text-xs text-slate-500">Menu and interaction audio</span></span><span className="flex items-center gap-2 text-sm text-cyan-200">{sound?<Volume2 size={18}/>:<VolumeX size={18}/>} {sound?'ON':'OFF'}</span></button>
-              <button className="flex w-full items-center justify-between py-5 text-left" onClick={()=>setMotion(v=>!v)}><span><span className="block font-medium">Motion effects</span><span className="mt-1 block text-xs text-slate-500">Ambient scanline and title animation</span></span><span className="text-sm text-cyan-200">{motion?'ON':'OFF'}</span></button>
-              <div className="py-5"><div className="font-medium">Access control</div><p className="mt-1 text-xs leading-5 text-slate-500">This preview uses a local password gate. It is meant to hide the game from casual visitors, not to secure a public deployment against someone inspecting the app code.</p><button className={smallBtn+' mt-3'} onClick={()=>{setUnlocked(false);setPassword('');try{localStorage.removeItem(ACCESS_KEY)}catch{}}}>LOCK PROJECT AGAIN</button></div>
+          {screen==='settings' && <div className="ds-settings-wrap ds-enter">
+            <button onClick={back} className="ds-settings-back"><ArrowLeft size={15}/> BACK TO MENU</button>
+            <div className="ds-settings-kicker">SYSTEM CONFIGURATION // 01</div><h2 className="ds-settings-title">SETTINGS<span className="text-cyan-300">.</span></h2><p className="ds-settings-subtitle">Tune the experience to your preference.</p>
+            <div className="ds-settings-card">
+              <button className="ds-setting-row" onClick={()=>setSound(v=>!v)}><span className="flex items-center gap-4"><span className="ds-setting-icon">{sound?<Volume2 size={19}/>:<VolumeX size={19}/>}</span><span><span className="ds-setting-name block">Interface sound</span><span className="ds-setting-description block">Menu and interaction audio</span></span></span><span className={'ds-toggle '+(sound?'on':'')}/></button>
+              <button className="ds-setting-row" onClick={()=>setMotion(v=>!v)}><span className="flex items-center gap-4"><span className="ds-setting-icon"><Monitor size={19}/></span><span><span className="ds-setting-name block">Motion effects</span><span className="ds-setting-description block">Animated transitions and ambient effects</span></span></span><span className={'ds-toggle '+(motion?'on':'')}/></button>
+              <div className="p-5 sm:p-6"><div className="flex items-center gap-3"><span className="ds-setting-icon"><Shield size={19}/></span><span><span className="ds-setting-name block">Access control</span><span className="ds-setting-description block">Lock the private preview again on this browser.</span></span></div><button className="ds-danger-button" onClick={()=>{setUnlocked(false);setPassword('');setIntro('password');try{localStorage.removeItem(ACCESS_KEY)}catch{}}}>LOCK PROJECT AGAIN</button></div>
             </div>
           </div>}
         </main>
