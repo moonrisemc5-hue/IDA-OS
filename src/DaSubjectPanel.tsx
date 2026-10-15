@@ -113,6 +113,29 @@ export default function DaSubjectPanel() {
       .ds-subject-name { margin-top:5px;font-size:19px;font-weight:700;letter-spacing:.06em; }
       .ds-subject-desc { margin-top:6px;font-size:12px;line-height:1.7;color:#94a3b8; }
       .ds-dossier-foot { display:flex;justify-content:space-between;gap:8px;margin-top:24px;font-size:9px;letter-spacing:.12em;color:#64748b; }
+
+      .ds-access-screen{position:relative;z-index:3;display:flex;flex:1;align-items:center;justify-content:center;padding:32px 24px}
+      .ds-access-card{width:100%;max-width:430px;padding:34px;border:1px solid rgba(103,232,249,.22);border-radius:18px;background:linear-gradient(145deg,rgba(5,17,31,.96),rgba(2,7,18,.94));box-shadow:0 25px 100px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(24px)}
+      .ds-lock-icon{display:grid;place-items:center;width:54px;height:54px;margin-bottom:24px;border:1px solid rgba(103,232,249,.3);border-radius:14px;background:rgba(34,211,238,.09);color:#a5f3fc}
+      .ds-access-kicker{margin-bottom:9px;font-size:10px;font-weight:700;letter-spacing:.3em;color:#a5f3fc}
+      .ds-access-title{margin:0;font-size:clamp(23px,3vw,31px);font-weight:800;letter-spacing:-.035em;color:#f8fafc}
+      .ds-access-copy{margin:13px 0 25px;font-size:13px;line-height:1.8;color:#94a3b8}
+      .ds-access-label{display:block;margin-bottom:9px;font-size:10px;letter-spacing:.17em;color:#cbd5e1}
+      .ds-access-field{display:flex;align-items:center;border:1px solid rgba(148,163,184,.22);border-radius:9px;background:rgba(0,0,0,.35);overflow:hidden}
+      .ds-access-field:focus-within{border-color:rgba(103,232,249,.7);box-shadow:0 0 0 3px rgba(34,211,238,.07)}
+      .ds-access-field input{min-width:0;flex:1;width:100%;padding:14px 13px;border:0!important;outline:0;background:transparent!important;color:#f8fafc!important;font-size:13px!important;box-shadow:none!important}
+      .ds-eye-button{display:grid;place-items:center;width:44px;align-self:stretch;border:0;background:transparent;color:#94a3b8}
+      .ds-eye-button:hover{color:#a5f3fc}
+      .ds-remember{display:flex;align-items:center;gap:9px;margin:14px 0 18px;font-size:11px;color:#94a3b8}
+      .ds-remember input{accent-color:#67e8f9}
+      .ds-submit{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 16px;border:1px solid rgba(165,243,252,.35);border-radius:9px;background:linear-gradient(100deg,#a5f3fc,#67e8f9);color:#04111c;font-size:11px;font-weight:900;letter-spacing:.15em;box-shadow:0 8px 28px rgba(34,211,238,.12);transition:filter .2s,transform .2s}
+      .ds-submit:hover{filter:brightness(1.08);transform:translateY(-1px)}
+      .ds-access-foot{margin-top:22px;padding-top:15px;border-top:1px solid rgba(255,255,255,.08);font-size:9px;letter-spacing:.12em;color:#64748b}
+      .ds-city-haze{position:absolute;left:0;right:0;bottom:0;height:58%;background:linear-gradient(to top,rgba(3,8,19,.12),rgba(3,8,19,.18) 35%,transparent);pointer-events:none}
+      .ds-city-glow{position:absolute;bottom:17%;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.55),rgba(251,146,60,.5),rgba(34,211,238,.45),transparent);box-shadow:0 0 35px rgba(34,211,238,.25)}
+      .ds-skyline-label{position:absolute;right:7%;bottom:32%;padding:7px 10px;border:1px solid rgba(103,232,249,.22);background:rgba(2,10,23,.7);font-size:8px;letter-spacing:.24em;color:rgba(165,243,252,.85);transform:skewY(-5deg)}
+      @media(max-width:760px){.ds-access-card{padding:25px 20px}}
+
       .ds-glass-card { border:1px solid rgba(255,255,255,.11);border-radius:15px;background:rgba(2,6,23,.68);box-shadow:0 24px 80px rgba(0,0,0,.42);backdrop-filter:blur(18px); }
       @media(max-width:760px) { .ds-shell header,.ds-shell main { padding-left:18px;padding-right:18px; } .ds-menu-layout { grid-template-columns:1fr;gap:28px;padding-top:26px; } .ds-menu-title { font-size:clamp(54px,13vw,82px); } .ds-dossier { display:none; } .ds-shell footer { padding:10px 18px;font-size:8px; } .ds-network { display:none; } }
 
@@ -141,7 +164,7 @@ export default function DaSubjectPanel() {
       <div className="absolute bottom-[20%] left-[18%] h-2 w-24 skew-x-[-25deg] bg-orange-400/70 shadow-[0_0_18px_3px_rgba(251,146,60,.4)]" />
       <div className="absolute bottom-[28%] right-[15%] h-1 w-36 skew-x-[-25deg] bg-cyan-300/80 shadow-[0_0_18px_3px_rgba(34,211,238,.4)]" />
     </div>
-    <div className="ds-scanline" />
+    <div className="ds-city-haze"/><div className="ds-city-glow"/><div className="ds-skyline-label">NEW TOKYO // SECTOR 09</div><div className="ds-scanline" />
     {intro !== 'ready' && <div className="absolute inset-0 z-30 flex min-h-[560px] items-center justify-center bg-[#020611]/95 px-6 backdrop-blur-xl">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(8,145,178,.17),transparent_48%)]"/>
       {intro === 'loading' ? <div className="relative w-full max-w-sm text-center ds-enter">
@@ -160,22 +183,22 @@ export default function DaSubjectPanel() {
       </header>
 
       {!unlocked ? <div className={'relative flex flex-1 items-center justify-center px-5 py-10 '+(intro==='password'?'ds-enter':'opacity-0 pointer-events-none')}>
-        <div className={card+' w-full max-w-md p-7 sm:p-9'}>
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-cyan-200"><LockKeyhole size={26}/></div>
-          <div className="mb-2 text-xs tracking-[.3em] text-cyan-200">RESTRICTED ACCESS</div>
-          <h1 className="text-2xl font-semibold tracking-[.08em]">PROJECT DA SUBJECT</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-400">This build is classified. Enter your access key to enter the city.</p>
+        <div className="ds-access-card">
+          <div className="ds-lock-icon"><LockKeyhole size={26}/></div>
+          <div className="ds-access-kicker">RESTRICTED ACCESS</div>
+          <h1 className="ds-access-title">PROJECT DA SUBJECT</h1>
+          <p className="ds-access-copy">This build is classified. Enter your access key to enter the city.</p>
           <form className="mt-6 space-y-4" onSubmit={e=>{e.preventDefault();enter()}}>
-            <label className="block text-xs tracking-wider text-slate-400">ACCESS PASSWORD</label>
-            <div className="flex items-center rounded-xl border border-white/15 bg-black/35 focus-within:border-cyan-300/70">
-              <input autoFocus type={showPassword?'text':'password'} value={password} onChange={e=>{setPassword(e.target.value);setPasswordError('')}} placeholder="Enter access password" className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-sm outline-none placeholder:text-slate-600" />
-              <button type="button" onClick={()=>setShowPassword(v=>!v)} className="px-3 text-slate-400 hover:text-white" aria-label="Show password">{showPassword?<EyeOff size={17}/>:<Eye size={17}/>}</button>
+            <label className="ds-access-label">ACCESS PASSWORD</label>
+            <div className="ds-access-field">
+              <input autoFocus type={showPassword?'text':'password'} value={password} onChange={e=>{setPassword(e.target.value);setPasswordError('')}} placeholder="Enter access password"  />
+              <button type="button" onClick={()=>setShowPassword(v=>!v)} className="ds-eye-button" aria-label="Show password">{showPassword?<EyeOff size={17}/>:<Eye size={17}/>}</button>
             </div>
             {passwordError && <p className="text-xs text-rose-300">{passwordError}</p>}
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-400"><input type="checkbox" checked={remember} onChange={e=>setRemember(e.target.checked)} className="accent-cyan-300"/> Remember access on this browser</label>
-            <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-300 px-4 py-3.5 text-sm font-bold tracking-[.14em] text-slate-950 transition hover:bg-cyan-200">ENTER PROJECT <ArrowRight size={16}/></button>
+            <label className="ds-remember"><input type="checkbox" checked={remember} onChange={e=>setRemember(e.target.checked)} className="accent-cyan-300"/> Remember access on this browser</label>
+            <button className="ds-submit">ENTER PROJECT <ArrowRight size={16}/></button>
           </form>
-          <div className="mt-5 border-t border-white/10 pt-4 text-[10px] tracking-[.14em] text-slate-600">PRIVATE PREVIEW • UNAUTHORIZED ENTRY PROHIBITED</div>
+          <div className="ds-access-foot">PRIVATE PREVIEW • UNAUTHORIZED ENTRY PROHIBITED</div>
         </div>
       </div> : <>
         <main>
