@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#071326"/><stop offset=".48" stop-color="#174b70"/><stop offset=".76" stop-color="#b96d59"/><stop offset="1" stop-color="#f0a36a"/></linearGradient>
+ <linearGradient id="glass" x2="0" y2="1"><stop stop-color="#0b2945" stop-opacity=".18"/><stop offset="1" stop-color="#061321" stop-opacity=".05"/></linearGradient>
+ <linearGradient id="room" x2="0" y2="1"><stop stop-color="#24384b"/><stop offset="1" stop-color="#050a14"/></linearGradient>
+ <linearGradient id="desk" x2="0" y2="1"><stop stop-color="#26394a"/><stop offset="1" stop-color="#080e18"/></linearGradient>
+ <pattern id="windows" width="30" height="27" patternUnits="userSpaceOnUse"><rect x="5" y="5" width="15" height="11" fill="#68d9f2" opacity=".65"/><rect x="22" y="5" width="3" height="11" fill="#ffad70" opacity=".45"/></pattern>
+ <filter id="glow"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<!-- evening sky and distant city -->
+<rect width="1600" height="900" fill="#030812"/><rect x="90" y="45" width="1420" height="655" fill="url(#sky)"/>
+<circle cx="1100" cy="260" r="210" fill="#34c9e6" opacity=".17" filter="url(#glow)"/>
+<path d="M90 505L150 455 210 478 280 390 340 465 405 350 470 433 535 320 610 430 675 300 740 415 805 350 870 435 940 305 1010 418 1070 330 1140 440 1210 290 1280 410 1350 330 1420 445 1510 375V700H90Z" fill="#102b43"/>
+<g fill="#091a2b" stroke="#32617b" stroke-opacity=".4">
+<path d="M90 450H175V700H90Z"/><path d="M180 500H240V700H180Z"/><path d="M250 400H330V700H250Z"/><path d="M340 455H395V700H340Z"/><path d="M405 365H490V700H405Z"/><path d="M500 430H565V700H500Z"/><path d="M575 325H665V700H575Z"/><path d="M675 450H735V700H675Z"/><path d="M745 370H825V700H745Z"/><path d="M835 430H900V700H835Z"/><path d="M910 335H1000V700H910Z"/><path d="M1010 445H1070V700H1010Z"/><path d="M1080 310H1170V700H1080Z"/><path d="M1180 415H1240V700H1180Z"/><path d="M1250 345H1340V700H1250Z"/><path d="M1350 430H1410V700H1350Z"/><path d="M1420 380H1510V700H1420Z"/>
+</g>
+<g opacity=".85"><path d="M250 400H330V700H250Z" fill="url(#windows)"/><path d="M405 365H490V700H405Z" fill="url(#windows)"/><path d="M575 325H665V700H575Z" fill="url(#windows)"/><path d="M745 370H825V700H745Z" fill="url(#windows)"/><path d="M910 335H1000V700H910Z" fill="url(#windows)"/><path d="M1080 310H1170V700H1080Z" fill="url(#windows)"/><path d="M1250 345H1340V700H1250Z" fill="url(#windows)"/><path d="M1420 380H1510V700H1420Z" fill="url(#windows)"/></g>
+<path d="M90 600Q400 560 720 604T1510 580" fill="none" stroke="#48d9f3" stroke-width="4" opacity=".85"/><path d="M90 612Q400 572 720 616T1510 592" fill="none" stroke="#f4a06c" stroke-width="2"/>
+<!-- office interior: floor-to-ceiling panoramic glass -->
+<rect x="65" y="20" width="1470" height="720" fill="url(#glass)" stroke="#182c40" stroke-width="34"/>
+<rect x="82" y="38" width="1436" height="680" fill="none" stroke="#71879a" stroke-opacity=".36" stroke-width="3"/>
+<path d="M425 38V720M800 38V720M1175 38V720" stroke="#1a2b3d" stroke-width="25"/><path d="M430 38V720M805 38V720M1180 38V720" stroke="#a5b8c7" stroke-opacity=".22" stroke-width="2"/>
+<path d="M82 520H1518" stroke="#1a2e41" stroke-width="16"/><path d="M82 517H1518" stroke="#91a6b7" stroke-opacity=".3" stroke-width="2"/>
+<!-- dark office floor -->
+<path d="M0 735L1600 690V900H0Z" fill="url(#room)"/><path d="M0 790L1600 735M0 845L1600 785" stroke="#476175" stroke-opacity=".35" stroke-width="2"/>
+<!-- desk, monitor, chair silhouette in foreground -->
+<path d="M95 690L1500 690L1580 755L30 755Z" fill="#0b1523" stroke="#30485d" stroke-width="4"/>
+<path d="M160 755L135 900M1430 755L1475 900" stroke="#101d2c" stroke-width="35"/>
+<path d="M570 688V530Q570 510 590 510H830Q850 510 850 530V688Z" fill="#08111e" stroke="#38536a" stroke-width="5"/>
+<rect x="592" y="532" width="236" height="135" rx="3" fill="#0d2b41" stroke="#52758a" stroke-width="3"/>
+<path d="M600 645L650 600L686 621L750 560L820 632V660H600Z" fill="#1a657a" opacity=".8"/><path d="M600 645L650 600L686 621L750 560L820 632" fill="none" stroke="#50d6e9" stroke-width="3" opacity=".65"/>
+<rect x="670" y="668" width="40" height="18" fill="#1c3043"/><path d="M650 688H730" stroke="#526b7e" stroke-width="7"/>
+<!-- keyboard and small lamp -->
+<path d="M865 697L1040 697L1065 714L850 714Z" fill="#172738" stroke="#42586a" stroke-width="2"/>
+<path d="M1250 690V605L1285 560L1320 605V690Z" fill="#111e2b"/><path d="M1285 560L1245 560L1265 535H1305L1325 560Z" fill="#30475b"/><path d="M1265 566L1305 566" stroke="#f4b37b" stroke-width="4" opacity=".8"/>
+<rect width="1600" height="900" fill="#020713" opacity=".08"/>
+</svg>
