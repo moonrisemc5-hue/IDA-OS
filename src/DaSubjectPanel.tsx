@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, LockKeyhole, RadioTower, Users, Shield, Volume2, VolumeX, Monitor, Check, Copy, RefreshCw, Zap, ChevronRight, Eye, EyeOff } from 'lucide-react'
 
 type Screen = 'menu' | 'play' | 'create' | 'join' | 'lobby' | 'credits' | 'settings'
@@ -12,14 +12,14 @@ function makeCode() {
 }
 
 export default function DaSubjectPanel() {
-  const [unlocked, setUnlocked] = useState(() => { try { return localStorage.getItem(ACCESS_KEY) === 'yes' } catch { return false } })
+  const [unlocked, setUnlocked] = useState(false)
+  const [intro, setIntro] = useState<'loading'|'password'|'entering'|'ready'>('loading')
+  useEffect(() => { const timer = window.setTimeout(() => setIntro('password'), 2400); return () => window.clearTimeout(timer) }, [])
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const [remember, setRemember] = useState(true)
-  const [screen, setScreen] = useState<Screen>(() => {
-    try { return localStorage.getItem(ACCESS_KEY) === 'yes' ? 'menu' : 'menu' } catch { return 'menu' }
-  })
+  const [screen, setScreen] = useState<Screen>('menu')
   const [roomCode, setRoomCode] = useState('')
   const [joinCode, setJoinCode] = useState('')
   const [roomRole, setRoomRole] = useState<'host'|'guest'>('host')
@@ -34,9 +34,9 @@ export default function DaSubjectPanel() {
   const canReady = !!character
   const enter = () => {
     if (password !== PASS) { setPasswordError('ACCESS DENIED — this project is still classified.'); return }
-    setUnlocked(true)
     setPasswordError('')
-    if (remember) { try { localStorage.setItem(ACCESS_KEY, 'yes') } catch {} }
+    setIntro('entering')
+    window.setTimeout(() => { setUnlocked(true); setIntro('ready'); if (remember) { try { localStorage.setItem(ACCESS_KEY, 'yes') } catch {} } }, 1500)
   }
   const createLobby = () => {
     const code = makeCode()
@@ -72,6 +72,12 @@ export default function DaSubjectPanel() {
       @keyframes ds-pulse { 0%,100%{opacity:.25} 50%{opacity:.75} }
       @keyframes ds-scan { from{transform:translateY(-100%)} to{transform:translateY(650%)} }
       @keyframes ds-flicker { 0%,96%,100%{opacity:1} 97%{opacity:.82} 98%{opacity:.96} }
+      @keyframes ds-rise { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes ds-reveal { from{opacity:0;filter:blur(12px);transform:scale(1.035)} to{opacity:1;filter:blur(0);transform:scale(1)} }
+      @keyframes ds-loader { 0%{transform:translateX(-110%)} 100%{transform:translateX(300%)} }
+      @keyframes ds-orbit { to{transform:rotate(360deg)} }
+      .ds-enter { animation:ds-rise .8s cubic-bezier(.2,.75,.25,1) both; }
+      .ds-reveal { animation:ds-reveal 1.1s cubic-bezier(.2,.7,.2,1) both; }
       .ds-grid { background-image:linear-gradient(rgba(34,211,238,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.055) 1px,transparent 1px);background-size:42px 42px; }
       .ds-city { position:absolute;bottom:0;left:0;right:0;height:58%;opacity:.68;overflow:hidden;mask-image:linear-gradient(to top,black 0%,black 52%,transparent 100%); }
       .ds-building { position:absolute;bottom:0;border:1px solid rgba(103,232,249,.14);background:linear-gradient(90deg,rgba(3,10,23,.98),rgba(10,31,49,.9),rgba(2,7,18,.99));box-shadow:inset 0 0 36px rgba(34,211,238,.06),0 0 24px rgba(0,0,0,.5); }
@@ -96,7 +102,15 @@ export default function DaSubjectPanel() {
       <div className="absolute bottom-[28%] right-[15%] h-1 w-36 skew-x-[-25deg] bg-cyan-300/80 shadow-[0_0_18px_3px_rgba(34,211,238,.4)]" />
     </div>
     <div className="ds-scanline" />
-    <div className="relative z-10 flex min-h-[560px] h-full flex-col">
+    {intro !== 'ready' && <div className="absolute inset-0 z-30 flex min-h-[560px] items-center justify-center bg-[#020611]/95 px-6 backdrop-blur-xl">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(8,145,178,.17),transparent_48%)]"/>
+      {intro === 'loading' ? <div className="relative w-full max-w-sm text-center ds-enter">
+        <div className="relative mx-auto mb-8 flex h-24 w-24 items-center justify-center"><div className="absolute inset-0 rounded-full border border-cyan-200/20"/><div className="absolute inset-1 rounded-full border-t border-cyan-200" style={{animation:'ds-orbit 1.5s linear infinite'}}/><div className="absolute inset-4 rounded-full border border-orange-300/30"/><RadioTower size={30} className="text-cyan-200"/></div>
+        <div className="text-[10px] tracking-[.48em] text-cyan-200">IDA ORIGINAL PRESENTS</div><h1 className="mt-4 text-4xl font-black tracking-[.12em]">DA SUBJECT</h1><p className="mt-3 text-xs tracking-[.2em] text-slate-500">INITIALIZING CLASSIFIED BUILD // 2091</p>
+        <div className="mx-auto mt-8 h-[2px] w-64 max-w-full overflow-hidden bg-white/10"><div className="h-full w-1/3 bg-cyan-200 shadow-[0_0_14px_rgba(103,232,249,.8)]" style={{animation:'ds-loader 1.2s ease-in-out infinite'}}/></div><div className="mt-3 text-[9px] tracking-[.28em] text-slate-600">LOADING CITY SIMULATION</div>
+      </div> : intro === 'entering' ? <div className="relative text-center ds-reveal"><div className="text-[10px] tracking-[.5em] text-cyan-200">IDENTITY VERIFIED</div><div className="mt-4 text-4xl font-black tracking-[.14em]">WELCOME TO <span className="text-cyan-300">2091</span></div><div className="mx-auto mt-6 h-px w-48 bg-gradient-to-r from-transparent via-cyan-200 to-transparent"/></div> : null}
+    </div>}
+    <div className={'relative z-10 flex min-h-[560px] h-full flex-col '+(intro==='ready'?'ds-reveal':'')}>
       <header className="flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-8">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-300/35 bg-cyan-300/10 text-cyan-200"><RadioTower size={19}/></div>
@@ -105,7 +119,7 @@ export default function DaSubjectPanel() {
         <div className="hidden items-center gap-2 text-[10px] tracking-[.2em] text-slate-500 sm:flex"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"/> CITY NETWORK ONLINE <span className="text-slate-700">/</span> BUILD 0.1</div>
       </header>
 
-      {!unlocked ? <div className="relative flex flex-1 items-center justify-center px-5 py-10">
+      {!unlocked ? <div className={'relative flex flex-1 items-center justify-center px-5 py-10 '+(intro==='password'?'ds-enter':'opacity-0 pointer-events-none')}>
         <div className={card+' w-full max-w-md p-7 sm:p-9'}>
           <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-cyan-200"><LockKeyhole size={26}/></div>
           <div className="mb-2 text-xs tracking-[.3em] text-cyan-200">RESTRICTED ACCESS</div>
