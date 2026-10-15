@@ -6,6 +6,7 @@ type Character = 'Ivor' | 'Teno' | null
 const PASS = 'Moha4ever'
 const ACCESS_KEY = 'ida-dasubject-access-v1'
 const ROOM_KEY = 'ida-dasubject-room-v1'
+const CHARACTER_KEY = 'ida-dasubject-character-v1'
 
 function makeCode() {
   return Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('')
@@ -23,7 +24,7 @@ export default function DaSubjectPanel() {
   const [roomCode, setRoomCode] = useState('')
   const [joinCode, setJoinCode] = useState('')
   const [roomRole, setRoomRole] = useState<'host'|'guest'>('host')
-  const [character, setCharacter] = useState<Character>(null)
+  const [character, setCharacter] = useState<Character>(() => { try { const saved=localStorage.getItem(CHARACTER_KEY); return saved==='Ivor'||saved==='Teno'?saved:null } catch { return null } })
   const [ready, setReady] = useState(false)
   const [sound, setSound] = useState(true)
   const [motion, setMotion] = useState(true)
@@ -44,6 +45,7 @@ export default function DaSubjectPanel() {
     setJoinCode('')
     setRoomRole('host')
     setCharacter(null)
+    try { localStorage.removeItem(CHARACTER_KEY) } catch {}
     setReady(false)
     setStatus('Lobby created. Share this code with your second player.')
     try { localStorage.setItem(ROOM_KEY, JSON.stringify({ code, hostReady: false, guestReady: false, createdAt: Date.now() })) } catch {}
@@ -256,16 +258,16 @@ export default function DaSubjectPanel() {
               <div><div className="text-[10px] tracking-[.25em] text-slate-500">YOUR LOBBY CODE</div><div className="mt-1 font-mono text-3xl font-bold tracking-[.2em] text-cyan-200">{codeForDisplay}</div><p className="mt-1 text-xs text-slate-500">Share this with your friend to invite them.</p></div>
               <button className={smallBtn+' flex items-center justify-center gap-2'} onClick={()=>{navigator.clipboard?.writeText(codeForDisplay);setCopied(true);window.setTimeout(()=>setCopied(false),1400)}}><Copy size={15}/>{copied?'COPIED':'COPY CODE'}</button>
             </div>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {(['Ivor','Teno'] as const).map((name,i)=>{const unavailable=character!==null&&character!==name;return <button key={name} disabled={unavailable} onClick={()=>{setCharacter(name);setReady(false)}} className={card+' overflow-hidden text-left transition '+(character===name?'border-cyan-300/70 bg-cyan-300/10':'hover:border-white/30')+(unavailable?' opacity-40 grayscale':'')}>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {(['Ivor','Teno'] as const).map((name,i)=>{const unavailable=character!==null&&character!==name;return <button key={name} disabled={unavailable} onClick={()=>{setCharacter(name);try{localStorage.setItem(CHARACTER_KEY,name)}catch{};setReady(false)}} className={card+' overflow-hidden text-left transition '+(character===name?'border-cyan-300/70 bg-cyan-300/10':'hover:border-white/30')+(unavailable?' opacity-40 grayscale':'')}>
                 <div className="relative grid h-36 place-items-center overflow-hidden border-b border-cyan-200/15 bg-gradient-to-b from-cyan-950 to-slate-950">
                   <span className="absolute left-3 top-3 text-[9px] tracking-[.2em] text-cyan-200">SUBJECT 0{i+1} / PORTRAIT</span>
-                  <svg viewBox="0 0 120 120" className="h-32 w-32" aria-label={name+' avatar'} role="img"><circle cx="60" cy="47" r="42" fill={i===0?'#fb923c':'#22d3ee'} opacity=".12"/><path d="M12 120Q15 83 42 78L49 70H71L78 78Q105 83 108 120Z" fill={i===0?'#334155':'#075985'} stroke={i===0?'#94a3b8':'#67e8f9'}/><ellipse cx="60" cy="45" rx="23" ry="28" fill={i===0?'#d7a17b':'#b98363'}/><path d={i===0?'M37 43Q33 15 61 15Q88 16 84 43L76 29L62 24L44 34Z':'M36 42Q35 14 61 15Q88 16 85 42L77 29L62 23L43 33Z'} fill={i===0?'#34343b':'#101827'}/><path d="M43 45L53 44M67 44L77 45" stroke="#4b362e" strokeWidth="3" strokeLinecap="round"/><circle cx="49" cy="51" r="2" fill="#111827"/><circle cx="71" cy="51" r="2" fill="#111827"/><path d={i===0?'M53 64Q60 61 67 64':'M52 63Q60 68 68 63'} fill="none" stroke="#704334" strokeWidth="2"/></svg>
+                  <svg viewBox="0 0 120 120" className="h-32 w-32" aria-label={name+' avatar'} role="img"><circle cx="60" cy="47" r="42" fill={i===0?'#fb923c':'#22d3ee'} opacity=".12"/><path d="M12 120Q15 83 42 78L49 70H71L78 78Q105 83 108 120Z" fill={i===0?'#334155':'#075985'} stroke={i===0?'#94a3b8':'#67e8f9'}/><ellipse cx="60" cy="45" rx="23" ry="28" fill={i===0?'#e0ad86':'#8d563b'}/><path d={i===0?'M37 43Q33 15 61 15Q88 16 84 43L76 29L62 24L44 34Z':'M36 42Q30 8 62 9Q91 12 85 44L78 28L67 20L53 23L42 35Z'} fill={i===0?'#34343b':'#101827'}/><path d="M43 45L53 44M67 44L77 45" stroke="#4b362e" strokeWidth="3" strokeLinecap="round"/><circle cx="49" cy="51" r="2" fill="#111827"/><circle cx="71" cy="51" r="2" fill="#111827"/><path d={i===0?'M53 64Q60 61 67 64':'M52 63Q60 68 68 63'} fill="none" stroke="#704334" strokeWidth="2"/></svg>
                   {unavailable&&<span className="absolute bottom-2 right-2 text-[9px] font-bold tracking-widest text-orange-200">TAKEN</span>}
                 </div><div className="p-5"><div className="text-[9px] tracking-[.22em] text-cyan-200">SUBJECT 0{i+1}</div><div className="mt-2 text-2xl font-bold tracking-wide">{name.toUpperCase()}</div><div className="mt-1 text-sm text-slate-400">{i===0?'Exhausted office worker. Observant and stubborn.':'Traveler from Tokyo. Resourceful and alert.'}</div><div className="mt-4 text-xs tracking-wider text-cyan-200">{character===name?'SELECTED':unavailable?'ALREADY TAKEN':'SELECT CHARACTER'} <ChevronRight size={13} className="inline"/></div></div>
               </button>})}
             </div>
-            <div className="mt-4 flex flex-col gap-3 rounded-xl border border-white/10 bg-black/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-3 flex flex-col gap-3 rounded-xl border border-white/10 bg-black/20 p-3 sm:flex-row sm:items-center sm:justify-between">
               <div><div className="font-medium">{character?character+' selected':'Choose your character'}</div><div className="mt-1 text-xs text-slate-500">{ready?'You are ready. Waiting for your partner...':'Both players must select a character and be ready.'}</div></div>
               <button disabled={!canReady} onClick={()=>setReady(v=>!v)} className={'rounded-xl px-6 py-3 text-sm font-bold tracking-wider transition disabled:cursor-not-allowed disabled:opacity-30 '+(ready?'border border-emerald-300/40 bg-emerald-300/10 text-emerald-200':'bg-cyan-300 text-slate-950 hover:bg-cyan-200')}>{ready?'✓ READY — CANCEL':'I AM READY'}</button>
             </div>
