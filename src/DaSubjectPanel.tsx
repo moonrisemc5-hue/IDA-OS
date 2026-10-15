@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, LockKeyhole, RadioTower, Users, Shield, Volume2,
 
 type Screen = 'menu' | 'play' | 'create' | 'join' | 'lobby' | 'credits' | 'settings'
 type Character = 'Ivor' | 'Teno' | null
-const PASS = 'moha4ever'
+const PASS = 'Moha4ever'
 const ACCESS_KEY = 'ida-dasubject-access-v1'
 const ROOM_KEY = 'ida-dasubject-room-v1'
 
@@ -12,7 +12,7 @@ function makeCode() {
 }
 
 export default function DaSubjectPanel() {
-  const [unlocked, setUnlocked] = useState(false)
+  const [unlocked, setUnlocked] = useState(() => { try { return localStorage.getItem(ACCESS_KEY) === 'yes' } catch { return false } })
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
