@@ -1,8 +1,8 @@
-import officeBackground from './dasubject-office.svg'
+import officeBackground from './dasubject-office.svg'\nimport DaSubjectIvorIntro from './DaSubjectIvorIntro'
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, LockKeyhole, RadioTower, Users, Shield, Volume2, VolumeX, Monitor, Check, Copy, RefreshCw, Zap, ChevronRight, Eye, EyeOff } from 'lucide-react'
 
-type Screen = 'menu' | 'play' | 'create' | 'join' | 'lobby' | 'credits' | 'settings'
+type Screen = 'menu' | 'play' | 'create' | 'join' | 'lobby' | 'credits' | 'settings' | 'ivor'
 type Character = 'Ivor' | 'Teno' | null
 const PASS = 'Moha4ever'
 const ACCESS_KEY = 'ida-dasubject-access-v1'
@@ -228,7 +228,7 @@ export default function DaSubjectPanel() {
               <h1 className="ds-menu-title" style={{animation:motion?'ds-flicker 10s infinite':undefined}}>DA<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-400 to-cyan-700">SUBJECT</span><span className="text-orange-300">.</span></h1>
               <p className="ds-menu-description">A world with no room left to breathe. A secret that should not exist. Your story begins in the city of 2091.</p>
               <div className="ds-menu-actions">
-                <button className="ds-action-primary" onClick={()=>setScreen('play')}><span className="flex items-center gap-3"><Zap size={18}/> BEGIN STORY</span><ArrowRight size={19}/></button>
+                <button className="ds-action-primary" onClick={()=>setScreen('ivor')}><span className="flex items-center gap-3"><Zap size={18}/> BEGIN STORY</span><ArrowRight size={19}/></button>
                 <div className="ds-action-row"><button className="ds-action-secondary" onClick={()=>setScreen('credits')}><span className="flex items-center gap-2"><Users size={16} className="text-cyan-200"/> CREDITS</span><ChevronRight size={16}/></button><button className="ds-action-secondary" onClick={()=>setScreen('settings')}><span className="flex items-center gap-2"><Monitor size={16} className="text-cyan-200"/> SETTINGS</span><ChevronRight size={16}/></button></div>
               </div>
             </section>
@@ -241,7 +241,7 @@ export default function DaSubjectPanel() {
             </aside>
           </div>}
 
-          {screen==='play' && <div className="ds-play-wrap ds-enter">
+          {screen==='ivor' && <DaSubjectIvorIntro soundEnabled={sound} onBack={()=>setScreen('menu')}/> }\n          {screen==='play' && <div className="ds-play-wrap ds-enter">
             <button onClick={back} className="ds-settings-back"><ArrowLeft size={15}/> BACK TO MENU</button>
             <div className="ds-kicker">MULTIPLAYER / STORY MODE</div><h2 className="ds-page-title">FIND YOUR PARTNER<span className="text-cyan-300">.</span></h2>
             <p className="ds-page-copy">Create a private session for a friend, or enter an invite code to join theirs.</p>
