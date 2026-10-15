@@ -1,4 +1,5 @@
-import officeBackground from './dasubject-office.svg'\nimport DaSubjectIvorIntro from './DaSubjectIvorIntro'
+import officeBackground from './dasubject-office.svg'
+import DaSubjectIvorIntro from './DaSubjectIvorIntro'
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, LockKeyhole, RadioTower, Users, Shield, Volume2, VolumeX, Monitor, Check, Copy, RefreshCw, Zap, ChevronRight, Eye, EyeOff } from 'lucide-react'
 
@@ -241,7 +242,8 @@ export default function DaSubjectPanel() {
             </aside>
           </div>}
 
-          {screen==='ivor' && <DaSubjectIvorIntro soundEnabled={sound} onBack={()=>setScreen('menu')}/> }\n          {screen==='play' && <div className="ds-play-wrap ds-enter">
+          {screen==='ivor' && <DaSubjectIvorIntro soundEnabled={sound} onBack={()=>setScreen('menu')}/> }
+          {screen==='play' && <div className="ds-play-wrap ds-enter">
             <button onClick={back} className="ds-settings-back"><ArrowLeft size={15}/> BACK TO MENU</button>
             <div className="ds-kicker">MULTIPLAYER / STORY MODE</div><h2 className="ds-page-title">FIND YOUR PARTNER<span className="text-cyan-300">.</span></h2>
             <p className="ds-page-copy">Create a private session for a friend, or enter an invite code to join theirs.</p>
